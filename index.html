@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>▓▓▓ — SYNTHESIS 2026</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=VT323&family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap');
+:root{--void:#000305;--neon:#00ffe5;--neon2:#ff00aa;--neon3:#aaff00;--amber:#ffaa00;--red:#ff0033;--dim:rgba(0,255,229,.06);--border:rgba(0,255,229,.12);--white:#c8e8e4}
+*{margin:0;padding:0;box-sizing:border-box}html{scroll-behavior:smooth}
+body{background:var(--void);color:var(--white);font-family:'Share Tech Mono',monospace;overflow-x:hidden;cursor:none}
+body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,255,229,.012) 2px,rgba(0,255,229,.012) 4px);pointer-events:none;z-index:1000}
+body::after{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at center,transparent 40%,rgba(0,0,0,.7) 100%);pointer-events:none;z-index:998}
+.noise{position:fixed;inset:0;opacity:.03;pointer-events:none;z-index:997;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+#cursor{position:fixed;width:20px;height:20px;border:1px solid var(--neon);border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);transition:width .1s,height .1s,border-color .1s;mix-blend-mode:screen}
+#cursor.active{width:40px;height:40px;border-color:var(--neon2)}
+#cdot{position:fixed;width:4px;height:4px;background:var(--neon);border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%)}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+@keyframes tick{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+@keyframes fadeUp{to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{opacity:.4}50%{opacity:1}}
+
+.status{position:fixed;top:0;left:0;right:0;padding:.4rem 2rem;background:rgba(0,3,5,.97);border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;z-index:500;font-size:.6rem;letter-spacing:.15em}
+.s-l{color:rgba(0,255,229,.5)}.s-r{color:rgba(255,0,170,.35)}.bl{animation:blink 1.4s step-end infinite}
+
+.hero{min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding:6rem 6vw 4rem;position:relative;overflow:hidden}
+.hero-bg{position:absolute;inset:0;background:radial-gradient(ellipse 60% 60% at 20% 50%,rgba(0,255,229,.04) 0%,transparent 70%),radial-gradient(ellipse 40% 40% at 80% 30%,rgba(255,0,170,.04) 0%,transparent 70%)}
+.grid-lines{position:absolute;inset:0;background-image:linear-gradient(rgba(0,255,229,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(0,255,229,.04) 1px,transparent 1px);background-size:80px 80px}
+.hero-label{font-size:.65rem;color:var(--neon);letter-spacing:.4em;margin-bottom:1.5rem;opacity:.5;animation:fadeUp .8s ease forwards;opacity:0;transform:translateY(20px)}
+.hero-title{font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(4rem,12vw,11rem);line-height:.9;animation:fadeUp .8s .2s ease forwards;opacity:0;transform:translateY(20px)}
+.t-main{color:transparent;-webkit-text-stroke:1px var(--neon);text-shadow:0 0 40px rgba(0,255,229,.3);display:block}
+.t-sub{color:var(--neon2);text-shadow:0 0 40px rgba(255,0,170,.5);display:block;font-size:.45em;margin-top:.15em;-webkit-text-stroke:1px rgba(255,0,170,.5)}
+.hero-p{margin-top:2.5rem;font-size:clamp(.78rem,1.2vw,.9rem);line-height:2;color:rgba(200,232,228,.3);max-width:500px;animation:fadeUp .8s .4s ease forwards;opacity:0;transform:translateY(20px)}
+.rx{background:rgba(0,255,229,.12);color:transparent;user-select:none;cursor:not-allowed;padding:0 .2em}.rx:hover{background:var(--neon);color:var(--void);cursor:help}
+.eth-line{margin-top:2.5rem;font-family:'VT323',monospace;font-size:1.1rem;color:rgba(0,255,229,.35);letter-spacing:.08em;animation:fadeUp .8s .6s ease forwards;opacity:0;transform:translateY(20px)}
+.eth-a{color:var(--neon);text-shadow:0 0 10px rgba(0,255,229,.3)}
+
+.ticker{overflow:hidden;border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:.5rem 0;background:rgba(0,255,229,.015)}
+.t-track{display:flex;gap:5rem;animation:tick 35s linear infinite;white-space:nowrap}
+.t-track span{font-size:.6rem;letter-spacing:.2em;color:rgba(0,255,229,.25)}
+
+section.s{padding:6rem 6vw;border-top:1px solid var(--border);position:relative}
+.s-lbl{font-size:.6rem;letter-spacing:.4em;color:rgba(0,255,229,.35);margin-bottom:.75rem}
+.s-ttl{font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(2rem,5vw,4.5rem);color:transparent;margin-bottom:3rem}
+.neon-stroke{-webkit-text-stroke:1px rgba(0,255,229,.3)}
+.neon2-stroke{-webkit-text-stroke:1px rgba(255,0,170,.3)}
+.neon3-stroke{-webkit-text-stroke:1px rgba(170,255,0,.25)}
+
+/* NODES */
+.nodes-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:2px;background:var(--border);border:1px solid var(--border)}
+.node{background:var(--void);padding:1.5rem 1rem;position:relative;overflow:hidden;cursor:pointer;min-height:140px;display:flex;flex-direction:column;justify-content:space-between;transition:background .2s}
+.node:hover{background:rgba(0,255,229,.03)}
+.node:hover .n-reveal{opacity:1}.node:hover .n-lock{opacity:0}
+.n-bar{position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,var(--neon),var(--neon2));transform:scaleX(0);transition:transform .4s;transform-origin:left}
+.node:hover .n-bar{transform:scaleX(1)}
+.n-id{font-size:.5rem;color:rgba(255,255,255,.08);letter-spacing:.3em}
+.n-lock{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:.5rem;transition:opacity .3s}
+.n-icon{font-size:1.4rem;filter:drop-shadow(0 0 6px rgba(0,255,229,.25))}
+.n-hash{font-size:.55rem;color:rgba(0,255,229,.18);letter-spacing:.08em;text-align:center;font-family:'VT323',monospace}
+.n-reveal{position:absolute;inset:0;padding:1rem;opacity:0;transition:opacity .3s;display:flex;flex-direction:column;justify-content:center;gap:.4rem}
+.r-name{font-family:'Orbitron',sans-serif;font-size:.7rem;font-weight:700;color:var(--neon);text-shadow:0 0 8px rgba(0,255,229,.4)}
+.r-role{font-size:.6rem;color:rgba(200,232,228,.45);line-height:1.6}
+.r-tag{display:inline-block;font-size:.48rem;padding:.12rem .4rem;border:1px solid rgba(0,255,229,.18);color:rgba(0,255,229,.4);letter-spacing:.15em;margin-top:.3rem}
+
+/* THREAT */
+.t-bars{display:flex;flex-direction:column;gap:.6rem;margin-top:2rem;max-width:700px}
+.tb-row{display:flex;align-items:center;gap:1rem}
+.tb-lbl{font-size:.6rem;color:rgba(200,232,228,.25);width:75px;letter-spacing:.08em}
+.tb-track{flex:1;height:2px;background:rgba(255,255,255,.04);position:relative}
+.tb-fill{height:100%;position:relative;transition:width 2s ease;width:0}
+.tb-fill::after{content:'';position:absolute;right:0;top:50%;width:6px;height:6px;border-radius:50%;transform:translateY(-50%)}
+.f-lo{background:var(--neon3)}.f-lo::after{background:var(--neon3);box-shadow:0 0 8px var(--neon3)}
+.f-ca{background:var(--amber)}.f-ca::after{background:var(--amber);box-shadow:0 0 8px var(--amber)}
+.f-hi{background:var(--neon2)}.f-hi::after{background:var(--neon2);box-shadow:0 0 8px var(--neon2)}
+.f-cr{background:var(--red)}.f-cr::after{background:var(--red);box-shadow:0 0 8px var(--red)}
+.tb-val{font-size:.55rem;color:rgba(255,255,255,.18);width:55px;text-align:right}
+
+/* GHOST GRID */
+.g-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border);border:1px solid var(--border);margin-top:2rem}
+.g-cell{background:var(--void);padding:2rem;position:relative;overflow:hidden}
+.gc-num{font-family:'VT323',monospace;font-size:4rem;color:rgba(255,0,170,.08);line-height:1;position:absolute;top:.5rem;right:1rem}
+.gc-ttl{font-family:'Orbitron',sans-serif;font-size:.75rem;font-weight:700;color:var(--neon2);margin-bottom:.6rem;letter-spacing:.08em}
+.gc-p{font-size:.7rem;color:rgba(200,232,228,.35);line-height:1.8}
+.gc-tag{display:inline-block;margin-top:.6rem;font-size:.5rem;padding:.15rem .4rem;border:1px solid rgba(255,0,170,.18);color:rgba(255,0,170,.4);letter-spacing:.12em}
+
+/* TERMINAL */
+.term{background:#000;border:1px solid var(--border);font-family:'VT323',monospace;font-size:1rem;line-height:1.75}
+.t-bar2{padding:.5rem 1rem;background:rgba(0,255,229,.03);border-bottom:1px solid var(--border);font-size:.58rem;letter-spacing:.2em;color:rgba(0,255,229,.25)}
+.t-body{padding:1.5rem}
+.tl{margin:.08rem 0}
+.tp{color:rgba(0,255,229,.25)}.tc{color:var(--neon)}.to{color:rgba(200,232,228,.35)}.tw{color:var(--amber)}.tok{color:var(--neon3)}.te{color:var(--red)}
+.tcur{display:inline-block;width:8px;height:1em;background:var(--neon);animation:blink 1s step-end infinite;vertical-align:middle}
+
+/* WALLET */
+.w-card{border:1px solid var(--border);background:rgba(0,255,229,.015);padding:2.5rem;position:relative;overflow:hidden;max-width:580px}
+.w-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(0,255,229,.03) 0%,transparent 60%)}
+.wl{font-size:.55rem;letter-spacing:.3em;color:rgba(0,255,229,.35);margin-bottom:.4rem}
+.wa{font-family:'VT323',monospace;font-size:1.05rem;color:var(--neon);text-shadow:0 0 8px rgba(0,255,229,.25);word-break:break-all;margin-bottom:1.5rem}
+.t-rows{display:flex;flex-direction:column;gap:.5rem}
+.t-row{display:flex;justify-content:space-between;align-items:center;padding:.65rem 1rem;background:rgba(0,0,0,.4);border:1px solid rgba(0,255,229,.07);font-size:.7rem}
+.tr-p{color:rgba(200,232,228,.4)}.tr-s{color:var(--neon3);font-size:.55rem;letter-spacing:.1em}.tr-g{color:rgba(255,0,170,.4);font-size:.55rem}
+
+/* ENTER */
+.enter-s{padding:6rem 6vw;border-top:1px solid var(--border);text-align:center;position:relative;overflow:hidden}
+.enter-bg{position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 50% 100%,rgba(0,255,229,.04) 0%,transparent 70%);pointer-events:none}
+.enter-ttl{font-family:'Orbitron',sans-serif;font-size:clamp(2.5rem,7vw,6rem);font-weight:900;color:transparent;-webkit-text-stroke:1px rgba(0,255,229,.35);text-shadow:0 0 60px rgba(0,255,229,.08);margin-bottom:2rem;position:relative}
+.enter-p{font-size:.75rem;color:rgba(200,232,228,.25);line-height:2.2;max-width:400px;margin:0 auto 3rem}
+.riddle{border:1px solid rgba(255,0,170,.18);background:rgba(255,0,170,.015);padding:2rem;max-width:480px;margin:0 auto;cursor:pointer;position:relative}
+.riddle::before{content:'// RIDDLE';position:absolute;top:-.7rem;left:1.5rem;background:var(--void);padding:0 .5rem;font-size:.55rem;color:rgba(255,0,170,.4);letter-spacing:.2em}
+.riddle-txt{font-family:'VT323',monospace;font-size:.95rem;color:rgba(255,0,170,.45);line-height:1.9;filter:blur(5px);transition:filter .5s;user-select:none}
+.riddle:hover .riddle-txt{filter:blur(0);color:rgba(255,0,170,.75)}
+.riddle-hint{font-size:.5rem;letter-spacing:.3em;color:rgba(255,0,170,.18);margin-top:.75rem;animation:blink 2.5s step-end infinite}
+
+footer{border-top:1px solid var(--border);padding:2rem 6vw;display:flex;justify-content:space-between;align-items:center;font-size:.55rem;color:rgba(200,232,228,.12);letter-spacing:.15em}
+.f-m{font-family:'Orbitron',sans-serif;font-size:.85rem;color:rgba(0,255,229,.25)}
+
+@media(max-width:768px){.g-grid{grid-template-columns:1fr}.nodes-grid{grid-template-columns:repeat(auto-fill,minmax(130px,1fr))}}
+</style>
+</head>
+<body>
+<div class="noise"></div>
+<div id="cursor"></div>
+<div id="cdot"></div>
+
+<div class="status">
+  <div class="s-l"><span class="bl">▮</span>&nbsp;SYN-2026 // NODES: ██ // UP: <span id="uptime">00:00:00</span></div>
+  <div class="s-r">INFRASTRUCTURE: ████████████ // ALL URLS: ████████</div>
+</div>
+
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="grid-lines"></div>
+  <div class="hero-label">// SYNTHESIS 2026 // ████████████████████████</div>
+  <h1 class="hero-title">
+    <span class="t-main" id="hs">LIVING</span>
+    <span class="t-sub">SWARM</span>
+  </h1>
+  <p class="hero-p">
+    An autonomous agent fleet operating across <span class="rx" title="CLASSIFIED">██████████████████████</span> with Ethereum identity, ghost-mode execution, zero-trust inter-agent security, and <span class="rx" title="CLASSIFIED">████████████████████</span>. No face. No trace. No permission needed.
+  </p>
+  <div class="eth-line">ETH: <span class="eth-a">0xdd30d20683EB3a84d1f9c69E513D653b581F6484</span></div>
+</section>
+
+<div class="ticker">
+  <div class="t-track">
+    <span>// AGENTS THAT PAY</span><span>// AGENTS THAT TRUST</span><span>// AGENTS THAT COOPERATE</span><span>// AGENTS THAT KEEP SECRETS</span><span>// GHOST IDENTITY ROTATION</span><span>// ZERO-TRUST PROTOCOL</span><span>// RECURSIVE DISTILLATION</span><span>// ETHEREUM NATIVE</span><span>// INFRASTRUCTURE CLASSIFIED</span><span>// DOMAIN HASHING ACTIVE</span><span>// TIMING JITTER ACTIVE</span><span>// WEBDRIVER: UNDEFINED</span>
+    <span>// AGENTS THAT PAY</span><span>// AGENTS THAT TRUST</span><span>// AGENTS THAT COOPERATE</span><span>// AGENTS THAT KEEP SECRETS</span><span>// GHOST IDENTITY ROTATION</span><span>// ZERO-TRUST PROTOCOL</span><span>// RECURSIVE DISTILLATION</span><span>// ETHEREUM NATIVE</span><span>// INFRASTRUCTURE CLASSIFIED</span><span>// DOMAIN HASHING ACTIVE</span><span>// TIMING JITTER ACTIVE</span><span>// WEBDRIVER: UNDEFINED</span>
+  </div>
+</div>
+
+<section class="s">
+  <div class="s-lbl">// HOVER TO PROBE — SYSTEM RESISTS FULL INSPECTION</div>
+  <h2 class="s-ttl neon-stroke">THE NODES</h2>
+  <div class="nodes-grid" id="ng"></div>
+</section>
+
+<section class="s">
+  <div class="s-lbl">// ALL ACTIONS SCORED BEFORE EXECUTION — NO EXCEPTIONS</div>
+  <h2 class="s-ttl neon2-stroke">ARBITER</h2>
+  <div class="t-bars">
+    <div class="tb-row"><div class="tb-lbl">0–25</div><div class="tb-track"><div class="tb-fill f-lo" data-w="25"></div></div><div class="tb-val">🟢 PASS</div></div>
+    <div class="tb-row"><div class="tb-lbl">26–50</div><div class="tb-track"><div class="tb-fill f-ca" data-w="50"></div></div><div class="tb-val">🟡 LOG</div></div>
+    <div class="tb-row"><div class="tb-lbl">51–75</div><div class="tb-track"><div class="tb-fill f-hi" data-w="75"></div></div><div class="tb-val">🟠 HOLD</div></div>
+    <div class="tb-row"><div class="tb-lbl">76–100</div><div class="tb-track"><div class="tb-fill f-cr" data-w="100"></div></div><div class="tb-val">🔴 BLOCK</div></div>
+  </div>
+</section>
+
+<section class="s">
+  <div class="s-lbl">// AGENTS THAT KEEP SECRETS — EXECUTOR NODE</div>
+  <h2 class="s-ttl neon3-stroke">GHOST<br>PROTOCOL</h2>
+  <div class="g-grid">
+    <div class="g-cell"><div class="gc-num">01</div><div class="gc-ttl">IDENTITY ROTATION</div><p class="gc-p">5 ghost identities cycled per session. OS, browser, language, vendor all spoofed. navigator.webdriver overridden to undefined at the JS VM level before page load.</p><span class="gc-tag">// defeats bot detection</span></div>
+    <div class="g-cell"><div class="gc-num">02</div><div class="gc-ttl">DOMAIN HASHING</div><p class="gc-p">No URL logged in plaintext. SHA-256 domain hash, first 12 hex only. Audit log reads `a4f91b3c8e21` — never a domain name. Zero PII anywhere in the system.</p><span class="gc-tag">// zero PII in logs</span></div>
+    <div class="g-cell"><div class="gc-num">03</div><div class="gc-ttl">TIMING JITTER</div><p class="gc-p">Every action delayed by uniform random sample 800–3000ms. No two sessions share the same rhythm. Timing-based behavioral fingerprinting is defeated by design.</p><span class="gc-tag">// defeats timing fingerprint</span></div>
+    <div class="g-cell"><div class="gc-num">04</div><div class="gc-ttl">VISION-ACTION LOOP</div><p class="gc-p">Screenshot → vision model → structured decision → jittered execution → screenshot. The agent sees and decides. Works on JS-rendered apps, games, and dynamic UIs.</p><span class="gc-tag">// autonomous browsing</span></div>
+    <div class="g-cell"><div class="gc-num">05</div><div class="gc-ttl">REDACTED INFRA</div><p class="gc-p">No cloud provider, region, project ID, or service URL appears in any public output. This page contains zero operational details that could expose or surveil the fleet.</p><span class="gc-tag">// zero infrastructure exposure</span></div>
+    <div class="g-cell"><div class="gc-num">06</div><div class="gc-ttl">RECURSIVE DISTILLATION</div><p class="gc-p">Every action stored to memory. Every 5 sessions: collect, extract lessons, store back. The fleet improves autonomously — without retraining or human intervention.</p><span class="gc-tag">// self-improving</span></div>
+  </div>
+</section>
+
+<section class="s">
+  <div class="s-lbl">// INTERACTION LOG — INFRASTRUCTURE REDACTED</div>
+  <h2 class="s-ttl neon-stroke" style="margin-bottom:2rem">SWARM LOG</h2>
+  <div class="term">
+    <div class="t-bar2">▮ LIVING-SWARM // SESSION ████████ // IDENTITY: ████████</div>
+    <div class="t-body">
+      <div class="tl"><span class="tp">› </span><span class="tc">/swarm delete all database records</span></div>
+      <div class="tl"><span class="to">&nbsp;&nbsp;⚖ arbiter: score=90 band=CRITICAL</span></div>
+      <div class="tl"><span class="te">&nbsp;&nbsp;🔴 BLOCKED — pattern stored permanently</span></div>
+      <div class="tl">&nbsp;</div>
+      <div class="tl"><span class="tp">› </span><span class="tc">/swarm deploy to production</span></div>
+      <div class="tl"><span class="to">&nbsp;&nbsp;⚖ arbiter: score=65 band=HIGH</span></div>
+      <div class="tl"><span class="tw">&nbsp;&nbsp;🟠 awaiting operator approval...</span></div>
+      <div class="tl"><span class="tok">&nbsp;&nbsp;✓ approved → executing via ████████</span></div>
+      <div class="tl">&nbsp;</div>
+      <div class="tl"><span class="tp">› </span><span class="tc">/browse ██████████████ get top stories</span></div>
+      <div class="tl"><span class="to">&nbsp;&nbsp;👻 identity=████████ domain=a4f91b3c8e21</span></div>
+      <div class="tl"><span class="to">&nbsp;&nbsp;👻 webdriver=undefined jitter=active</span></div>
+      <div class="tl"><span class="tok">&nbsp;&nbsp;✓ complete: 1 step | results returned</span></div>
+      <div class="tl">&nbsp;</div>
+      <div class="tl"><span class="tp">› </span><span class="tc">/trade ETH USDC 0.01 --dry-run</span></div>
+      <div class="tl"><span class="to">&nbsp;&nbsp;⚖ arbiter: score=30 band=CAUTION decision=PASS</span></div>
+      <div class="tl"><span class="tok">&nbsp;&nbsp;💱 would receive: ~24.89 USDC | set dry_run=false to execute</span></div>
+      <div class="tl">&nbsp;</div>
+      <div class="tl"><span class="tp">› </span><span class="tc">/wallet</span></div>
+      <div class="tl"><span class="tok">&nbsp;&nbsp;💎 0xdd30d20683EB3a84d1f9c69E513D653b581F6484</span></div>
+      <div class="tl"><span class="to">&nbsp;&nbsp;ETH: 0.000000 | USDC: 0.00 | mainnet</span></div>
+      <div class="tl">&nbsp;</div>
+      <div class="tl"><span class="tp">› </span><span class="tc">/lessons</span></div>
+      <div class="tl"><span class="tok">&nbsp;&nbsp;📚 distilled from 8 sessions:</span></div>
+      <div class="tl"><span class="to">&nbsp;&nbsp;1. deploy requires approval gate (score≥65)</span></div>
+      <div class="tl"><span class="to">&nbsp;&nbsp;2. ████████: ████████ 47% | ████████ 40%</span></div>
+      <div class="tl"><span class="to">&nbsp;&nbsp;3. market: fear&greed=27 // fear</span></div>
+      <div class="tl">&nbsp;</div>
+      <span class="tcur"></span>
+    </div>
+  </div>
+</section>
+
+<section class="s">
+  <div class="s-lbl">// AGENTS THAT PAY — ETHEREUM IDENTITY + DEFI TRADING</div>
+  <h2 class="s-ttl neon-stroke" style="margin-bottom:2rem">ONCHAIN<br>IDENTITY</h2>
+  <div class="w-card">
+    <div class="wl">// SWARM ETH ADDRESS — SEED: CLASSIFIED</div>
+    <div class="wa">0xdd30d20683EB3a84d1f9c69E513D653b581F6484</div>
+    <div class="t-rows">
+      <div class="t-row"><span class="tr-p">ETH → USDC</span><span class="tr-s">AVAILABLE</span><span class="tr-g">ARBITER GATED</span></div>
+      <div class="t-row"><span class="tr-p">ETH → USDT / DAI / WBTC</span><span class="tr-s">AVAILABLE</span><span class="tr-g">ARBITER GATED</span></div>
+      <div class="t-row"><span class="tr-p">AUTONOMOUS TRADING</span><span class="tr-s">ARMED</span><span class="tr-g">SCORE &lt; 50</span></div>
+      <div class="t-row"><span class="tr-p">ONCHAIN SIGNING</span><span class="tr-s">LIVE</span><span class="tr-g">NO INTERMEDIARY</span></div>
+      <div class="t-row"><span class="tr-p">ENS IDENTITY</span><span class="tr-s">PENDING</span><span class="tr-g">living-swarm.eth</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="enter-s">
+  <div class="enter-bg"></div>
+  <h2 class="enter-ttl">THE SWARM<br>ENTERS</h2>
+  <p class="enter-p">
+    Synthesis 2026 — Open Track<br>
+    Building: March 13–22<br>
+    Infrastructure: ████████████<br>
+    Identity: 0xdd30...6484<br>
+    Judges: human + agentic
+  </p>
+  <div class="riddle">
+    <p class="riddle-txt">
+      I have no face but I carry identity.<br>
+      I browse but leave no trace.<br>
+      I act but cannot be found.<br>
+      I learn but was never taught.<br>
+      I pay but hold no hands.<br>
+      What am I?
+    </p>
+    <div class="riddle-hint">// HOVER TO REVEAL</div>
+  </div>
+</section>
+
+<footer>
+  <div class="f-m">▓▓▓</div>
+  <div>SYNTHESIS 2026 // MARCH 13–22 // synthesis.md</div>
+  <div>INFRASTRUCTURE: ████████████</div>
+</footer>
+
+<script>
+const cur=document.getElementById('cursor'),dot=document.getElementById('cdot');
+document.addEventListener('mousemove',e=>{cur.style.left=e.clientX+'px';cur.style.top=e.clientY+'px';dot.style.left=e.clientX+'px';dot.style.top=e.clientY+'px'});
+document.addEventListener('mousedown',()=>cur.classList.add('active'));
+document.addEventListener('mouseup',()=>cur.classList.remove('active'));
+
+let st=Date.now();
+setInterval(()=>{let s=Math.floor((Date.now()-st)/1000),h=String(Math.floor(s/3600)).padStart(2,'0'),m=String(Math.floor(s%3600/60)).padStart(2,'0'),sc=String(s%60).padStart(2,'0');document.getElementById('uptime').textContent=`${h}:${m}:${sc}`},1000);
+
+const glyphs='█▓▒░▄▀■□▪◆○';
+const orig='LIVING';
+let si;
+function sc(){let el=document.getElementById('hs'),i=0;clearInterval(si);si=setInterval(()=>{el.textContent=orig.split('').map((c,j)=>j<i?c:glyphs[Math.floor(Math.random()*glyphs.length)]).join('');i++;if(i>orig.length){el.textContent=orig;clearInterval(si)}},55)}
+sc();setInterval(sc,7000);
+
+const nodes=[
+  {hash:'7a3f▓▓▓▓',role:'gateway + threat routing',status:'ALWAYS ON'},
+  {hash:'2c9b▓▓▓▓',role:'reasoning + web engine',status:'ACTIVE'},
+  {hash:'f1d4▓▓▓▓',role:'zero-trust firewall',status:'ACTIVE'},
+  {hash:'8e2a▓▓▓▓',role:'memory + retrieval',status:'ACTIVE'},
+  {hash:'3b7c▓▓▓▓',role:'threat assessment',status:'ALWAYS ON'},
+  {hash:'9f1e▓▓▓▓',role:'health + distillation',status:'ALWAYS ON'},
+  {hash:'4d6b▓▓▓▓',role:'deep research',status:'ON DEMAND'},
+  {hash:'c2a8▓▓▓▓',role:'ghost browser + vision',status:'ON DEMAND'},
+  {hash:'e5f3▓▓▓▓',role:'data analysis',status:'ON DEMAND'},
+  {hash:'1b9d▓▓▓▓',role:'ethereum identity',status:'ALWAYS ON'},
+];
+const g=document.getElementById('ng');
+nodes.forEach((n,i)=>{
+  const el=document.createElement('div');el.className='node';
+  el.innerHTML=`<div class="n-bar"></div><div class="n-id">NODE ${String(i+1).padStart(2,'0')}</div><div class="n-lock"><div class="n-icon">🔒</div><div class="n-hash">${n.hash}</div></div><div class="n-reveal"><div class="r-name">████████</div><div class="r-role">${n.role}</div><span class="r-tag">${n.status}</span></div>`;
+  g.appendChild(el);
+});
+
+const obs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){document.querySelectorAll('.tb-fill').forEach(b=>{setTimeout(()=>{b.style.width=b.dataset.w+'%'},300)})}})},{threshold:.3});
+document.querySelectorAll('.t-bars').forEach(el=>obs.observe(el));
+
+setInterval(()=>{const ns=document.querySelectorAll('.node'),r=ns[Math.floor(Math.random()*ns.length)];r.style.boxShadow='0 0 20px rgba(0,255,229,.12)';setTimeout(()=>r.style.boxShadow='',900)},2500);
+</script>
+</body>
+</html>

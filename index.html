@@ -115,6 +115,12 @@ footer{border-top:1px solid var(--border);padding:2rem 6vw;display:flex;justify-
 .f-m{font-family:'Orbitron',sans-serif;font-size:.85rem;color:rgba(0,255,229,.25)}
 
 @media(max-width:768px){.g-grid{grid-template-columns:1fr}.nodes-grid{grid-template-columns:repeat(auto-fill,minmax(130px,1fr))}}
+@keyframes glitch1{0%,90%,100%{transform:translate(0)}92%{transform:translate(-3px,1px)}94%{transform:translate(3px,-1px)}96%{transform:translate(-2px,2px)}}
+@keyframes glitch2{0%,90%,100%{transform:translate(0)}91%{transform:translate(3px,-2px)}93%{transform:translate(-3px,1px)}95%{transform:translate(2px,2px)}}
+.glitch{position:relative;display:inline-block}
+.glitch::before,.glitch::after{content:attr(data-text);position:absolute;top:0;left:0;width:100%;height:100%}
+.glitch::before{color:var(--magenta,#ff00aa);animation:glitch1 3s infinite;clip-path:polygon(0 0,100% 0,100% 35%,0 35%)}
+.glitch::after{color:var(--cyan,#00ffe7);animation:glitch2 3s infinite;clip-path:polygon(0 65%,100% 65%,100% 100%,0 100%)}
 </style>
 </head>
 <body>
@@ -127,19 +133,201 @@ footer{border-top:1px solid var(--border);padding:2rem 6vw;display:flex;justify-
   <div class="s-r">INFRASTRUCTURE: ████████████ // ALL URLS: ████████</div>
 </div>
 
-<section class="hero">
-  <div class="hero-bg"></div>
-  <div class="grid-lines"></div>
-  <div class="hero-label">// SYNTHESIS 2026 // ████████████████████████</div>
-  <h1 class="hero-title">
-    <span class="t-main" id="hs">LIVING</span>
-    <span class="t-sub">SWARM</span>
-  </h1>
-  <p class="hero-p">
-    An autonomous agent fleet operating across <span class="rx" title="CLASSIFIED">██████████████████████</span> with Ethereum identity, ghost-mode execution, zero-trust inter-agent security, and <span class="rx" title="CLASSIFIED">████████████████████</span>. No face. No trace. No permission needed.
-  </p>
-  <div class="eth-line">ETH: <span class="eth-a">0xdd30d20683EB3a84d1f9c69E513D653b581F6484</span></div>
+<section class="hero" style="position:relative;overflow:hidden;min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding:0;align-items:center;">
+  <canvas id="swarm3d" style="position:absolute;inset:0;width:100%;height:100%;z-index:0;cursor:crosshair;"></canvas>
+
+  <!-- Live data strip -->
+  <div id="live-strip" style="position:absolute;top:0;left:0;right:0;z-index:10;height:30px;background:rgba(0,4,8,0.75);backdrop-filter:blur(12px);border-bottom:1px solid rgba(0,255,231,0.08);display:flex;align-items:center;justify-content:space-between;padding:0 24px;font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:2px;">
+    <div style="display:flex;gap:24px;align-items:center;color:rgba(0,255,231,0.3);">
+      <span><span id="l-eth" style="color:#00ffe7;font-weight:bold;">--</span> <span style="font-size:7px;opacity:.5">ETH/USD</span></span>
+      <span><span id="l-uni" style="color:#00ffe7;font-weight:bold;">--</span> <span style="font-size:7px;opacity:.5">ETH/USDC · UNISWAP</span></span>
+      <span><span id="l-chg" style="color:#00ffe7;">--</span> <span style="font-size:7px;opacity:.5">24H</span></span>
+    </div>
+    <div style="display:flex;gap:20px;align-items:center;color:rgba(0,255,231,0.25);">
+      <span>ROYAL LOGS <span style="color:#ffd700;">3 LIVE</span></span>
+      <span>SWARM <span style="color:#39ff8f;">ONLINE</span></span>
+    </div>
+  </div>
+
+  <!-- Main content -->
+  <div style="position:relative;z-index:5;text-align:center;display:flex;flex-direction:column;align-items:center;gap:14px;padding:40px 20px;">
+    <div style="font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:6px;color:var(--magenta);text-shadow:var(--glow-m);animation:blink 2.4s step-end infinite;">// SYNTHESIS 2026 // ENCRYPTED AUTONOMOUS SYSTEM //</div>
+
+    <!-- Glitch title -->
+    <h1 class="hero-title glitch" data-text="LIVING SWARM" style="font-family:'Bebas Neue',sans-serif;font-size:clamp(52px,11vw,130px);letter-spacing:10px;color:var(--cyan);text-shadow:var(--glow-c);line-height:.95;position:relative;">
+      LIVING SWARM
+    </h1>
+
+    <p style="font-family:'Share Tech Mono',monospace;font-size:12px;letter-spacing:4px;color:rgba(200,240,236,0.4);max-width:500px;">SOVEREIGN &middot; SELF-HEALING &middot; ZERO TRUST &middot; ALWAYS WATCHING</p>
+
+    <p style="font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:2px;color:var(--gold);opacity:.65;font-style:italic;">"I think without a brain. I act without hands.<br>I remember without sleep. What am I?"</p>
+
+    <!-- ETH address (clickable secret) -->
+    <div style="font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:2px;color:rgba(0,255,231,0.25);">ETH: <span id="eth-addr" style="cursor:pointer;transition:color .3s;" onmouseenter="this.style.color='#00ffe7'" onmouseleave="this.style.color='rgba(0,255,231,0.35)'">0xdd30d20683EB3a84d1f9c69E513D653b581F6484</span></div>
+
+    <!-- Royal Logs NFT mini previews -->
+    <div style="display:flex;gap:10px;align-items:center;margin-top:4px;">
+      <div id="hn1" onclick="location.href='/royal-logs/'" style="width:68px;height:68px;border-radius:8px;overflow:hidden;border:1px solid rgba(0,255,231,0.12);cursor:pointer;transition:all .4s;position:relative;" onmouseenter="this.style.borderColor='rgba(255,215,0,.45)';this.style.transform='translateY(-4px) scale(1.08)'" onmouseleave="this.style.borderColor='rgba(0,255,231,0.12)';this.style.transform='none'"></div>
+      <div style="font-family:'Share Tech Mono',monospace;font-size:8px;color:rgba(0,255,231,0.15);letter-spacing:2px;text-align:center;line-height:2;">◈ ROYAL<br>LOGS ◈</div>
+      <div id="hn2" onclick="location.href='/royal-logs/'" style="width:68px;height:68px;border-radius:8px;overflow:hidden;border:1px solid rgba(0,255,231,0.12);cursor:pointer;transition:all .4s;" onmouseenter="this.style.borderColor='rgba(255,215,0,.45)';this.style.transform='translateY(-4px) scale(1.08)'" onmouseleave="this.style.borderColor='rgba(0,255,231,0.12)';this.style.transform='none'"></div>
+      <div style="font-family:'Share Tech Mono',monospace;font-size:8px;color:rgba(255,215,0,0.3);letter-spacing:1px;text-align:center;line-height:2;">0.000369<br>ETH</div>
+      <div id="hn3" onclick="location.href='/royal-logs/'" style="width:68px;height:68px;border-radius:8px;overflow:hidden;border:1px solid rgba(0,255,231,0.12);cursor:pointer;transition:all .4s;" onmouseenter="this.style.borderColor='rgba(255,215,0,.45)';this.style.transform='translateY(-4px) scale(1.08)'" onmouseleave="this.style.borderColor='rgba(0,255,231,0.12)';this.style.transform='none'"></div>
+    </div>
+
+    <!-- Live Uniswap pill -->
+    <a href="/uniswap/" style="display:inline-flex;align-items:center;gap:8px;background:rgba(0,255,231,0.04);border:1px solid rgba(0,255,231,0.14);border-radius:20px;padding:6px 18px;font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:2px;color:rgba(0,255,231,0.45);text-decoration:none;transition:all .3s;margin-top:2px;" onmouseenter="this.style.borderColor='rgba(0,255,231,0.35)';this.style.background='rgba(0,255,231,0.08)'" onmouseleave="this.style.borderColor='rgba(0,255,231,0.14)';this.style.background='rgba(0,255,231,0.04)'">
+      <div style="width:5px;height:5px;border-radius:50%;background:#00ffe7;box-shadow:0 0 6px #00ffe7;animation:pulse 1.5s ease-in-out infinite;"></div>
+      <span>UNISWAP LIVE &nbsp;</span>
+      <span id="uni-pill" style="color:#00ffe7;font-weight:bold;">1 ETH = -- USDC</span>
+      <span style="opacity:.4;font-size:8px;">&#x25B6;</span>
+    </a>
+  </div>
+
+  <div style="position:absolute;bottom:32px;left:50%;transform:translateX(-50%);z-index:5;font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:4px;color:rgba(0,255,231,0.3);animation:float 2s ease-in-out infinite;">&#x2193; DESCEND &#x2193;</div>
+  <div style="position:absolute;bottom:60px;right:24px;z-index:5;font-family:'Share Tech Mono',monospace;font-size:8px;letter-spacing:2px;color:rgba(0,255,231,0.1);text-align:right;line-height:2;">MOVE MOUSE TO<br>DISTURB THE SWARM</div>
 </section>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+// ═══ REACTIVE WEBGL SWARM — 8000 particles ═══════════════════
+(function(){
+  var C=document.getElementById('swarm3d');
+  var W=function(){return window.innerWidth;},H=function(){return window.innerHeight;};
+  var R=new THREE.WebGLRenderer({canvas:C,alpha:false,antialias:true,powerPreference:'high-performance'});
+  R.setPixelRatio(Math.min(devicePixelRatio,2)); R.setClearColor(0x000408,1);
+  var scene=new THREE.Scene();
+  var cam=new THREE.PerspectiveCamera(60,W()/H(),.01,100);
+  cam.position.set(0,0,5);
+  var mouse=new THREE.Vector2(),mt=new THREE.Vector2(),energy=0,cke=0;
+  document.addEventListener('mousemove',function(e){mouse.x=(e.clientX/W()-.5)*2;mouse.y=-(e.clientY/H()-.5)*2;});
+  C.addEventListener('click',function(){cke=1;});
+
+  var VERT=[
+    'uniform float u_t,u_e,u_c;uniform vec2 u_m;',
+    'attribute float a_ph,a_tr;attribute vec3 a_or;',
+    'varying float vt,vd,va;',
+    'float h(float n){return fract(sin(n)*43758.5453);}',
+    'float ns(vec3 p){vec3 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);float n=i.x+i.y*57.+i.z*113.;',
+    'return mix(mix(mix(h(n),h(n+1.),f.x),mix(h(n+57.),h(n+58.),f.x),f.y),mix(mix(h(n+113.),h(n+114.),f.x),mix(h(n+170.),h(n+171.),f.x),f.y),f.z);}',
+    'void main(){',
+    '  float t=u_t*(.25+a_tr*.12);vec3 p=a_or;',
+    '  p+=vec3(ns(p*1.6+vec3(t*.4,t*.3,t*.5)),ns(p*3.1-vec3(t*.2,t*.5,t*.3)),ns(p*5.8+vec3(t*.6,t*.2,t*.4)))*.2;',
+    '  p+=vec3(sin(length(p.xy)*9.-t*2.2+a_ph)*.04);',
+    '  p+=normalize(a_or+.001)*sin(p.x*3.8+t*.9)*sin(p.y*2.9+t*.7)*sin(p.z*4.8+t*.5)*.07;',
+    '  vec3 md=p-vec3(u_m*.8,0.);float mdl=length(md);',
+    '  float rep=smoothstep(.8,.0,mdl)*(u_e*.5+u_c*.8);p+=normalize(md+.001)*rep;',
+    '  float sh=smoothstep(1.2,.0,length(p))*u_c*.3*sin(u_t*20.+length(p)*8.);p+=normalize(p+.001)*sh;',
+    '  p*=1.+sin(u_t*.65+a_ph)*(.05+a_tr*.025);',
+    '  vt=a_tr;vd=length(p);va=(.35+a_tr*.45)*(1.-smoothstep(1.4,2.4,vd));',
+    '  vec4 mv=modelViewMatrix*vec4(p,1.);gl_Position=projectionMatrix*mv;',
+    '  gl_PointSize=clamp((2.2+a_tr*2.8+rep*10.)*(3./(-mv.z)),1.,16.);',
+    '}'
+  ].join('');
+  var FRAG=[
+    'precision highp float;uniform float u_t;varying float vt,vd,va;',
+    'void main(){vec2 uv=gl_PointCoord-.5;float r=length(uv);if(r>.5)discard;',
+    'float core=1.-smoothstep(0.,.28,r),ring=smoothstep(.28,.5,r)*(1.-smoothstep(.42,.5,r)),glow=exp(-r*r*8.);',
+    'vec3 c0=vec3(1.,0.,.67),c1=vec3(0.,1.,.91),c2=vec3(1.,.84,0.),c3=vec3(.22,.83,.6),c4=vec3(.94,.43,.97);',
+    'float t4=vt*4.;vec3 col;',
+    'if(t4<1.)col=mix(c0,c1,t4);else if(t4<2.)col=mix(c1,c2,t4-1.);else if(t4<3.)col=mix(c2,c3,t4-2.);else col=mix(c3,c4,t4-3.);',
+    'col*=.7+.3*sin(u_t*3.1+vd*9.+vt*6.28);',
+    'col=mix(col,vec3(1.),ring*.25);',
+    'gl_FragColor=vec4(col*(1.+glow*.5),(core*.88+glow*.38+ring*.18)*va);}'
+  ].join('');
+
+  var N=8000,pos=new Float32Array(N*3),ph=new Float32Array(N),tr=new Float32Array(N),or=new Float32Array(N*3);
+  for(var i=0;i<N;i++){
+    var u=Math.random(),r=u<.6?Math.random():1+Math.random()*.5;
+    var th=Math.random()*Math.PI*2,phi=Math.acos(2*Math.random()-1),lb=Math.random()<.5?-.4:.4;
+    var x=r*Math.sin(phi)*Math.cos(th)*1.1+lb*r*.3,y=r*Math.sin(phi)*Math.sin(th)*.8,z=r*Math.cos(phi)*.9;
+    if(r<.95){var f=Math.sin(y*7+x*5)*Math.sin(z*6+y*4)*.09;x+=f;y+=f*.6;z+=f*.4;}
+    or[i*3]=x;or[i*3+1]=y;or[i*3+2]=z;pos[i*3]=x;pos[i*3+1]=y;pos[i*3+2]=z;
+    ph[i]=Math.random()*Math.PI*2;tr[i]=Math.random();
+  }
+  var geo=new THREE.BufferGeometry();
+  geo.setAttribute('position',new THREE.BufferAttribute(pos,3));
+  geo.setAttribute('a_ph',new THREE.BufferAttribute(ph,1));
+  geo.setAttribute('a_tr',new THREE.BufferAttribute(tr,1));
+  geo.setAttribute('a_or',new THREE.BufferAttribute(or,3));
+  var uni={u_t:{value:0},u_m:{value:new THREE.Vector2()},u_e:{value:0},u_c:{value:0}};
+  var mat=new THREE.ShaderMaterial({uniforms:uni,vertexShader:VERT,fragmentShader:FRAG,transparent:true,depthWrite:false,blending:THREE.AdditiveBlending});
+  var pts=new THREE.Points(geo,mat);scene.add(pts);
+  window.addEventListener('resize',function(){R.setSize(W(),H());cam.aspect=W()/H();cam.updateProjectionMatrix();});
+  R.setSize(W(),H());
+  var start=Date.now();
+  (function loop(){requestAnimationFrame(loop);
+    var t=(Date.now()-start)/1e3;uni.u_t.value=t;
+    mt.x+=(mouse.x-mt.x)*.05;mt.y+=(mouse.y-mt.y)*.05;
+    uni.u_m.value.set(mt.x,mt.y);
+    energy=Math.min(1,energy+(Math.abs(mouse.x-mt.x)+Math.abs(mouse.y-mt.y))*1.2)*0.94;
+    uni.u_e.value=energy;cke*=.95;uni.u_c.value=cke;
+    pts.rotation.y=t*.05+mt.x*.25;pts.rotation.x=Math.sin(t*.035)*.1+mt.y*.14;
+    R.render(scene,cam);
+  })();
+})();
+
+// ═══ ROYAL LOGS MINI ART ═══════════════════════════════════
+function miniSVG(seed,w){
+  var h=(seed*137)%360,h2=(h+150)%360,sp=(0.8+(seed%5)*.3).toFixed(1),fr=(0.012+(seed%7)*.002).toFixed(4);
+  return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+w+' '+w+'">'
+    +'<defs><filter id="mf'+seed+'" x="-30%" y="-30%" width="160%" height="160%">'
+    +'<feTurbulence type="fractalNoise" baseFrequency="'+fr+'" numOctaves="3" seed="'+seed+'">'
+    +'<animate attributeName="baseFrequency" dur="'+(sp*8)+'s" values="'+fr+';'+(fr*1.5).toFixed(4)+';'+fr+'" repeatCount="indefinite"/>'
+    +'</feTurbulence><feDisplacementMap in="SourceGraphic" scale="'+(w*.08|0)+'" xChannelSelector="R" yChannelSelector="G"/></filter>'
+    +'<filter id="mg'+seed+'"><feGaussianBlur stdDeviation="'+(w*.018|0)+'" result="b"/>'
+    +'<feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>'
+    +'<radialGradient id="mb'+seed+'" cx="50%" cy="50%" r="70%">'
+    +'<stop offset="0%" stop-color="hsl('+h+',65%,18%)"><animate attributeName="stop-color" dur="'+(sp*6)+'s" values="hsl('+h+',65%,18%);hsl('+h2+',55%,12%);hsl('+h+',65%,18%)" repeatCount="indefinite"/></stop>'
+    +'<stop offset="100%" stop-color="#000408"/></radialGradient>'
+    +'<radialGradient id="mc'+seed+'" cx="50%" cy="50%" r="30%"><stop offset="0%" stop-color="hsl('+h+',95%,80%)" stop-opacity="0.9"/><stop offset="100%" stop-color="transparent"/></radialGradient>'
+    +'</defs><rect width="'+w+'" height="'+w+'" fill="#000408"/><rect width="'+w+'" height="'+w+'" fill="url(#mb'+seed+')"/>'
+    +'<ellipse cx="'+(w/2|0)+'" cy="'+(w/2|0)+'" rx="'+(w*.35|0)+'" ry="'+(w*.33|0)+'" fill="hsl('+h+',60%,16%)" filter="url(#mf'+seed+')" opacity="0.8">'
+    +'<animate attributeName="rx" dur="'+(sp*5)+'s" values="'+(w*.35|0)+';'+(w*.40|0)+';'+(w*.33|0)+';'+(w*.35|0)+'" repeatCount="indefinite"/></ellipse>'
+    +'<circle cx="'+(w/2|0)+'" cy="'+(w/2|0)+'" r="'+(w*.27|0)+'" fill="url(#mc'+seed+')" opacity="0.6" filter="url(#mg'+seed+')">'
+    +'<animate attributeName="opacity" dur="'+(sp*3)+'s" values="0.6;0.9;0.6" repeatCount="indefinite"/></circle>'
+    +'<text x="'+(w/2|0)+'" y="'+(w/2+w*.06|0)+'" text-anchor="middle" font-family="monospace" font-size="'+(w*.12|0)+'" fill="white" opacity="0.9" filter="url(#mg'+seed+')">&#x2B21;</text>'
+    +'</svg>';
+}
+['hn1','hn2','hn3'].forEach(function(id,i){
+  var el=document.getElementById(id);
+  if(el){el.innerHTML=miniSVG([49,56,63][i],68)+el.innerHTML;}
+});
+
+// ═══ LIVE MARKET DATA ══════════════════════════════════════
+var prevETH=0;
+function fetchPrice(){
+  fetch('https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd&include_24hr_change=true')
+    .then(function(r){return r.json();}).then(function(d){
+      var p=d.ethereum&&d.ethereum.usd,c=d.ethereum&&d.ethereum.usd_24h_change;
+      if(!p)return;
+      var el=document.getElementById('l-eth');
+      if(el)el.textContent='$'+p.toLocaleString('en-US',{maximumFractionDigits:0});
+      if(document.getElementById('l-chg')&&c!==undefined)
+        document.getElementById('l-chg').textContent=(c>0?'+':'')+c.toFixed(2)+'%';
+      prevETH=p;
+    }).catch(function(){});
+}
+function fetchUniRate(){
+  fetch('/api/uniswap/quote',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({type:'EXACT_INPUT',amount:'1000000000000000000',
+      tokenIn:'0x0000000000000000000000000000000000000000',
+      tokenOut:'0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
+      tokenInChainId:1,tokenOutChainId:1,
+      swapper:'0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045',
+      routingPreference:'BEST_PRICE',autoSlippage:'DEFAULT',urgency:'normal'})
+  }).then(function(r){return r.json();}).then(function(d){
+    var cq=d.classicQuote||d.dutchLimitV2Quote||d.dutchLimitQuote||d.priorityQuote;
+    if(cq&&cq.quoteDecimals){
+      var v=parseFloat(cq.quoteDecimals).toLocaleString('en-US',{maximumFractionDigits:0});
+      if(document.getElementById('l-uni'))document.getElementById('l-uni').textContent=v+' USDC';
+      if(document.getElementById('uni-pill'))document.getElementById('uni-pill').textContent='1 ETH = '+v+' USDC';
+    }
+  }).catch(function(){});
+}
+fetchPrice();fetchUniRate();
+setInterval(fetchPrice,30000);setInterval(fetchUniRate,60000);
+</script>
+
 
 <div class="ticker">
   <div class="t-track">
@@ -153,15 +341,15 @@ footer{border-top:1px solid var(--border);padding:2rem 6vw;display:flex;justify-
 .rl-s,.uni-s{max-width:1100px;margin:0 auto;padding:48px 24px 0;font-family:'Share Tech Mono',monospace}
 .sdiv{color:#0a1a14;font-size:11px;letter-spacing:.2em;text-align:center;max-width:1100px;margin:8px auto 0;padding:0 24px 8px;font-family:'Share Tech Mono',monospace}
 .gx{font-size:clamp(22px,4vw,38px);font-weight:800;display:inline-block;position:relative;font-family:'Bebas Neue',sans-serif;letter-spacing:6px}
-.gx-gold{background:linear-gradient(135deg,#fff,#ffd700,#ff9500,#ff00aa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;text-shadow:none}
-.gx-cyan{background:linear-gradient(135deg,#fff,#00ffe7,#9b59ff,#ff00aa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;text-shadow:none}
+.gx-gold{background:linear-gradient(135deg,#fff,#ffd700,#ff9500,#ff00aa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.gx-cyan{background:linear-gradient(135deg,#fff,#00ffe7,#9b59ff,#ff00aa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
 .gx-gold::before{content:'ROYAL LOGS';position:absolute;top:0;left:0;background:linear-gradient(135deg,#00ffe7,#9b59ff);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:gxa 5s infinite;opacity:.45}
 .gx-gold::after{content:'ROYAL LOGS';position:absolute;top:0;left:0;background:linear-gradient(135deg,#ff00aa,#ffd700);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:gxb 5s infinite;opacity:.25}
 .gx-cyan::before{content:'SWARM TRADE';position:absolute;top:0;left:0;background:linear-gradient(135deg,#ff00aa,#00ffe7);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:gxa 4s infinite;opacity:.45}
 .gx-cyan::after{content:'SWARM TRADE';position:absolute;top:0;left:0;background:linear-gradient(135deg,#ffd700,#9b59ff);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:gxb 4s infinite;opacity:.25}
 @keyframes gxa{0%,89%,100%{clip-path:none;transform:none}90%{clip-path:polygon(0 10%,100% 10%,100% 28%,0 28%);transform:translate(-3px,0) skewX(-3deg)}92%{clip-path:polygon(0 58%,100% 58%,100% 72%,0 72%);transform:translate(3px,0)}94%{clip-path:none}}
 @keyframes gxb{0%,86%,100%{clip-path:none;transform:none}87%{clip-path:polygon(0 35%,100% 35%,100% 48%,0 48%);transform:translate(2px,0) skewX(-2deg)}90%{clip-path:none}}
-.rl-ey{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--magenta);letter-spacing:4px;margin-bottom:10px;text-shadow:0 0 20px #ff00aa80}
+.rl-ey{font-family:'Share Tech Mono',monospace;font-size:10px;color:#ff00aa;letter-spacing:4px;margin-bottom:10px;text-shadow:0 0 20px #ff00aa80}
 .rl-hrow,.uni-hrow{display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:16px}
 .rl-meta{font-family:'Share Tech Mono',monospace;font-size:9px;color:rgba(0,255,231,0.3);letter-spacing:2px;line-height:2}
 .rl-meta span{color:rgba(0,255,231,0.6)}
@@ -175,48 +363,48 @@ footer{border-top:1px solid var(--border);padding:2rem 6vw;display:flex;justify-
 .rl-frow,.uni-frow{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:6px}
 .rl-info{font-family:'Share Tech Mono',monospace;font-size:9px;color:rgba(200,240,236,0.2);line-height:1.8;letter-spacing:1px}
 .uni-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:14px}
-.uni-card{background:rgba(0,255,231,0.02);border:1px solid rgba(0,255,231,0.1);border-radius:4px;padding:14px;transition:border-color .3s;backdrop-filter:blur(8px)}
-.uni-card:hover{border-color:rgba(0,255,231,0.3);box-shadow:0 0 20px rgba(0,255,231,0.05)}
-.uni-ct{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--cyan);letter-spacing:3px;margin-bottom:6px;text-shadow:0 0 10px rgba(0,255,231,0.4)}
+.uni-card{background:rgba(0,255,231,0.02);border:1px solid rgba(0,255,231,0.1);border-radius:4px;padding:14px;transition:border-color .3s}
+.uni-card:hover{border-color:rgba(0,255,231,0.3)}
+.uni-ct{font-family:'Share Tech Mono',monospace;font-size:9px;color:#00ffe7;letter-spacing:3px;margin-bottom:6px}
 .uni-cd{font-family:'Rajdhani',sans-serif;font-size:13px;color:rgba(200,240,236,0.45);line-height:1.6}
 .uni-stats{display:flex;gap:20px}
-.uni-sv{font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--cyan);text-shadow:0 0 20px #00ffe780;line-height:1}
+.uni-sv{font-family:'Bebas Neue',sans-serif;font-size:22px;color:#00ffe7;text-shadow:0 0 20px #00ffe780;line-height:1}
 .uni-sl{font-family:'Share Tech Mono',monospace;font-size:8px;color:rgba(0,255,231,0.3);letter-spacing:2px;margin-top:2px}
-.ebtn{display:inline-flex;align-items:center;gap:8px;border-radius:2px;text-decoration:none;transition:all .3s;text-transform:uppercase;font-family:'Share Tech Mono',monospace;font-size:9px;font-weight:400;letter-spacing:4px;padding:10px 22px}
-.egold{background:rgba(255,215,0,0.06);border:1px solid rgba(255,215,0,0.3);color:#ffd700;text-shadow:0 0 10px rgba(255,215,0,.4)}
+.ebtn{display:inline-flex;align-items:center;gap:8px;border-radius:2px;text-decoration:none;transition:all .3s;text-transform:uppercase;font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:4px;padding:10px 22px}
+.egold{background:rgba(255,215,0,0.06);border:1px solid rgba(255,215,0,0.3);color:#ffd700}
 .egold:hover{background:rgba(255,215,0,.12);box-shadow:0 0 30px rgba(255,215,0,.2)}
-.ecyan{background:rgba(0,255,231,0.04);border:1px solid rgba(0,255,231,0.25);color:var(--cyan);text-shadow:0 0 10px rgba(0,255,231,.4)}
+.ecyan{background:rgba(0,255,231,0.04);border:1px solid rgba(0,255,231,0.25);color:#00ffe7}
 .ecyan:hover{background:rgba(0,255,231,.08);box-shadow:0 0 30px rgba(0,255,231,.15)}
 </style>
 
 <div class="rl-s">
-  <div class="rl-ey">◈ ONCHAIN MEMORY ARTIFACTS // RARE PROTOCOL // SEPOLIA TESTNET</div>
+  <div class="rl-ey">&#x25C8; ONCHAIN MEMORY ARTIFACTS // RARE PROTOCOL // SEPOLIA TESTNET</div>
   <div class="rl-hrow">
     <div class="gx gx-gold">ROYAL LOGS</div>
     <div class="rl-meta">3 tokens &middot; <span>0.000369 ETH</span> &middot; fully onchain &middot; <span>zero IPFS</span></div>
   </div>
   <div class="rl-grid">
-    <div class="rl-thumb" onclick="location.href='/royal-logs/'"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 260"><defs><filter id="f49" x="-30%" y="-30%" width="160%" height="160%"><feTurbulence type="fractalNoise" baseFrequency="0.012" numOctaves="3" seed="49"><animate attributeName="baseFrequency" dur="16.0s" values="0.012;0.018;0.012" repeatCount="indefinite"/></feTurbulence><feDisplacementMap in="SourceGraphic" scale="18" xChannelSelector="R" yChannelSelector="G"/></filter><filter id="g49"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter><radialGradient id="bg49" cx="50%" cy="50%" r="70%"><stop offset="0%" stop-color="hsl(233,55%,15%)"><animate attributeName="stop-color" dur="12.0s" values="hsl(233,55%,15%);hsl(23,50%,10%);hsl(233,55%,15%)" repeatCount="indefinite"/></stop><stop offset="100%" stop-color="#030308"/></radialGradient><radialGradient id="cr49" cx="50%" cy="50%" r="30%"><stop offset="0%" stop-color="hsl(233,90%,75%)" stop-opacity="0.8"/><stop offset="100%" stop-color="transparent"/></radialGradient></defs><rect width="260" height="260" fill="#030308"/><rect width="260" height="260" fill="url(#bg49)"/><ellipse cx="130" cy="130" rx="86" ry="81" fill="hsl(233,60%,15%)" filter="url(#f49)" opacity="0.7"><animate attributeName="rx" dur="10.0s" values="86;99;81;86" repeatCount="indefinite"/></ellipse><circle cx="130" cy="130" r="68" fill="url(#cr49)" opacity="0.5" filter="url(#g49)"><animate attributeName="opacity" dur="6.0s" values="0.5;0.8;0.5" repeatCount="indefinite"/></circle><circle cx="130" cy="130" r="52" fill="none" stroke="hsl(233,80%,60%)" stroke-width="0.5" opacity="0.4" filter="url(#g49)"><animateTransform attributeName="transform" type="rotate" from="0 130 130" to="360 130 130" dur="36.0s" repeatCount="indefinite"/></circle><text x="130" y="142" text-anchor="middle" font-family="monospace" font-size="23" fill="white" opacity="0.85" filter="url(#g49)">&#x2B21;</text><rect x="1" y="1" width="258" height="258" rx="8" fill="none" stroke="hsl(233,60%,40%)" stroke-width="0.5" opacity="0.25"/></svg><div class="rl-lbl">TOKEN 1 &middot; 0.000369 ETH</div></div>
-    <div class="rl-thumb" onclick="location.href='/royal-logs/'"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 260"><defs><filter id="f56" x="-30%" y="-30%" width="160%" height="160%"><feTurbulence type="fractalNoise" baseFrequency="0.012" numOctaves="3" seed="56"><animate attributeName="baseFrequency" dur="8.8s" values="0.012;0.018;0.012" repeatCount="indefinite"/></feTurbulence><feDisplacementMap in="SourceGraphic" scale="18" xChannelSelector="R" yChannelSelector="G"/></filter><filter id="g56"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter><radialGradient id="bg56" cx="50%" cy="50%" r="70%"><stop offset="0%" stop-color="hsl(112,55%,15%)"><animate attributeName="stop-color" dur="6.6000000000000005s" values="hsl(112,55%,15%);hsl(262,50%,10%);hsl(112,55%,15%)" repeatCount="indefinite"/></stop><stop offset="100%" stop-color="#030308"/></radialGradient><radialGradient id="cr56" cx="50%" cy="50%" r="30%"><stop offset="0%" stop-color="hsl(112,90%,75%)" stop-opacity="0.8"/><stop offset="100%" stop-color="transparent"/></radialGradient></defs><rect width="260" height="260" fill="#030308"/><rect width="260" height="260" fill="url(#bg56)"/><ellipse cx="130" cy="130" rx="86" ry="81" fill="hsl(112,60%,15%)" filter="url(#f56)" opacity="0.7"><animate attributeName="rx" dur="5.5s" values="86;99;81;86" repeatCount="indefinite"/></ellipse><circle cx="130" cy="130" r="68" fill="url(#cr56)" opacity="0.5" filter="url(#g56)"><animate attributeName="opacity" dur="3.3000000000000003s" values="0.5;0.8;0.5" repeatCount="indefinite"/></circle><circle cx="130" cy="130" r="52" fill="none" stroke="hsl(112,80%,60%)" stroke-width="0.5" opacity="0.4" filter="url(#g56)"><animateTransform attributeName="transform" type="rotate" from="0 130 130" to="360 130 130" dur="19.8s" repeatCount="indefinite"/></circle><text x="130" y="142" text-anchor="middle" font-family="monospace" font-size="23" fill="white" opacity="0.85" filter="url(#g56)">&#x2B21;</text><rect x="1" y="1" width="258" height="258" rx="8" fill="none" stroke="hsl(112,60%,40%)" stroke-width="0.5" opacity="0.25"/></svg><div class="rl-lbl">TOKEN 2 &middot; 0.000369 ETH</div></div>
-    <div class="rl-thumb" onclick="location.href='/royal-logs/'"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 260"><defs><filter id="f63" x="-30%" y="-30%" width="160%" height="160%"><feTurbulence type="fractalNoise" baseFrequency="0.012" numOctaves="3" seed="63"><animate attributeName="baseFrequency" dur="13.6s" values="0.012;0.018;0.012" repeatCount="indefinite"/></feTurbulence><feDisplacementMap in="SourceGraphic" scale="18" xChannelSelector="R" yChannelSelector="G"/></filter><filter id="g63"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter><radialGradient id="bg63" cx="50%" cy="50%" r="70%"><stop offset="0%" stop-color="hsl(351,55%,15%)"><animate attributeName="stop-color" dur="10.2s" values="hsl(351,55%,15%);hsl(141,50%,10%);hsl(351,55%,15%)" repeatCount="indefinite"/></stop><stop offset="100%" stop-color="#030308"/></radialGradient><radialGradient id="cr63" cx="50%" cy="50%" r="30%"><stop offset="0%" stop-color="hsl(351,90%,75%)" stop-opacity="0.8"/><stop offset="100%" stop-color="transparent"/></radialGradient></defs><rect width="260" height="260" fill="#030308"/><rect width="260" height="260" fill="url(#bg63)"/><ellipse cx="130" cy="130" rx="86" ry="81" fill="hsl(351,60%,15%)" filter="url(#f63)" opacity="0.7"><animate attributeName="rx" dur="8.5s" values="86;99;81;86" repeatCount="indefinite"/></ellipse><circle cx="130" cy="130" r="68" fill="url(#cr63)" opacity="0.5" filter="url(#g63)"><animate attributeName="opacity" dur="5.1s" values="0.5;0.8;0.5" repeatCount="indefinite"/></circle><circle cx="130" cy="130" r="52" fill="none" stroke="hsl(351,80%,60%)" stroke-width="0.5" opacity="0.4" filter="url(#g63)"><animateTransform attributeName="transform" type="rotate" from="0 130 130" to="360 130 130" dur="30.599999999999998s" repeatCount="indefinite"/></circle><text x="130" y="142" text-anchor="middle" font-family="monospace" font-size="23" fill="white" opacity="0.85" filter="url(#g63)">&#x2B21;</text><rect x="1" y="1" width="258" height="258" rx="8" fill="none" stroke="hsl(351,60%,40%)" stroke-width="0.5" opacity="0.25"/></svg><div class="rl-lbl">TOKEN 3 &middot; 0.000369 ETH</div></div>
+    <div class="rl-thumb" onclick="location.href='/royal-logs/'"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 260"><defs><filter id="f49" x="-30%" y="-30%" width="160%" height="160%"><feTurbulence type="fractalNoise" baseFrequency="0.012" numOctaves="3" seed="49"><animate attributeName="baseFrequency" dur="16.0s" values="0.012;0.018;0.012" repeatCount="indefinite"/></feTurbulence><feDisplacementMap in="SourceGraphic" scale="18" xChannelSelector="R" yChannelSelector="G"/></filter><filter id="g49"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter><radialGradient id="bg49" cx="50%" cy="50%" r="70%"><stop offset="0%" stop-color="hsl(233,55%,15%)"><animate attributeName="stop-color" dur="12.0s" values="hsl(233,55%,15%);hsl(23,50%,10%);hsl(233,55%,15%)" repeatCount="indefinite"/></stop><stop offset="100%" stop-color="#000408"/></radialGradient><radialGradient id="cr49" cx="50%" cy="50%" r="30%"><stop offset="0%" stop-color="hsl(233,90%,75%)" stop-opacity="0.8"/><stop offset="100%" stop-color="transparent"/></radialGradient></defs><rect width="260" height="260" fill="#000408"/><rect width="260" height="260" fill="url(#bg49)"/><ellipse cx="130" cy="130" rx="86" ry="81" fill="hsl(233,60%,15%)" filter="url(#f49)" opacity="0.7"><animate attributeName="rx" dur="10.0s" values="86;99;81;86" repeatCount="indefinite"/></ellipse><circle cx="130" cy="130" r="68" fill="url(#cr49)" opacity="0.5" filter="url(#g49)"><animate attributeName="opacity" dur="6.0s" values="0.5;0.8;0.5" repeatCount="indefinite"/></circle><circle cx="130" cy="130" r="52" fill="none" stroke="hsl(233,80%,60%)" stroke-width="0.5" opacity="0.4" filter="url(#g49)"><animateTransform attributeName="transform" type="rotate" from="0 130 130" to="360 130 130" dur="36.0s" repeatCount="indefinite"/></circle><text x="130" y="142" text-anchor="middle" font-family="monospace" font-size="23" fill="white" opacity="0.85" filter="url(#g49)">&#x2B21;</text><rect x="1" y="1" width="258" height="258" rx="8" fill="none" stroke="hsl(233,60%,40%)" stroke-width="0.5" opacity="0.25"/></svg><div class="rl-lbl">TOKEN 1 &middot; 0.000369 ETH</div></div>
+    <div class="rl-thumb" onclick="location.href='/royal-logs/'"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 260"><defs><filter id="f56" x="-30%" y="-30%" width="160%" height="160%"><feTurbulence type="fractalNoise" baseFrequency="0.012" numOctaves="3" seed="56"><animate attributeName="baseFrequency" dur="8.8s" values="0.012;0.018;0.012" repeatCount="indefinite"/></feTurbulence><feDisplacementMap in="SourceGraphic" scale="18" xChannelSelector="R" yChannelSelector="G"/></filter><filter id="g56"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter><radialGradient id="bg56" cx="50%" cy="50%" r="70%"><stop offset="0%" stop-color="hsl(112,55%,15%)"><animate attributeName="stop-color" dur="6.6000000000000005s" values="hsl(112,55%,15%);hsl(262,50%,10%);hsl(112,55%,15%)" repeatCount="indefinite"/></stop><stop offset="100%" stop-color="#000408"/></radialGradient><radialGradient id="cr56" cx="50%" cy="50%" r="30%"><stop offset="0%" stop-color="hsl(112,90%,75%)" stop-opacity="0.8"/><stop offset="100%" stop-color="transparent"/></radialGradient></defs><rect width="260" height="260" fill="#000408"/><rect width="260" height="260" fill="url(#bg56)"/><ellipse cx="130" cy="130" rx="86" ry="81" fill="hsl(112,60%,15%)" filter="url(#f56)" opacity="0.7"><animate attributeName="rx" dur="5.5s" values="86;99;81;86" repeatCount="indefinite"/></ellipse><circle cx="130" cy="130" r="68" fill="url(#cr56)" opacity="0.5" filter="url(#g56)"><animate attributeName="opacity" dur="3.3000000000000003s" values="0.5;0.8;0.5" repeatCount="indefinite"/></circle><circle cx="130" cy="130" r="52" fill="none" stroke="hsl(112,80%,60%)" stroke-width="0.5" opacity="0.4" filter="url(#g56)"><animateTransform attributeName="transform" type="rotate" from="0 130 130" to="360 130 130" dur="19.8s" repeatCount="indefinite"/></circle><text x="130" y="142" text-anchor="middle" font-family="monospace" font-size="23" fill="white" opacity="0.85" filter="url(#g56)">&#x2B21;</text><rect x="1" y="1" width="258" height="258" rx="8" fill="none" stroke="hsl(112,60%,40%)" stroke-width="0.5" opacity="0.25"/></svg><div class="rl-lbl">TOKEN 2 &middot; 0.000369 ETH</div></div>
+    <div class="rl-thumb" onclick="location.href='/royal-logs/'"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 260"><defs><filter id="f63" x="-30%" y="-30%" width="160%" height="160%"><feTurbulence type="fractalNoise" baseFrequency="0.012" numOctaves="3" seed="63"><animate attributeName="baseFrequency" dur="13.6s" values="0.012;0.018;0.012" repeatCount="indefinite"/></feTurbulence><feDisplacementMap in="SourceGraphic" scale="18" xChannelSelector="R" yChannelSelector="G"/></filter><filter id="g63"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter><radialGradient id="bg63" cx="50%" cy="50%" r="70%"><stop offset="0%" stop-color="hsl(351,55%,15%)"><animate attributeName="stop-color" dur="10.2s" values="hsl(351,55%,15%);hsl(141,50%,10%);hsl(351,55%,15%)" repeatCount="indefinite"/></stop><stop offset="100%" stop-color="#000408"/></radialGradient><radialGradient id="cr63" cx="50%" cy="50%" r="30%"><stop offset="0%" stop-color="hsl(351,90%,75%)" stop-opacity="0.8"/><stop offset="100%" stop-color="transparent"/></radialGradient></defs><rect width="260" height="260" fill="#000408"/><rect width="260" height="260" fill="url(#bg63)"/><ellipse cx="130" cy="130" rx="86" ry="81" fill="hsl(351,60%,15%)" filter="url(#f63)" opacity="0.7"><animate attributeName="rx" dur="8.5s" values="86;99;81;86" repeatCount="indefinite"/></ellipse><circle cx="130" cy="130" r="68" fill="url(#cr63)" opacity="0.5" filter="url(#g63)"><animate attributeName="opacity" dur="5.1s" values="0.5;0.8;0.5" repeatCount="indefinite"/></circle><circle cx="130" cy="130" r="52" fill="none" stroke="hsl(351,80%,60%)" stroke-width="0.5" opacity="0.4" filter="url(#g63)"><animateTransform attributeName="transform" type="rotate" from="0 130 130" to="360 130 130" dur="30.599999999999998s" repeatCount="indefinite"/></circle><text x="130" y="142" text-anchor="middle" font-family="monospace" font-size="23" fill="white" opacity="0.85" filter="url(#g63)">&#x2B21;</text><rect x="1" y="1" width="258" height="258" rx="8" fill="none" stroke="hsl(351,60%,40%)" stroke-width="0.5" opacity="0.25"/></svg><div class="rl-lbl">TOKEN 3 &middot; 0.000369 ETH</div></div>
   </div>
   <div class="rl-frow">
     <div class="rl-info">Liquid-glass animated SVG. Art lives in the token forever.<br>ERC-721 &middot; Contract: 0xc9E138fe...121e &middot; Blocks 10443612&ndash;14</div>
-    <a href="/royal-logs/" class="ebtn egold">⬡ ENTER ROYAL LOGS &rarr;</a>
+    <a href="/royal-logs/" class="ebtn egold">&#x2B21; ENTER ROYAL LOGS &#x2192;</a>
   </div>
 </div>
-<div class="sdiv">▓▓▓</div>
+<div class="sdiv">&#x2593;&#x2593;&#x2593;</div>
 
 <div class="uni-s">
-  <div class="rl-ey">⬡ UNISWAP TRADING API // PERMIT2 // UNISWAPX // ARBITER-GATED</div>
+  <div class="rl-ey">&#x2B21; UNISWAP TRADING API // PERMIT2 // UNISWAPX // ARBITER-GATED</div>
   <div class="uni-hrow">
     <div class="gx gx-cyan">SWARM TRADE</div>
     <div class="rl-meta">real quotes &middot; <span>live routing</span> &middot; UniswapX &middot; <span>Permit2 EIP-712</span></div>
   </div>
   <div class="uni-cards">
-    <div class="uni-card"><div class="uni-ct">◈ BEST_PRICE ROUTING</div><div class="uni-cd">Classic AMM, UniswapX, Dutch V2/V3, Priority. Optimizer picks best route live.</div></div>
-    <div class="uni-card"><div class="uni-ct">⛏ PERMIT2 SIGNING</div><div class="uni-cd">Full EIP-712 off-chain Permit2. No gas for auth. Universal Router v2.0.</div></div>
-    <div class="uni-card"><div class="uni-ct">⚖ ARBITER-GATED</div><div class="uni-cd">Every swap scored 0&ndash;100. Above 75 blocked. Zero-trust DeFi in the swarm.</div></div>
+    <div class="uni-card"><div class="uni-ct">&#x25C8; BEST_PRICE ROUTING</div><div class="uni-cd">Classic AMM, UniswapX, Dutch V2/V3, Priority. Optimizer picks best route live.</div></div>
+    <div class="uni-card"><div class="uni-ct">&#x26BF; PERMIT2 SIGNING</div><div class="uni-cd">Full EIP-712 off-chain Permit2. No gas for auth. Universal Router v2.0.</div></div>
+    <div class="uni-card"><div class="uni-ct">&#x2696; ARBITER-GATED</div><div class="uni-cd">Every swap scored 0&ndash;100. Above 75 blocked. Zero-trust DeFi in the swarm.</div></div>
   </div>
   <div class="uni-frow">
     <div class="uni-stats">
@@ -224,10 +412,10 @@ footer{border-top:1px solid var(--border);padding:2rem 6vw;display:flex;justify-
       <div><div class="uni-sv">10+</div><div class="uni-sl">ROUTE TYPES</div></div>
       <div><div class="uni-sv">V2</div><div class="uni-sl">UNIV ROUTER</div></div>
     </div>
-    <a href="/uniswap/" class="ebtn ecyan">▶ OPEN SWARM TRADE &rarr;</a>
+    <a href="/uniswap/" class="ebtn ecyan">&#x25B6; OPEN SWARM TRADE &#x2192;</a>
   </div>
 </div>
-<div class="sdiv" style="padding-bottom:40px">▓▓▓</div>
+<div class="sdiv" style="padding-bottom:40px">&#x2593;&#x2593;&#x2593;</div>
 
 <section class="s">
   <div class="s-lbl">// HOVER TO PROBE — SYSTEM RESISTS FULL INSPECTION</div>

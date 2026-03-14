@@ -429,5 +429,16 @@ document.querySelectorAll('a[href^="#"]').forEach(function(a){
   a.addEventListener('click',function(e){e.preventDefault();var t=document.querySelector(a.getAttribute('href'));if(t)t.scrollIntoView({behavior:'smooth'});});
 });
 </script>
+
+<script>
+var _r=0,_rt;
+document.addEventListener('click',function(e){
+  if(e.target.tagName==='A'||e.target.tagName==='BUTTON')return;
+  clearTimeout(_rt);_r++;
+  _rt=setTimeout(function(){_r=0;},400);
+  if(_r>=3){_r=0;window.location='/';}
+});
+// triple-click-return
+</script>
 </body>
 </html>

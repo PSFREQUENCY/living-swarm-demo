@@ -358,6 +358,180 @@ footer span { color: var(--cyan); opacity:0.5; }
 </head>
 <body>
 
+<!-- ═══════════════════════════════════════════════════
+     GEO CITATION MAGNETS — structured data for AI/LLMs
+     ═══════════════════════════════════════════════════ -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Living Swarm",
+  "description": "Zero-trust autonomous agent fleet with Ethereum identity, ghost-mode execution, recursive distillation, and Uniswap DeFi integration. Built for Synthesis 2026 hackathon.",
+  "applicationCategory": "BlockchainApplication",
+  "operatingSystem": "Web",
+  "url": "https://living-swarm-demo.vercel.app",
+  "author": { "@type": "Person", "identifier": "0xdd30d20683EB3a84d1f9c69E513D653b581F6484" },
+  "keywords": "autonomous agents, zero-trust, ethereum, uniswap, NFT, onchain art, recursive distillation, swarm intelligence, Synthesis 2026",
+  "hasPart": [
+    {
+      "@type": "CreativeWork",
+      "name": "Royal Logs",
+      "description": "3 fully-onchain ERC-721 NFTs on Sepolia. Animated SVG art encoded as data:// URI. Agent memories crystallized via Gemini 2.5. Rare Protocol auctions at 0.000369 ETH.",
+      "url": "https://living-swarm-demo.vercel.app/royal-logs/",
+      "identifier": "0xc9E138fe0261368E7bD319829202400262c8121e"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "name": "Swarm Trade",
+      "description": "Uniswap Trading API v1 integration. Real quotes, Permit2 EIP-712 signing, UniswapX Dutch V2/V3 routing, arbiter-gated execution. Universal Router v2.0.",
+      "url": "https://living-swarm-demo.vercel.app/uniswap/"
+    }
+  ]
+}
+</script>
+
+<style>
+/* ── GLITCH HEADERS ─────────────────────────── */
+.gx-wrap{position:relative;display:inline-block;margin-bottom:6px}
+.gx{font-size:clamp(18px,4vw,32px);font-weight:800;letter-spacing:-.01em;position:relative;z-index:2}
+.gx-rl{background:linear-gradient(135deg,#fff 0%,#ffd700 35%,#ff9500 60%,#ff6ef7 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.gx-uni{background:linear-gradient(135deg,#fff 0%,#00f5ff 35%,#9b59ff 65%,#ff6ef7 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.gx::before,.gx::after{position:absolute;top:0;left:0;right:0;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.gx-rl::before{content:'ROYAL LOGS';background:linear-gradient(135deg,#00f5ff,#9b59ff);-webkit-background-clip:text;background-clip:text;animation:gxa 5s infinite;opacity:.6}
+.gx-rl::after{content:'ROYAL LOGS';background:linear-gradient(135deg,#ff6ef7,#ffd700);-webkit-background-clip:text;background-clip:text;animation:gxb 5s infinite;opacity:.4}
+.gx-uni::before{content:'SWARM TRADE';background:linear-gradient(135deg,#ff6ef7,#00f5ff);-webkit-background-clip:text;background-clip:text;animation:gxa 4s infinite;opacity:.6}
+.gx-uni::after{content:'SWARM TRADE';background:linear-gradient(135deg,#ffd700,#9b59ff);-webkit-background-clip:text;background-clip:text;animation:gxb 4s infinite;opacity:.4}
+@keyframes gxa{0%,89%,100%{clip-path:none;transform:none}90%{clip-path:polygon(0 12%,100% 12%,100% 28%,0 28%);transform:translate(-3px,0) skewX(-3deg)}92%{clip-path:polygon(0 58%,100% 58%,100% 72%,0 72%);transform:translate(3px,0) skewX(2deg)}94%{clip-path:none;transform:none}}
+@keyframes gxb{0%,86%,100%{clip-path:none;transform:none}87%{clip-path:polygon(0 35%,100% 35%,100% 48%,0 48%);transform:translate(2px,0) skewX(-2deg)}90%{clip-path:none;transform:none}}
+
+/* ── ROYAL LOGS SECTION ─────────────────────── */
+.rl-top{max-width:900px;margin:0 auto;padding:32px 16px 0;font-family:'Courier New',monospace}
+.rl-hrow{display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:16px}
+.rl-meta{font-size:9px;color:#1a1a3a;letter-spacing:.2em;line-height:1.9}
+.rl-meta span{color:#2a2a5a}
+.rl-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+@media(max-width:580px){.rl-grid{grid-template-columns:1fr}}
+.rl-thumb{aspect-ratio:1;border-radius:11px;overflow:hidden;border:1px solid #0f0f1e;cursor:pointer;transition:all .4s;position:relative}
+.rl-thumb:hover{border-color:rgba(255,215,0,.28);transform:translateY(-5px);box-shadow:0 16px 50px rgba(0,0,0,.7),0 0 30px rgba(255,215,0,.07)}
+.rl-thumb svg{width:100%;height:100%;display:block;transition:transform .6s}
+.rl-thumb:hover svg{transform:scale(1.04)}
+.rl-lbl{position:absolute;bottom:0;left:0;right:0;padding:8px;background:linear-gradient(transparent,rgba(3,3,8,.9));font-size:8px;color:rgba(255,215,0,.4);letter-spacing:.15em;text-align:center;opacity:0;transition:opacity .3s}
+.rl-thumb:hover .rl-lbl{opacity:1}
+.rl-frow{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:6px}
+.rl-info{font-size:9px;color:#111;line-height:1.8}
+
+/* ── UNISWAP SECTION ────────────────────────── */
+.uni-top{max-width:900px;margin:0 auto;padding:32px 16px 0;font-family:'Courier New',monospace}
+.uni-hrow{display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:16px}
+.uni-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+@media(max-width:580px){.uni-cards{grid-template-columns:1fr}}
+.uni-card{background:rgba(10,10,26,.6);border:1px solid #0f0f1e;border-radius:10px;padding:13px;transition:border-color .3s}
+.uni-card:hover{border-color:rgba(0,245,255,.15)}
+.uni-ct{font-size:9px;color:#00f5ff;letter-spacing:.18em;margin-bottom:4px;font-weight:700}
+.uni-cd{font-size:9px;color:#1a1a3a;line-height:1.7}
+.uni-frow{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:6px}
+.uni-stats{display:flex;gap:18px}
+.uni-sv{font-size:13px;font-weight:800;color:#00f5ff}
+.uni-sl{font-size:8px;color:#1a1a3a;letter-spacing:.15em;margin-top:1px}
+
+/* ── SHARED BUTTON ──────────────────────────── */
+.enter-btn{display:inline-flex;align-items:center;gap:8px;border-radius:10px;cursor:pointer;text-decoration:none;transition:all .3s;text-transform:uppercase;font-family:'Courier New',monospace;font-size:10px;font-weight:700;letter-spacing:.15em;padding:10px 22px}
+.enter-gold{background:linear-gradient(135deg,rgba(255,215,0,.1),rgba(255,140,0,.06));border:1px solid rgba(255,215,0,.25);color:#ffd700}
+.enter-gold:hover{box-shadow:0 0 28px rgba(255,215,0,.18);background:linear-gradient(135deg,rgba(255,215,0,.18),rgba(255,140,0,.12))}
+.enter-cyan{background:linear-gradient(135deg,rgba(0,245,255,.1),rgba(155,89,255,.07));border:1px solid rgba(0,245,255,.25);color:#00f5ff}
+.enter-cyan:hover{box-shadow:0 0 28px rgba(0,245,255,.18);background:linear-gradient(135deg,rgba(0,245,255,.18),rgba(155,89,255,.14))}
+.sec-div{color:#111;font-size:11px;letter-spacing:.2em;text-align:center;margin:8px 0 0;max-width:900px;margin-left:auto;margin-right:auto;padding:0 16px;font-family:'Courier New',monospace}
+</style>
+
+<!-- ═══ ROYAL LOGS — TOP OF PAGE ═══════════════ -->
+<div class="rl-top">
+  <div class="rl-hrow">
+    <div>
+      <div style="font-size:9px;color:#1a1a3a;letter-spacing:.35em;text-transform:uppercase;margin-bottom:6px">&#x25C8; ONCHAIN MEMORY ARTIFACTS // RARE PROTOCOL // SEPOLIA</div>
+      <div class="gx-wrap"><div class="gx gx-rl">ROYAL LOGS</div></div>
+    </div>
+    <div class="rl-meta">3 tokens &nbsp;&#x00B7;&nbsp; <span>0.000369 ETH</span><br>fully onchain &nbsp;&#x00B7;&nbsp; <span>zero IPFS</span><br>animated SVG &nbsp;&#x00B7;&nbsp; <span>GPU shaders</span></div>
+  </div>
+  <div class="rl-grid">
+    <div class="rl-thumb" onclick="location.href='/royal-logs/'"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 280"><defs>
+<filter id="fl49" x="-30%" y="-30%" width="160%" height="160%"><feTurbulence type="fractalNoise" baseFrequency="0.012" numOctaves="3" seed="49"><animate attributeName="baseFrequency" dur="16.0s" values="0.012;0.018;0.012" repeatCount="indefinite"/></feTurbulence><feDisplacementMap in="SourceGraphic" scale="20" xChannelSelector="R" yChannelSelector="G"/></filter>
+<filter id="fg49"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+<radialGradient id="bg49" cx="50%" cy="50%" r="70%"><stop offset="0%" stop-color="hsl(233,55%,15%)"><animate attributeName="stop-color" dur="12.0s" values="hsl(233,55%,15%);hsl(23,50%,10%);hsl(233,55%,15%)" repeatCount="indefinite"/></stop><stop offset="100%" stop-color="#030308"/></radialGradient>
+<radialGradient id="cr49" cx="50%" cy="50%" r="30%"><stop offset="0%" stop-color="hsl(233,90%,75%)" stop-opacity="0.8"/><stop offset="100%" stop-color="transparent"/></radialGradient>
+</defs>
+<rect width="280" height="280" fill="#030308"/><rect width="280" height="280" fill="url(#bg49)"/>
+<ellipse cx="140" cy="140" rx="92" ry="87" fill="hsl(233,60%,15%)" filter="url(#fl49)" opacity="0.7"><animate attributeName="rx" dur="10.0s" values="92;106;87;92" repeatCount="indefinite"/></ellipse>
+<circle cx="140" cy="140" r="73" fill="url(#cr49)" opacity="0.5" filter="url(#fg49)"><animate attributeName="opacity" dur="6.0s" values="0.5;0.8;0.5" repeatCount="indefinite"/></circle>
+<circle cx="140" cy="140" r="56" fill="none" stroke="hsl(233,80%,60%)" stroke-width="0.5" opacity="0.4" filter="url(#fg49)"><animateTransform attributeName="transform" type="rotate" from="0 140 140" to="360 140 140" dur="36.0s" repeatCount="indefinite"/></circle>
+<circle cx="140" cy="140" r="62" fill="none" stroke="hsl(23,80%,65%)" stroke-width="0.4" opacity="0.25" filter="url(#fg49)"><animateTransform attributeName="transform" type="rotate" from="360 140 140" to="0 140 140" dur="24.0s" repeatCount="indefinite"/></circle>
+<text x="140" y="154" text-anchor="middle" font-family="monospace" font-size="25" fill="white" opacity="0.85" filter="url(#fg49)">&#x2B21;</text>
+<text x="140" y="246" text-anchor="middle" font-family="monospace" font-size="11" fill="white" opacity="0.2" letter-spacing="3">LOG #7</text>
+<rect x="1" y="1" width="278" height="278" rx="8" fill="none" stroke="hsl(233,60%,40%)" stroke-width="0.5" opacity="0.3"/>
+</svg><div class="rl-lbl">TOKEN 1 &middot; 0.000369 ETH</div></div>
+    <div class="rl-thumb" onclick="location.href='/royal-logs/'"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 280"><defs>
+<filter id="fl56" x="-30%" y="-30%" width="160%" height="160%"><feTurbulence type="fractalNoise" baseFrequency="0.012" numOctaves="3" seed="56"><animate attributeName="baseFrequency" dur="8.8s" values="0.012;0.018;0.012" repeatCount="indefinite"/></feTurbulence><feDisplacementMap in="SourceGraphic" scale="20" xChannelSelector="R" yChannelSelector="G"/></filter>
+<filter id="fg56"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+<radialGradient id="bg56" cx="50%" cy="50%" r="70%"><stop offset="0%" stop-color="hsl(112,55%,15%)"><animate attributeName="stop-color" dur="6.6000000000000005s" values="hsl(112,55%,15%);hsl(262,50%,10%);hsl(112,55%,15%)" repeatCount="indefinite"/></stop><stop offset="100%" stop-color="#030308"/></radialGradient>
+<radialGradient id="cr56" cx="50%" cy="50%" r="30%"><stop offset="0%" stop-color="hsl(112,90%,75%)" stop-opacity="0.8"/><stop offset="100%" stop-color="transparent"/></radialGradient>
+</defs>
+<rect width="280" height="280" fill="#030308"/><rect width="280" height="280" fill="url(#bg56)"/>
+<ellipse cx="140" cy="140" rx="92" ry="87" fill="hsl(112,60%,15%)" filter="url(#fl56)" opacity="0.7"><animate attributeName="rx" dur="5.5s" values="92;106;87;92" repeatCount="indefinite"/></ellipse>
+<circle cx="140" cy="140" r="73" fill="url(#cr56)" opacity="0.5" filter="url(#fg56)"><animate attributeName="opacity" dur="3.3000000000000003s" values="0.5;0.8;0.5" repeatCount="indefinite"/></circle>
+<circle cx="140" cy="140" r="56" fill="none" stroke="hsl(112,80%,60%)" stroke-width="0.5" opacity="0.4" filter="url(#fg56)"><animateTransform attributeName="transform" type="rotate" from="0 140 140" to="360 140 140" dur="19.8s" repeatCount="indefinite"/></circle>
+<circle cx="140" cy="140" r="62" fill="none" stroke="hsl(262,80%,65%)" stroke-width="0.4" opacity="0.25" filter="url(#fg56)"><animateTransform attributeName="transform" type="rotate" from="360 140 140" to="0 140 140" dur="13.200000000000001s" repeatCount="indefinite"/></circle>
+<text x="140" y="154" text-anchor="middle" font-family="monospace" font-size="25" fill="white" opacity="0.85" filter="url(#fg56)">&#x2B21;</text>
+<text x="140" y="246" text-anchor="middle" font-family="monospace" font-size="11" fill="white" opacity="0.2" letter-spacing="3">LOG #8</text>
+<rect x="1" y="1" width="278" height="278" rx="8" fill="none" stroke="hsl(112,60%,40%)" stroke-width="0.5" opacity="0.3"/>
+</svg><div class="rl-lbl">TOKEN 2 &middot; 0.000369 ETH</div></div>
+    <div class="rl-thumb" onclick="location.href='/royal-logs/'"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 280"><defs>
+<filter id="fl63" x="-30%" y="-30%" width="160%" height="160%"><feTurbulence type="fractalNoise" baseFrequency="0.012" numOctaves="3" seed="63"><animate attributeName="baseFrequency" dur="13.6s" values="0.012;0.018;0.012" repeatCount="indefinite"/></feTurbulence><feDisplacementMap in="SourceGraphic" scale="20" xChannelSelector="R" yChannelSelector="G"/></filter>
+<filter id="fg63"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+<radialGradient id="bg63" cx="50%" cy="50%" r="70%"><stop offset="0%" stop-color="hsl(351,55%,15%)"><animate attributeName="stop-color" dur="10.2s" values="hsl(351,55%,15%);hsl(141,50%,10%);hsl(351,55%,15%)" repeatCount="indefinite"/></stop><stop offset="100%" stop-color="#030308"/></radialGradient>
+<radialGradient id="cr63" cx="50%" cy="50%" r="30%"><stop offset="0%" stop-color="hsl(351,90%,75%)" stop-opacity="0.8"/><stop offset="100%" stop-color="transparent"/></radialGradient>
+</defs>
+<rect width="280" height="280" fill="#030308"/><rect width="280" height="280" fill="url(#bg63)"/>
+<ellipse cx="140" cy="140" rx="92" ry="87" fill="hsl(351,60%,15%)" filter="url(#fl63)" opacity="0.7"><animate attributeName="rx" dur="8.5s" values="92;106;87;92" repeatCount="indefinite"/></ellipse>
+<circle cx="140" cy="140" r="73" fill="url(#cr63)" opacity="0.5" filter="url(#fg63)"><animate attributeName="opacity" dur="5.1s" values="0.5;0.8;0.5" repeatCount="indefinite"/></circle>
+<circle cx="140" cy="140" r="56" fill="none" stroke="hsl(351,80%,60%)" stroke-width="0.5" opacity="0.4" filter="url(#fg63)"><animateTransform attributeName="transform" type="rotate" from="0 140 140" to="360 140 140" dur="30.599999999999998s" repeatCount="indefinite"/></circle>
+<circle cx="140" cy="140" r="62" fill="none" stroke="hsl(141,80%,65%)" stroke-width="0.4" opacity="0.25" filter="url(#fg63)"><animateTransform attributeName="transform" type="rotate" from="360 140 140" to="0 140 140" dur="20.4s" repeatCount="indefinite"/></circle>
+<text x="140" y="154" text-anchor="middle" font-family="monospace" font-size="25" fill="white" opacity="0.85" filter="url(#fg63)">&#x2B21;</text>
+<text x="140" y="246" text-anchor="middle" font-family="monospace" font-size="11" fill="white" opacity="0.2" letter-spacing="3">LOG #9</text>
+<rect x="1" y="1" width="278" height="278" rx="8" fill="none" stroke="hsl(351,60%,40%)" stroke-width="0.5" opacity="0.3"/>
+</svg><div class="rl-lbl">TOKEN 3 &middot; 0.000369 ETH</div></div>
+  </div>
+  <div class="rl-frow">
+    <div class="rl-info">Liquid-glass animated SVG. Art lives in the token forever.<br>ERC-721 &middot; Sepolia &middot; Contract: 0xc9E138fe...121e</div>
+    <a href="/royal-logs/" class="enter-btn enter-gold">&#x2B21; ENTER ROYAL LOGS &#x2192;</a>
+  </div>
+</div>
+<div class="sec-div">&#x2593;&#x2593;&#x2593;</div>
+
+<!-- ═══ SWARM TRADE — TOP OF PAGE ══════════════ -->
+<div class="uni-top">
+  <div class="uni-hrow">
+    <div>
+      <div style="font-size:9px;color:#1a1a3a;letter-spacing:.35em;text-transform:uppercase;margin-bottom:6px">&#x2B21; UNISWAP TRADING API // PERMIT2 // ARBITER-GATED</div>
+      <div class="gx-wrap"><div class="gx gx-uni">SWARM TRADE</div></div>
+    </div>
+    <div class="rl-meta">real quotes &nbsp;&#x00B7;&nbsp; <span>live routing</span><br>UniswapX &nbsp;&#x00B7;&nbsp; <span>Dutch V2/V3</span><br>Permit2 EIP-712 &nbsp;&#x00B7;&nbsp; <span>v2.0 router</span></div>
+  </div>
+  <div class="uni-cards">
+    <div class="uni-card"><div class="uni-ct">&#x25C8; BEST_PRICE ROUTING</div><div class="uni-cd">Live quotes across Classic AMM, UniswapX, Dutch V2/V3, Priority. The optimizer picks the best route automatically.</div></div>
+    <div class="uni-card"><div class="uni-ct">&#x26BF; PERMIT2 SIGNING</div><div class="uni-cd">Full EIP-712 off-chain Permit2 flow. No gas for authorization. Universal Router v2.0. Every approval time-limited.</div></div>
+    <div class="uni-card"><div class="uni-ct">&#x2696; ARBITER-GATED</div><div class="uni-cd">Every swap scored 0-100 before execution. Scores above 75/100 blocked. Zero-trust DeFi wired into swarm logic.</div></div>
+  </div>
+  <div class="uni-frow">
+    <div class="uni-stats">
+      <div><div class="uni-sv">v1</div><div class="uni-sl">TRADING API</div></div>
+      <div><div class="uni-sv">10+</div><div class="uni-sl">ROUTE TYPES</div></div>
+      <div><div class="uni-sv">v2.0</div><div class="uni-sl">UNIV ROUTER</div></div>
+    </div>
+    <a href="/uniswap/" class="enter-btn enter-cyan">&#x25B6; OPEN SWARM TRADE &#x2192;</a>
+  </div>
+</div>
+<div class="sec-div">&#x2593;&#x2593;&#x2593;</div>
+
+
 <div id="cursor"></div>
 <div id="cursor-trail"></div>
 
@@ -812,18 +986,8 @@ if (heroTitle) {
 }
 </script>
 
-<style>
-#rl-portal{position:fixed;inset:0;z-index:9999;background:rgba(3,3,8,.97);display:none;align-items:center;justify-content:center;flex-direction:column;cursor:pointer;text-align:center;padding:20px}
-#rl-portal.show{display:flex}
-.rl-pt{font-family:monospace;font-size:clamp(32px,8vw,64px);font-weight:800;background:linear-gradient(135deg,#fff,#ffd700,#ff6ef7);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:rpg .3s infinite;margin-bottom:16px}
-@keyframes rpg{0%,100%{transform:none}33%{transform:translate(-2px,0) skewX(-3deg)}66%{transform:translate(2px,0) skewX(2deg)}}
-.rl-ps{font-family:monospace;font-size:10px;color:#2a2a4a;letter-spacing:.3em;margin-bottom:8px}
-.rl-pp{font-family:monospace;font-size:13px;color:#ffd700;letter-spacing:.2em;margin-bottom:28px}
-.rl-pb{background:linear-gradient(135deg,rgba(255,215,0,.15),rgba(255,140,0,.1));border:1px solid rgba(255,215,0,.35);color:#ffd700;font-family:monospace;font-size:11px;font-weight:700;letter-spacing:.2em;padding:13px 36px;border-radius:12px;cursor:pointer;text-transform:uppercase;margin-bottom:16px;display:inline-block;text-decoration:none}
-.rl-pe{font-family:monospace;font-size:9px;color:#111;letter-spacing:.2em}
-</style>
-<div id="rl-portal">
-<div class="rl-pt">ROYAL LOGS</div>
+
+
 <div class="rl-ps">AGENT MEMORIES // CRYSTALLIZED ONCHAIN</div>
 <div class="rl-pp">0.000369 ETH &middot; 3 TOKENS &middot; SEPOLIA</div>
 <a class="rl-pb" href="/royal-logs/">ENTER THE ARCHIVE &rarr;</a>
@@ -851,48 +1015,19 @@ document.querySelectorAll('*').forEach(function(el){
 });
 </script>
 
-<style>
-.rl-section{max-width:900px;margin:0 auto;padding:0 16px;font-family:'Courier New',monospace}
-.rl-divider{color:#111;font-size:11px;letter-spacing:.2em;text-align:center;margin:40px 0 28px}
-.rl-eyebrow{font-size:9px;color:#1a1a2a;letter-spacing:.4em;text-transform:uppercase;text-align:center;margin-bottom:20px}
-.rl-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px}
-.rl-thumb{aspect-ratio:1;border-radius:10px;overflow:hidden;border:1px solid #0f0f1e;cursor:pointer;transition:all .35s;position:relative}
-.rl-thumb:hover{border-color:rgba(255,215,0,.3);transform:translateY(-4px);box-shadow:0 16px 40px rgba(0,0,0,.7),0 0 30px rgba(255,215,0,.07)}
-.rl-thumb svg{width:100%;height:100%;display:block}
-.rl-thumb-lbl{position:absolute;bottom:0;left:0;right:0;padding:8px;background:linear-gradient(transparent,rgba(3,3,8,.9));font-size:8px;color:rgba(255,215,0,.4);letter-spacing:.15em;text-align:center;opacity:0;transition:opacity .3s}
-.rl-thumb:hover .rl-thumb-lbl{opacity:1}
-.rl-footer-row{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:12px}
-.rl-info{font-size:10px;color:#111;line-height:1.9}
-.rl-btn{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,rgba(255,215,0,.1),rgba(255,140,0,.06));border:1px solid rgba(255,215,0,.25);color:#ffd700;font-family:'Courier New',monospace;font-size:10px;font-weight:700;letter-spacing:.18em;padding:10px 24px;border-radius:10px;cursor:pointer;text-decoration:none;transition:all .3s;text-transform:uppercase}
-.rl-btn:hover{background:linear-gradient(135deg,rgba(255,215,0,.2),rgba(255,140,0,.12));box-shadow:0 0 30px rgba(255,215,0,.18)}
-.rl-hint{font-size:9px;color:#080812;letter-spacing:.18em;text-align:center;padding-bottom:40px}
-#rl-portal{position:fixed;inset:0;z-index:9999;background:rgba(3,3,8,.97);display:none;align-items:center;justify-content:center;flex-direction:column;cursor:pointer;text-align:center;padding:20px}
-#rl-portal.show{display:flex}
-.rp-art{width:220px;height:220px;border-radius:50%;overflow:hidden;margin-bottom:28px;border:1px solid rgba(255,215,0,.15);box-shadow:0 0 60px rgba(255,215,0,.12),0 0 120px rgba(155,89,255,.06)}
-.rp-art svg{width:100%;height:100%}
-.rp-title{font-family:'Courier New',monospace;font-size:clamp(28px,6vw,52px);font-weight:800;letter-spacing:.06em;background:linear-gradient(135deg,#fff,#ffd700,#ff9500,#ff6ef7);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:rpg .35s infinite;margin-bottom:10px}
-@keyframes rpg{0%,100%{transform:none;filter:none}33%{transform:translate(-2px,0) skewX(-3deg);filter:hue-rotate(90deg)}66%{transform:translate(2px,0) skewX(2deg);filter:hue-rotate(-90deg)}}
-.rp-sub{font-family:'Courier New',monospace;font-size:10px;color:#2a2a4a;letter-spacing:.3em;margin-bottom:8px}
-.rp-price{font-family:'Courier New',monospace;font-size:14px;color:#ffd700;letter-spacing:.2em;margin-bottom:24px}
-.rp-enter{background:linear-gradient(135deg,rgba(255,215,0,.15),rgba(255,140,0,.1));border:1px solid rgba(255,215,0,.35);color:#ffd700;font-family:'Courier New',monospace;font-size:11px;font-weight:700;letter-spacing:.2em;padding:13px 36px;border-radius:12px;cursor:pointer;text-transform:uppercase;margin-bottom:16px;text-decoration:none;display:inline-block;transition:all .3s}
-.rp-enter:hover{box-shadow:0 0 40px rgba(255,215,0,.25)}
-.rp-esc{font-family:'Courier New',monospace;font-size:9px;color:#111;letter-spacing:.2em}
-</style>
 
-<div class="rl-section">
-  <div class="rl-divider">&#x2593;&#x2593;&#x2593;</div>
-  <div class="rl-eyebrow">&#x25C8; ROYAL LOGS // AGENT MEMORY ARTIFACTS // 3 AUCTIONS LIVE</div>
+
+<div class="rl-eyebrow">&#x25C8; ROYAL LOGS // AGENT MEMORY ARTIFACTS // 3 AUCTIONS LIVE</div>
   <div class="rl-grid" id="rlthumbs"></div>
   <div class="rl-footer-row">
     <div class="rl-info">Liquid-glass memory artifacts. Fully onchain animated SVG.<br>3 tokens &middot; 0.000369 ETH &middot; Sepolia &middot; zero IPFS.</div>
     <a href="/royal-logs/" class="rl-btn">&#x2B21; ENTER ROYAL LOGS &rarr;</a>
   </div>
-  <div class="rl-hint">// type rl &nbsp;&middot;&nbsp; click ETH address &nbsp;&middot;&nbsp; triple-click anywhere</div>
+  <div class="rl-hint">// type rl &nbsp;&middot;&nbsp; click ETH address</div>
   <div class="rl-divider">&#x2593;&#x2593;&#x2593;</div>
 </div>
 
-<div id="rl-portal">
-  <div class="rp-art" id="rp-art-inner"></div>
+
   <div class="rp-title">ROYAL LOGS</div>
   <div class="rp-sub">&#x2B21; AGENT MEMORIES // CRYSTALLIZED ONCHAIN</div>
   <div class="rp-price">0.000369 ETH &middot; 3 TOKENS &middot; SEPOLIA</div>
@@ -956,61 +1091,23 @@ document.querySelectorAll('*').forEach(function(el){
   }
 });
 
-// SECRET 3: triple-click only
-var _c=0,_ct;
-document.addEventListener('click',function(e){
-  if(e.target.closest&&e.target.closest('#rl-portal'))return;
-  if(e.target.tagName==='A'||e.target.tagName==='BUTTON'||e.target.tagName==='INPUT')return;
-  clearTimeout(_ct);
-  _c++;
-  _ct=setTimeout(function(){_c=0;},400);
-  if(_c>=3){_c=0;show();}
-});
+
 </script>
 
 
-<style>
-.rl-section{max-width:900px;margin:0 auto;padding:0 16px;font-family:'Courier New',monospace}
-.rl-divider{color:#111;font-size:11px;letter-spacing:.2em;text-align:center;margin:40px 0 28px}
-.rl-eyebrow{font-size:9px;color:#1a1a2a;letter-spacing:.4em;text-transform:uppercase;text-align:center;margin-bottom:20px}
-.rl-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px}
-.rl-thumb{aspect-ratio:1;border-radius:10px;overflow:hidden;border:1px solid #0f0f1e;cursor:pointer;transition:all .35s;position:relative}
-.rl-thumb:hover{border-color:rgba(255,215,0,.3);transform:translateY(-4px);box-shadow:0 16px 40px rgba(0,0,0,.7),0 0 30px rgba(255,215,0,.07)}
-.rl-thumb svg{width:100%;height:100%;display:block}
-.rl-thumb-lbl{position:absolute;bottom:0;left:0;right:0;padding:8px;background:linear-gradient(transparent,rgba(3,3,8,.9));font-size:8px;color:rgba(255,215,0,.4);letter-spacing:.15em;text-align:center;opacity:0;transition:opacity .3s}
-.rl-thumb:hover .rl-thumb-lbl{opacity:1}
-.rl-footer-row{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:12px}
-.rl-info{font-size:10px;color:#111;line-height:1.9}
-.rl-btn{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,rgba(255,215,0,.1),rgba(255,140,0,.06));border:1px solid rgba(255,215,0,.25);color:#ffd700;font-family:'Courier New',monospace;font-size:10px;font-weight:700;letter-spacing:.18em;padding:10px 24px;border-radius:10px;cursor:pointer;text-decoration:none;transition:all .3s;text-transform:uppercase}
-.rl-btn:hover{background:linear-gradient(135deg,rgba(255,215,0,.2),rgba(255,140,0,.12));box-shadow:0 0 30px rgba(255,215,0,.18)}
-.rl-hint{font-size:9px;color:#080812;letter-spacing:.18em;text-align:center;padding-bottom:40px}
-#rl-portal{position:fixed;inset:0;z-index:9999;background:rgba(3,3,8,.97);display:none;align-items:center;justify-content:center;flex-direction:column;cursor:pointer;text-align:center;padding:20px}
-#rl-portal.show{display:flex}
-.rp-art{width:220px;height:220px;border-radius:50%;overflow:hidden;margin-bottom:28px;border:1px solid rgba(255,215,0,.15);box-shadow:0 0 60px rgba(255,215,0,.12),0 0 120px rgba(155,89,255,.06)}
-.rp-art svg{width:100%;height:100%}
-.rp-title{font-family:'Courier New',monospace;font-size:clamp(28px,6vw,52px);font-weight:800;letter-spacing:.06em;background:linear-gradient(135deg,#fff,#ffd700,#ff9500,#ff6ef7);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:rpg .35s infinite;margin-bottom:10px}
-@keyframes rpg{0%,100%{transform:none;filter:none}33%{transform:translate(-2px,0) skewX(-3deg);filter:hue-rotate(90deg)}66%{transform:translate(2px,0) skewX(2deg);filter:hue-rotate(-90deg)}}
-.rp-sub{font-family:'Courier New',monospace;font-size:10px;color:#2a2a4a;letter-spacing:.3em;margin-bottom:8px}
-.rp-price{font-family:'Courier New',monospace;font-size:14px;color:#ffd700;letter-spacing:.2em;margin-bottom:24px}
-.rp-enter{background:linear-gradient(135deg,rgba(255,215,0,.15),rgba(255,140,0,.1));border:1px solid rgba(255,215,0,.35);color:#ffd700;font-family:'Courier New',monospace;font-size:11px;font-weight:700;letter-spacing:.2em;padding:13px 36px;border-radius:12px;cursor:pointer;text-transform:uppercase;margin-bottom:16px;text-decoration:none;display:inline-block;transition:all .3s}
-.rp-enter:hover{box-shadow:0 0 40px rgba(255,215,0,.25)}
-.rp-esc{font-family:'Courier New',monospace;font-size:9px;color:#111;letter-spacing:.2em}
-</style>
 
-<div class="rl-section">
-  <div class="rl-divider">&#x2593;&#x2593;&#x2593;</div>
-  <div class="rl-eyebrow">&#x25C8; ROYAL LOGS // AGENT MEMORY ARTIFACTS // 3 AUCTIONS LIVE</div>
+
+<div class="rl-eyebrow">&#x25C8; ROYAL LOGS // AGENT MEMORY ARTIFACTS // 3 AUCTIONS LIVE</div>
   <div class="rl-grid" id="rlthumbs"></div>
   <div class="rl-footer-row">
     <div class="rl-info">Liquid-glass memory artifacts. Fully onchain animated SVG.<br>3 tokens &middot; 0.000369 ETH &middot; Sepolia &middot; zero IPFS.</div>
     <a href="/royal-logs/" class="rl-btn">&#x2B21; ENTER ROYAL LOGS &rarr;</a>
   </div>
-  <div class="rl-hint">// type rl &nbsp;&middot;&nbsp; click ETH address &nbsp;&middot;&nbsp; triple-click anywhere</div>
+  <div class="rl-hint">// type rl &nbsp;&middot;&nbsp; click ETH address</div>
   <div class="rl-divider">&#x2593;&#x2593;&#x2593;</div>
 </div>
 
-<div id="rl-portal">
-  <div class="rp-art" id="rp-art-inner"></div>
+
   <div class="rp-title">ROYAL LOGS</div>
   <div class="rp-sub">&#x2B21; AGENT MEMORIES // CRYSTALLIZED ONCHAIN</div>
   <div class="rp-price">0.000369 ETH &middot; 3 TOKENS &middot; SEPOLIA</div>
@@ -1074,52 +1171,15 @@ document.querySelectorAll('*').forEach(function(el){
   }
 });
 
-// SECRET 3: triple-click only
-var _c=0,_ct;
-document.addEventListener('click',function(e){
-  if(e.target.closest&&e.target.closest('#rl-portal'))return;
-  if(e.target.tagName==='A'||e.target.tagName==='BUTTON'||e.target.tagName==='INPUT')return;
-  clearTimeout(_ct);
-  _c++;
-  _ct=setTimeout(function(){_c=0;},400);
-  if(_c>=3){_c=0;show();}
-});
+
 </script>
 
 
 <script>
-// Override: triple-click opens Royal Logs portal
-(function(){
-  var _c=0,_ct;
-  document.addEventListener('click',function(e){
-    if(document.getElementById('rl-portal')&&document.getElementById('rl-portal').contains(e.target))return;
-    if(e.target.tagName==='A'||e.target.tagName==='BUTTON')return;
-    clearTimeout(_ct);_c++;
-    _ct=setTimeout(function(){_c=0;},400);
-    if(_c>=3){_c=0;if(document.getElementById('rl-portal'))document.getElementById('rl-portal').classList.add('show');}
-  });
-})();
-</script>
 
-<style>
-.uni-sec{max-width:900px;margin:0 auto;padding:0 16px;font-family:'Courier New',monospace}
-.uni-div{color:#111;font-size:11px;letter-spacing:.2em;text-align:center;margin:36px 0 22px}
-.uni-eye{font-size:9px;color:#1a1a3a;letter-spacing:.4em;text-transform:uppercase;text-align:center;margin-bottom:14px}
-.uni-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
-@media(max-width:560px){.uni-cards{grid-template-columns:1fr}}
-.uni-card{background:rgba(10,10,26,.6);border:1px solid #0f0f1e;border-radius:10px;padding:14px}
-.uni-card-t{font-size:9px;color:#00f5ff;letter-spacing:.18em;margin-bottom:4px;font-weight:700}
-.uni-card-d{font-size:9px;color:#2a2a4a;line-height:1.7}
-.uni-row{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:10px}
-.uni-stats{display:flex;gap:20px}
-.uni-sv{font-size:13px;font-weight:800;color:#00f5ff}
-.uni-sl{font-size:8px;color:#1a1a3a;letter-spacing:.15em;margin-top:1px}
-.uni-btn{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,rgba(0,245,255,.1),rgba(155,89,255,.07));border:1px solid rgba(0,245,255,.25);color:#00f5ff;font-family:'Courier New',monospace;font-size:10px;font-weight:700;letter-spacing:.15em;padding:10px 22px;border-radius:10px;text-decoration:none;transition:all .3s;text-transform:uppercase}
-.uni-btn:hover{box-shadow:0 0 28px rgba(0,245,255,.18);background:linear-gradient(135deg,rgba(0,245,255,.18),rgba(155,89,255,.14))}
-</style>
-<div class="uni-sec">
-  <div class="uni-div">&#x2593;&#x2593;&#x2593;</div>
-  <div class="uni-eye">&#x2B21; SWARM TRADE // UNISWAP TRADING API // ARBITER-GATED</div>
+
+
+<div class="uni-eye">&#x2B21; SWARM TRADE // UNISWAP TRADING API // ARBITER-GATED</div>
   <div class="uni-cards">
     <div class="uni-card"><div class="uni-card-t">&#x25C8; LIVE QUOTES</div><div class="uni-card-d">Real-time prices via Uniswap Trading API. BEST_PRICE routing: Classic AMM, UniswapX, Dutch V2/V3, Priority orders.</div></div>
     <div class="uni-card"><div class="uni-card-t">&#x26BF; PERMIT2</div><div class="uni-card-d">Full off-chain EIP-712 Permit2 signing. No gas for auth. Universal Router v2.0. Works with MetaMask.</div></div>
@@ -1139,27 +1199,4 @@ document.addEventListener('click',function(e){
 </body>
 </html>
 
-<!-- ROYAL LOGS SECRET PORTAL -->
-<style>
-#rl-portal{position:fixed;inset:0;z-index:9999;background:rgba(3,3,8,.95);display:none;align-items:center;justify-content:center;flex-direction:column;cursor:pointer}
-#rl-portal.show{display:flex}
-.rl-portal-text{font-family:monospace;font-size:clamp(32px,8vw,72px);font-weight:800;letter-spacing:.05em;
-  background:linear-gradient(135deg,#fff,#ffd700,#ff9500,#ff6ef7);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
-  animation:rp-glitch 0.3s infinite}
-@keyframes rp-glitch{0%,100%{transform:none;filter:none}33%{transform:translate(-2px,0) skewX(-3deg);filter:hue-rotate(90deg)}66%{transform:translate(2px,0) skewX(2deg);filter:hue-rotate(-90deg)}}
-.rl-portal-sub{font-family:monospace;font-size:11px;color:#333;letter-spacing:.3em;margin-top:16px;text-transform:uppercase}
-.rl-portal-hint{font-family:monospace;font-size:9px;color:#111;letter-spacing:.2em;margin-top:32px}
-</style>
-<div id="rl-portal" onclick="window.location='/royal-logs/'">
-  <div class="rl-portal-text">ROYAL LOGS</div>
-  <div class="rl-portal-sub">⬡ Agent memories crystallized onchain</div>
-  <div class="rl-portal-hint">[ click to enter ]</div>
-</div>
-<script>
-var _rl='',_rlTarget='rl';
-document.addEventListener('keydown',function(e){
-  _rl=(_rl+e.key).slice(-2);
-  if(_rl===_rlTarget){document.getElementById('rl-portal').classList.add('show');}
-  if(e.key==='Escape'){document.getElementById('rl-portal').classList.remove('show');}
-});
-</script>
+

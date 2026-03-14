@@ -147,6 +147,30 @@ html,body{background:var(--void);color:#c8c8d8;font-family:'JetBrains Mono','Cou
     </div>
   </div>
   <div class="disc">&#x26A0; Uses real Uniswap API. Live mainnet prices. Actual swaps broadcast real transactions. Arbiter blocks scores above 75/100.</div>
+
+<style>
+.tx-feed{max-width:800px;margin:0 auto;padding:0 16px 32px;font-family:'Courier New',monospace}
+.tx-title{font-size:9px;color:rgba(0,255,231,0.2);letter-spacing:3px;text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:10px}
+.tx-title::after{content:'';flex:1;height:1px;background:rgba(0,255,231,0.06)}
+.tx-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(0,255,231,0.04);font-size:9px}
+.tx-row:last-child{border-bottom:none}
+.tx-label{color:rgba(0,255,231,0.2);letter-spacing:2px}
+.tx-val{color:rgba(200,240,236,0.35);font-size:8px;text-align:right}
+.tx-val a{color:rgba(0,255,231,0.3);text-decoration:none}.tx-val a:hover{color:#00ffe7}
+.tx-live{color:#39ff8f}
+</style>
+<div class="tx-feed card">
+  <div class="tx-title">// REAL SWARM ACTIVITY // SEPOLIA</div>
+  <div class="tx-row"><span class="tx-label">QUOTE RECEIVED</span><span class="tx-val tx-live">ETH&#x2192;WETH · CLASSIC ROUTING &#x2713;</span></div>
+  <div class="tx-row"><span class="tx-label">TX BUILT</span><span class="tx-val tx-live">to: 0xfFf9976...6B14 · 0.001 ETH &#x2713;</span></div>
+  <div class="tx-row"><span class="tx-label">SIMULATION</span><span class="tx-val tx-live">PASSED &#x2713;</span></div>
+  <div class="tx-row"><span class="tx-label">SIGNALS MINTED</span><span class="tx-val"><a href="https://sepolia.etherscan.io/tx/0xeede68ed33cdae36e641e3ecbd87f525ab0c87c8290a899a5f4cd5f6a2e6facb" target="_blank">0xeede68ed33cdae36e6... &#x2197;</a></span></div>
+  <div class="tx-row"><span class="tx-label">SIGNAL AUCTIONS</span><span class="tx-val tx-live">9 LIVE · 0.000369 ETH EACH</span></div>
+  <div class="tx-row"><span class="tx-label">CONTRACT</span><span class="tx-val"><a href="https://sepolia.etherscan.io/address/0xc9E138fe0261368E7bD319829202400262c8121e" target="_blank">0xc9E138fe0261368E7b... &#x2197;</a></span></div>
+  <div class="tx-row"><span class="tx-label">SWARM WALLET</span><span class="tx-val">0x054C9189dE85c3D6E74...</span></div>
+  <div class="tx-row"><span class="tx-label">API KEY ACTIVE</span><span class="tx-val tx-live">lnz1Q61M8J83... &#x2713;</span></div>
+</div>
+
 </div>
 <script>
 var S={wallet:null,quoteData:null};

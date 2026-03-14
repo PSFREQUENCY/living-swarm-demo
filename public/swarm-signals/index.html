@@ -279,10 +279,10 @@ function sigArt(token, seed, routing, hue, hue2, hue3, sp, fr) {
 }
 
 // ── Derive params same way as Python script ─────────────────
-var BASE_SEED = 0x0339d448; // from wallet key prefix
+var BASE_SEED = 0x0339d448; // real tokens 4-12 // from wallet key prefix
 var CONTRACT = '0xc9E138fe0261368E7bD319829202400262c8121e';
 var TOKENS = [];
-for(var i=1;i<=9;i++){
+var TOKEN_OFFSET=3; for(var i=1;i<=9;i++){
   var seed = (BASE_SEED * 137 + i * 47) & 0xFFFFFFFF;
   var hue = (seed * 137 + i * 47) % 360;
   var hue2 = (hue + 120 + i * 30) % 360;
@@ -321,7 +321,7 @@ TOKENS.forEach(function(tk){
     +'<div class="auction-bar-bg"><div class="auction-bar-fill" style="width:'+Math.round(tk.num/9*100)+'%"></div></div>'
     +'</div>'
     +'<div class="bid-pulse"><div class="bid-dot"></div>AUCTION LIVE</div>'
-    +'<button class="bid-btn" onclick="window.open(\'https://sepolia.etherscan.io/token/'+CONTRACT+'?a='+tk.num+'\',\'_blank\')">VIEW ON CHAIN &rarr;</button>'
+    +'<button class="bid-btn" onclick="window.open(\'https://sepolia.etherscan.io/token/'+CONTRACT+'?a='+(tk.num+TOKEN_OFFSET)+'\',\'_blank\')">VIEW ON CHAIN &rarr;</button>'
     +'</div>';
   grid.appendChild(card);
 });

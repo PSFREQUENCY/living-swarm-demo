@@ -189,7 +189,7 @@ async function getQuote(){
   log('la','QUOTE_REQ',amt+' '+im.s+' -> '+om.s);
   var btn=document.getElementById('qbtn');btn.disabled=true;btn.textContent='FETCHING...';
   try{
-    var r=await fetch('https://trade-api.gateway.uniswap.org/v1/quote',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':'lnz1Q61M8J83WoesZpUIlgIBDLum9xUwONLS1VQrMUw','x-universal-router-version':'2.0','origin':'https://app.uniswap.org'},body:JSON.stringify({type:'EXACT_INPUT',amount:toWei(amt,im.d),tokenIn:ti,tokenOut:to,tokenInChainId:1,tokenOutChainId:1,swapper:sw,routingPreference:'BEST_PRICE',autoSlippage:'DEFAULT',urgency:'urgent',permitAmount:'FULL'})});
+    var r=await fetch('/api/uniswap/quote',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type:'EXACT_INPUT',amount:toWei(amt,im.d),tokenIn:ti,tokenOut:to,tokenInChainId:1,tokenOutChainId:1,swapper:sw,routingPreference:'BEST_PRICE',autoSlippage:'DEFAULT',urgency:'urgent',permitAmount:'FULL'})});
     var d=await r.json();
     // client-side arbiter
 var _score=5;try{var _a=BigInt(body.amount||'0'),_E=BigInt('1000000000000000000');if(_a>_E*BigInt(10))_score+=40;else if(_a>_E)_score+=20;}catch(e){}
@@ -242,7 +242,7 @@ async function checkApproval(){
   log('lp','PERMIT2','Checking approval...');
   try{
     var amt=document.getElementById('amtin').value||'0.1',im=SYMS[ti.toLowerCase()]||{d:18};
-    var r=await fetch('https://trade-api.gateway.uniswap.org/v1/check_approval',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':'lnz1Q61M8J83WoesZpUIlgIBDLum9xUwONLS1VQrMUw','x-universal-router-version':'2.0','origin':'https://app.uniswap.org'},body:JSON.stringify({token:ti,amount:toWei(amt,im.d),walletAddress:S.wallet,chainId:1})});
+    var r=await fetch('/api/uniswap/approval',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token:ti,amount:toWei(amt,im.d),walletAddress:S.wallet,chainId:1})});
     var d=await r.json();
     if(d.needsApproval){log('lw','APPROVAL_NEEDED','Token needs Permit2 approval');document.getElementById('p2box').style.display='';}
     else log('lok','PERMIT2_OK','Already approved');
@@ -262,7 +262,7 @@ async function executeSwap(){
     catch(e){log('lw','PERMIT2_SKIP',e.message);}
   }
   try{
-    var r=await fetch('https://trade-api.gateway.uniswap.org/v1/swap',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':'lnz1Q61M8J83WoesZpUIlgIBDLum9xUwONLS1VQrMUw','x-universal-router-version':'2.0','origin':'https://app.uniswap.org'},body:JSON.stringify({quote,signature:sig||undefined,permitData:sig?pd:undefined,urgency:'urgent'})});
+    var r=await fetch('/api/uniswap/swap',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({quote,signature:sig||undefined,permitData:sig?pd:undefined,urgency:'urgent'})});
     var sd=await r.json();
     if(!r.ok||sd.error){log('le','SWAP_ERR',JSON.stringify(sd.error||'').slice(0,80));btn.disabled=false;return;}
     var tx=sd.swap;log('lok','TX_BUILT','Ready');log('la','TO',tx&&tx.to||'--');

@@ -1,6 +1,0 @@
-{
-  "rewrites": [
-    { "source": "/royal-logs", "destination": "/royal-logs/index.html" },
-    { "source": "/royal-logs/", "destination": "/royal-logs/index.html" }
-  ]
-}

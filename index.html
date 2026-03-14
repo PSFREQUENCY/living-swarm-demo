@@ -813,3 +813,28 @@ if (heroTitle) {
 </script>
 </body>
 </html>
+
+<!-- ROYAL LOGS SECRET PORTAL -->
+<style>
+#rl-portal{position:fixed;inset:0;z-index:9999;background:rgba(3,3,8,.95);display:none;align-items:center;justify-content:center;flex-direction:column;cursor:pointer}
+#rl-portal.show{display:flex}
+.rl-portal-text{font-family:monospace;font-size:clamp(32px,8vw,72px);font-weight:800;letter-spacing:.05em;
+  background:linear-gradient(135deg,#fff,#ffd700,#ff9500,#ff6ef7);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  animation:rp-glitch 0.3s infinite}
+@keyframes rp-glitch{0%,100%{transform:none;filter:none}33%{transform:translate(-2px,0) skewX(-3deg);filter:hue-rotate(90deg)}66%{transform:translate(2px,0) skewX(2deg);filter:hue-rotate(-90deg)}}
+.rl-portal-sub{font-family:monospace;font-size:11px;color:#333;letter-spacing:.3em;margin-top:16px;text-transform:uppercase}
+.rl-portal-hint{font-family:monospace;font-size:9px;color:#111;letter-spacing:.2em;margin-top:32px}
+</style>
+<div id="rl-portal" onclick="window.location='/royal-logs/'">
+  <div class="rl-portal-text">ROYAL LOGS</div>
+  <div class="rl-portal-sub">⬡ Agent memories crystallized onchain</div>
+  <div class="rl-portal-hint">[ click to enter ]</div>
+</div>
+<script>
+var _rl='',_rlTarget='rl';
+document.addEventListener('keydown',function(e){
+  _rl=(_rl+e.key).slice(-2);
+  if(_rl===_rlTarget){document.getElementById('rl-portal').classList.add('show');}
+  if(e.key==='Escape'){document.getElementById('rl-portal').classList.remove('show');}
+});
+</script>

@@ -1,1 +1,258 @@
-<h1>loading</h1>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>SWARM TRADE // UNISWAP</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--void:#030308;--gold:#ffd700;--cyan:#00f5ff;--violet:#9b59ff;--sage:#39ff8f;--red:#ff4455;--orange:#ff8c00;--plasma:#ff6ef7}
+html,body{background:var(--void);color:#c8c8d8;font-family:'JetBrains Mono','Courier New',monospace;min-height:100vh}
+::-webkit-scrollbar{width:2px}::-webkit-scrollbar-track{background:var(--void)}::-webkit-scrollbar-thumb{background:#1a1a3e}
+.page{max-width:800px;margin:0 auto;padding:28px 16px 60px}
+.back{font-size:10px;color:#222;letter-spacing:.2em;text-decoration:none;display:inline-block;margin-bottom:24px;transition:color .2s}.back:hover{color:#555}
+.eyebrow{font-size:9px;color:#1a1a3a;letter-spacing:.4em;text-transform:uppercase;margin-bottom:10px}
+.title{font-size:clamp(26px,6vw,52px);font-weight:800;line-height:.95;margin-bottom:8px;background:linear-gradient(135deg,#fff 0%,var(--cyan) 40%,var(--violet) 70%,var(--plasma) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.sub{font-size:10px;color:#2a2a4a;letter-spacing:.18em;line-height:1.8;margin-bottom:28px}
+.card{background:rgba(10,10,26,.7);border:1px solid #1a1a3a;border-radius:14px;padding:20px;margin-bottom:14px}
+.ctitle{font-size:9px;color:#333;letter-spacing:.25em;text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:10px}.ctitle::after{content:'';flex:1;height:1px;background:#111}
+.steps{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap}
+.step{flex:1;min-width:70px;background:rgba(0,0,0,.3);border:1px solid #0a0a18;border-radius:8px;padding:8px 6px;text-align:center;font-size:8px;color:#222;letter-spacing:.1em;transition:all .3s}
+.step.active{border-color:rgba(0,245,255,.3);color:var(--cyan);background:rgba(0,245,255,.04)}
+.step.done{border-color:rgba(57,255,143,.2);color:var(--sage)}
+.step-n{font-size:12px;font-weight:800;display:block;margin-bottom:2px}
+.trow{display:grid;grid-template-columns:1fr 36px 1fr;gap:8px;align-items:center;margin-bottom:12px}
+.tbox{background:rgba(0,0,0,.4);border:1px solid #111;border-radius:10px;padding:12px}
+.tlabel{font-size:8px;color:#333;letter-spacing:.18em;margin-bottom:5px}
+.tsel{width:100%;background:transparent;border:none;color:#777;font-family:inherit;font-size:11px;outline:none;cursor:pointer}.tsel option{background:#0a0a1a}
+.tamt{width:100%;background:transparent;border:none;color:#ddd;font-family:inherit;font-size:15px;font-weight:700;outline:none;margin-top:4px}.tamt::placeholder{color:#1a1a3a}
+.arr{text-align:center;color:#333;font-size:16px;cursor:pointer;user-select:none;transition:color .2s}.arr:hover{color:#666}
+.outval{font-size:15px;font-weight:700;color:var(--sage);min-height:22px}
+.outrate{font-size:9px;color:#333;margin-top:3px}
+.qgrid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px}
+.qi{background:rgba(0,0,0,.3);border:1px solid #0a0a18;border-radius:8px;padding:8px 10px}
+.ql{font-size:8px;color:#1a1a3a;letter-spacing:.15em;margin-bottom:3px}
+.qv{font-size:11px;color:#777}
+.rbadge{display:inline-flex;align-items:center;font-size:9px;letter-spacing:.12em;padding:2px 9px;border-radius:10px;font-weight:700}
+.rCLASSIC{background:rgba(0,245,255,.08);border:1px solid rgba(0,245,255,.2);color:var(--cyan)}
+.rDUTCH{background:rgba(155,89,255,.08);border:1px solid rgba(155,89,255,.25);color:var(--violet)}
+.rPRIORITY{background:rgba(255,215,0,.08);border:1px solid rgba(255,215,0,.2);color:var(--gold)}
+.arb{background:rgba(0,0,0,.3);border-radius:10px;padding:12px;margin-bottom:10px}
+.arbrow{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px}
+.arblabel{font-size:9px;color:#333;letter-spacing:.15em}
+.arbscore{font-size:17px;font-weight:800}
+.sPASS{color:var(--sage)}.sLOG{color:var(--gold)}.sHOLD{color:var(--orange)}.sBLOCK{color:var(--red)}
+.barbg{height:2px;background:#0a0a0a;border-radius:1px;overflow:hidden}
+.barfill{height:100%;border-radius:1px;transition:width .5s ease}
+.bPASS{background:var(--sage)}.bLOG{background:var(--gold)}.bHOLD{background:var(--orange)}.bBLOCK{background:var(--red)}
+.arbv{font-size:9px;letter-spacing:.12em;margin-top:5px}
+.p2box{background:rgba(155,89,255,.06);border:1px solid rgba(155,89,255,.15);border-radius:10px;padding:10px;margin-bottom:10px}
+.p2title{font-size:9px;color:var(--violet);letter-spacing:.18em;margin-bottom:5px}
+.p2desc{font-size:9px;color:#444;line-height:1.7}
+.btn{width:100%;background:linear-gradient(135deg,rgba(0,245,255,.1),rgba(155,89,255,.07));border:1px solid rgba(0,245,255,.28);color:var(--cyan);font-family:inherit;font-size:11px;font-weight:700;letter-spacing:.16em;padding:12px;border-radius:10px;cursor:pointer;transition:all .3s;text-transform:uppercase;margin-bottom:7px}
+.btn:hover:not(:disabled){background:linear-gradient(135deg,rgba(0,245,255,.18),rgba(155,89,255,.14));box-shadow:0 0 28px rgba(0,245,255,.18)}
+.btn:disabled{opacity:.3;cursor:not-allowed}
+.btng{background:linear-gradient(135deg,rgba(255,215,0,.12),rgba(255,140,0,.07));border-color:rgba(255,215,0,.28);color:var(--gold)}
+.btns{background:linear-gradient(135deg,rgba(57,255,143,.1),rgba(0,200,100,.05));border-color:rgba(57,255,143,.28);color:var(--sage)}
+.wrow{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.waddr{font-size:9px;color:#2a2a5a;background:rgba(0,0,0,.3);padding:5px 10px;border-radius:6px;border:1px solid #0a0a1a}
+.wcbtn{background:rgba(155,89,255,.1);border:1px solid rgba(155,89,255,.22);color:var(--violet);font-family:inherit;font-size:9px;letter-spacing:.1em;padding:5px 12px;border-radius:7px;cursor:pointer;transition:all .2s}.wcbtn:hover{background:rgba(155,89,255,.18)}
+.term{background:#020208;border:1px solid #0a0a18;border-radius:10px;padding:12px;min-height:110px;max-height:240px;overflow-y:auto;font-size:10px;line-height:1.8}
+.ll{margin-bottom:1px}
+.lts{color:#1a1a3a}.la{color:var(--violet)}.ld{color:#444}.lok{color:var(--sage)}.lw{color:var(--gold)}.le{color:var(--red)}.ltx{color:var(--cyan)}.lp{color:var(--plasma)}.larb{color:var(--orange)}
+.disc{font-size:8px;color:#111;line-height:1.7;margin-top:8px}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}.pulsing{animation:pulse 1.5s ease-in-out infinite}
+</style>
+</head>
+<body>
+<div class="page">
+  <a href="/" class="back">&#8592; LIVING SWARM</a>
+  <div class="eyebrow">&#x2B21; SWARM TRADE // UNISWAP TRADING API // ARBITER-GATED</div>
+  <h1 class="title">SWARM TRADE</h1>
+  <div class="sub">REAL QUOTES &middot; PERMIT2 SIGNING &middot; UNISWAPX ROUTING &middot; ARBITER SCORES EVERY SWAP</div>
+  <div class="steps">
+    <div class="step active" id="s1"><span class="step-n">1</span>QUOTE</div>
+    <div class="step" id="s2"><span class="step-n">2</span>ARBITER</div>
+    <div class="step" id="s3"><span class="step-n">3</span>APPROVE</div>
+    <div class="step" id="s4"><span class="step-n">4</span>PERMIT2</div>
+    <div class="step" id="s5"><span class="step-n">5</span>SWAP</div>
+    <div class="step" id="s6"><span class="step-n">6</span>BROADCAST</div>
+  </div>
+  <div class="card">
+    <div class="ctitle">&#x25CE; WALLET</div>
+    <div class="wrow">
+      <div><div style="font-size:8px;color:#333;letter-spacing:.15em;margin-bottom:4px">ADDRESS</div><div class="waddr" id="waddr">NOT CONNECTED</div></div>
+      <button class="wcbtn" id="wcbtn" onclick="connectWallet()">CONNECT</button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="ctitle">&#x25C8; SWAP</div>
+    <div class="trow">
+      <div class="tbox">
+        <div class="tlabel">SELL</div>
+        <select class="tsel" id="tin">
+          <option value="0x0000000000000000000000000000000000000000">ETH</option>
+          <option value="0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48">USDC</option>
+          <option value="0xdAC17F958D2ee523a2206206994597C13D831ec7">USDT</option>
+          <option value="0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2">WETH</option>
+          <option value="0x6B175474E89094C44Da98b954EedeAC495271d0F">DAI</option>
+        </select>
+        <input class="tamt" id="amtin" type="number" placeholder="0.0" value="0.1" step="any"/>
+      </div>
+      <div class="arr" onclick="flip()">&#x21C4;</div>
+      <div class="tbox">
+        <div class="tlabel">BUY</div>
+        <select class="tsel" id="tout">
+          <option value="0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48">USDC</option>
+          <option value="0x0000000000000000000000000000000000000000">ETH</option>
+          <option value="0xdAC17F958D2ee523a2206206994597C13D831ec7">USDT</option>
+          <option value="0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2">WETH</option>
+          <option value="0x6B175474E89094C44Da98b954EedeAC495271d0F">DAI</option>
+        </select>
+        <div class="outval" id="outval">&#x2014;</div>
+        <div class="outrate" id="outrate"></div>
+      </div>
+    </div>
+    <div id="qdetails" style="display:none">
+      <div class="qgrid">
+        <div class="qi"><div class="ql">ROUTING</div><div class="qv" id="qrouting">&#x2014;</div></div>
+        <div class="qi"><div class="ql">PRICE IMPACT</div><div class="qv" id="qimpact">&#x2014;</div></div>
+        <div class="qi"><div class="ql">GAS (USD)</div><div class="qv" id="qgas">&#x2014;</div></div>
+        <div class="qi"><div class="ql">MIN RECEIVED</div><div class="qv" id="qmin">&#x2014;</div></div>
+      </div>
+    </div>
+    <button class="btn" id="qbtn" onclick="getQuote()">&#x25C8; GET LIVE QUOTE</button>
+  </div>
+  <div class="card" id="arbcard" style="display:none">
+    <div class="ctitle">&#x2696; ARBITER</div>
+    <div class="arb">
+      <div class="arbrow"><span class="arblabel">RISK SCORE</span><span class="arbscore" id="ascore">0</span></div>
+      <div class="barbg"><div class="barfill" id="abar" style="width:0%"></div></div>
+      <div class="arbv" id="averdict"></div>
+    </div>
+    <div class="p2box" id="p2box" style="display:none">
+      <div class="p2title">&#x26BF; PERMIT2 REQUIRED</div>
+      <div class="p2desc">Off-chain EIP-712 signature. No gas. Time-limited authorization for this swap only.</div>
+    </div>
+    <button class="btn btng pulsing" id="appbtn" style="display:none" onclick="checkApproval()">&#x270F; CHECK PERMIT2 APPROVAL</button>
+    <button class="btn btns" id="execbtn" style="display:none" onclick="executeSwap()">&#x2B21; EXECUTE SWAP</button>
+  </div>
+  <div class="card">
+    <div class="ctitle">&#x25BA; SWARM LOG</div>
+    <div class="term" id="term">
+      <div class="ll"><span class="lts">[BOOT]</span> <span class="la">SWARM_TRADE</span> <span class="ld">Uniswap Trading API v1 // Arbiter-gated // Permit2</span></div>
+      <div class="ll"><span class="lts">[BOOT]</span> <span class="lp">Universal Router v2.0 // UniswapX ready</span></div>
+      <div class="ll"><span class="lts">[WAIT]</span> <span class="ld">awaiting quote...</span></div>
+    </div>
+  </div>
+  <div class="disc">&#x26A0; Uses real Uniswap API. Live mainnet prices. Actual swaps broadcast real transactions. Arbiter blocks scores above 75/100.</div>
+</div>
+<script>
+var S={wallet:null,quoteData:null};
+var SYMS={'0x0000000000000000000000000000000000000000':{s:'ETH',d:18},'0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48':{s:'USDC',d:6},'0xdac17f958d2ee523a2206206994597c13d831ec7':{s:'USDT',d:6},'0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2':{s:'WETH',d:18},'0x6b175474e89094c44da98b954eedeac495271d0f':{s:'DAI',d:18}};
+var RN={0:'CLASSIC',1:'DUTCH_LIMIT',2:'DUTCH_V2',3:'LIMIT_ORDER',4:'WRAP',5:'UNWRAP',6:'BRIDGE',7:'PRIORITY',8:'DUTCH_V3',9:'QUICKROUTE',10:'CHAINED'};
+function log(cls,a,d){var t=document.getElementById('term'),ts=new Date().toISOString().slice(11,19),l=document.createElement('div');l.className='ll';l.innerHTML='<span class="lts">['+ts+']</span> <span class="'+cls+'">'+a+'</span> <span class="ld">'+d+'</span>';t.appendChild(l);t.scrollTop=t.scrollHeight;}
+function setStep(n){for(var i=1;i<=6;i++){var e=document.getElementById('s'+i);e.className='step'+(i<n?' done':i===n?' active':'');}}
+async function connectWallet(){if(!window.ethereum){log('le','WALLET','No wallet detected. Install MetaMask.');return;}try{var a=await window.ethereum.request({method:'eth_requestAccounts'});S.wallet=a[0];document.getElementById('waddr').textContent=a[0].slice(0,6)+'...'+a[0].slice(-4);document.getElementById('wcbtn').textContent='CONNECTED';document.getElementById('wcbtn').style.color='var(--sage)';log('lok','WALLET',a[0]);}catch(e){log('le','WALLET_ERR',e.message);}}
+function flip(){var i=document.getElementById('tin'),o=document.getElementById('tout'),t=i.value;for(var x=0;x<i.options.length;x++)if(i.options[x].value===o.value){i.selectedIndex=x;break;}for(var x=0;x<o.options.length;x++)if(o.options[x].value===t){o.selectedIndex=x;break;}}
+function toWei(amt,dec){var p=String(amt).split('.'),f=BigInt(10)**BigInt(dec);return(BigInt(p[0]||'0')*f+(p[1]?BigInt(p[1].slice(0,dec).padEnd(dec,'0')):BigInt(0))).toString();}
+async function getQuote(){
+  setStep(1);
+  var ti=document.getElementById('tin').value,to=document.getElementById('tout').value,amt=document.getElementById('amtin').value||'0.1';
+  var im=SYMS[ti.toLowerCase()]||{s:'?',d:18},om=SYMS[to.toLowerCase()]||{s:'?',d:18};
+  var sw=S.wallet||'0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045';
+  log('la','QUOTE_REQ',amt+' '+im.s+' -> '+om.s);
+  var btn=document.getElementById('qbtn');btn.disabled=true;btn.textContent='FETCHING...';
+  try{
+    var r=await fetch('/api/uniswap/quote',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type:'EXACT_INPUT',amount:toWei(amt,im.d),tokenIn:ti,tokenOut:to,tokenInChainId:1,tokenOutChainId:1,swapper:sw,routingPreference:'BEST_PRICE',autoSlippage:'DEFAULT',urgency:'urgent',permitAmount:'FULL'})});
+    var d=await r.json();
+    if(!r.ok||d.error){log('le','QUOTE_ERR',d.error||'status '+r.status);btn.disabled=false;btn.textContent='&#x25C8; GET LIVE QUOTE';return;}
+    S.quoteData=d;
+    var rn=d.routingName||RN[d.routing]||'UNKNOWN';
+    log('lok','QUOTE_OK',(d.requestId||'').slice(0,14)+'...');
+    log('la','ROUTING',rn+' selected');
+    var cq=d.classicQuote||d.dutchLimitV2Quote||d.dutchLimitV3Quote||d.dutchLimitQuote||d.priorityQuote;
+    if(cq&&cq.quoteDecimals){
+      var out=parseFloat(cq.quoteDecimals).toFixed(6)+' '+om.s;
+      document.getElementById('outval').textContent=out;
+      document.getElementById('outrate').textContent='1 '+im.s+' ~ '+(parseFloat(cq.quoteDecimals)/parseFloat(amt)).toFixed(4)+' '+om.s;
+      document.getElementById('qgas').textContent=cq.gasFeeUSD?'$'+parseFloat(cq.gasFeeUSD).toFixed(4):'--';
+      document.getElementById('qimpact').textContent=cq.priceImpact?parseFloat(cq.priceImpact).toFixed(3)+'%':'<0.01%';
+      document.getElementById('qmin').textContent=(parseFloat(cq.quoteDecimals)*.995).toFixed(6)+' '+om.s;
+      log('lok','OUTPUT',out);
+    }
+    var rc=rn.startsWith('DUTCH')?'rDUTCH':rn==='PRIORITY'?'rPRIORITY':'rCLASSIC';
+    document.getElementById('qrouting').innerHTML='<span class="rbadge '+rc+'">'+rn+'</span>';
+    document.getElementById('qdetails').style.display='';
+    showArbiter(d.arbiter);setStep(2);
+  }catch(e){log('le','ERR',e.message);}
+  btn.disabled=false;btn.textContent='&#x25C8; GET LIVE QUOTE';
+}
+function showArbiter(arb){
+  if(!arb)return;
+  document.getElementById('arbcard').style.display='';
+  var sc=arb.score||0,bd=(arb.verdict||{}).band||'PASS';
+  document.getElementById('ascore').textContent=sc+'/100';
+  document.getElementById('ascore').className='arbscore s'+bd;
+  document.getElementById('abar').style.width=sc+'%';
+  document.getElementById('abar').className='barfill b'+bd;
+  var msgs={PASS:'&#x2713; APPROVED',LOG:'&#x26A0; LOGGED',HOLD:'&#x23F8; HOLD',BLOCK:'&#x26D4; BLOCKED'};
+  var cols={PASS:'var(--sage)',LOG:'var(--gold)',HOLD:'var(--orange)',BLOCK:'var(--red)'};
+  document.getElementById('averdict').innerHTML=msgs[bd]||'';
+  document.getElementById('averdict').style.color=cols[bd];
+  log('larb','ARBITER','score='+sc+' band='+bd);
+  if(bd==='BLOCK'){log('le','BLOCKED','Swap rejected');return;}
+  if(S.wallet)document.getElementById('appbtn').style.display='';
+  else{document.getElementById('execbtn').style.display='';document.getElementById('execbtn').textContent='&#x2B21; SIMULATE (NO WALLET)';}
+}
+async function checkApproval(){
+  setStep(3);
+  var ti=document.getElementById('tin').value;
+  if(ti==='0x0000000000000000000000000000000000000000'){log('lok','PERMIT2','ETH -- no approval needed');document.getElementById('appbtn').style.display='none';document.getElementById('execbtn').style.display='';setStep(4);return;}
+  log('lp','PERMIT2','Checking approval...');
+  try{
+    var amt=document.getElementById('amtin').value||'0.1',im=SYMS[ti.toLowerCase()]||{d:18};
+    var r=await fetch('/api/uniswap/approval',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token:ti,amount:toWei(amt,im.d),walletAddress:S.wallet,chainId:1})});
+    var d=await r.json();
+    if(d.needsApproval){log('lw','APPROVAL_NEEDED','Token needs Permit2 approval');document.getElementById('p2box').style.display='';}
+    else log('lok','PERMIT2_OK','Already approved');
+    document.getElementById('appbtn').style.display='none';document.getElementById('execbtn').style.display='';setStep(4);
+  }catch(e){log('le','ERR',e.message);}
+}
+async function executeSwap(){
+  if(!S.quoteData)return;
+  setStep(5);var btn=document.getElementById('execbtn');btn.disabled=true;
+  var d=S.quoteData,quote=d.classicQuote||d.dutchLimitV2Quote||d.dutchLimitV3Quote||d.dutchLimitQuote||d.priorityQuote;
+  if(!quote){log('le','NO_QUOTE','routing: '+d.routingName);btn.disabled=false;return;}
+  log('la','SWAP_BUILD','Building tx...');
+  var pd=d.permitSingleData||d.permitTransferFromData,sig=null;
+  if(pd&&window.ethereum&&S.wallet){
+    log('lp','PERMIT2_SIGN','Requesting off-chain signature...');
+    try{sig=await window.ethereum.request({method:'eth_signTypedData_v4',params:[S.wallet,JSON.stringify({domain:pd.domain,types:pd.types,primaryType:pd.primaryType||'PermitSingle',message:pd.values||pd.message})]});log('lok','PERMIT2_SIGNED',sig.slice(0,18)+'...');}
+    catch(e){log('lw','PERMIT2_SKIP',e.message);}
+  }
+  try{
+    var r=await fetch('/api/uniswap/swap',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({quote,signature:sig||undefined,permitData:sig?pd:undefined,urgency:'urgent'})});
+    var sd=await r.json();
+    if(!r.ok||sd.error){log('le','SWAP_ERR',JSON.stringify(sd.error||'').slice(0,80));btn.disabled=false;return;}
+    var tx=sd.swap;log('lok','TX_BUILT','Ready');log('la','TO',tx&&tx.to||'--');
+    if(sd.txFailureReasons&&sd.txFailureReasons.length)log('lw','SIM_WARN',sd.txFailureReasons.join(', '));
+    else log('lok','SIMULATION','Passed');
+    setStep(6);
+    if(window.ethereum&&S.wallet&&tx){
+      try{var hash=await window.ethereum.request({method:'eth_sendTransaction',params:[{from:S.wallet,to:tx.to,value:tx.value||'0x0',data:tx.data,gas:tx.gasLimit}]});log('ltx','TX_HASH',hash);log('lok','ETHERSCAN','etherscan.io/tx/'+hash);btn.textContent='&#x2713; SUBMITTED';btn.style.color='var(--sage)';}
+      catch(e){log('lw','DECLINED',e.message);btn.disabled=false;btn.textContent='&#x2B21; EXECUTE SWAP';}
+    }else{log('lw','NO_WALLET','Connect wallet to broadcast');btn.disabled=false;btn.textContent='&#x2B21; EXECUTE SWAP';}
+  }catch(e){log('le','ERR',e.message);btn.disabled=false;btn.textContent='&#x2B21; EXECUTE SWAP';}
+}
+window.addEventListener('load',function(){
+  if(window.ethereum)window.ethereum.request({method:'eth_accounts'}).then(function(a){if(a&&a[0]){S.wallet=a[0];document.getElementById('waddr').textContent=a[0].slice(0,6)+'...'+a[0].slice(-4);document.getElementById('wcbtn').textContent='CONNECTED';document.getElementById('wcbtn').style.color='var(--sage)';log('lok','AUTO_CONNECT',a[0]);}}).catch(function(){});
+  log('ld','READY','Click GET LIVE QUOTE to start');
+});
+var _r=0,_rt;
+document.addEventListener('click',function(e){if(e.target.tagName==='A'||e.target.tagName==='BUTTON')return;clearTimeout(_rt);_r++;_rt=setTimeout(function(){_r=0;},400);if(_r>=3){_r=0;window.location='/';}});
+// triple-click-return
+</script>
+</body>
+</html>

@@ -8,7 +8,7 @@ Requirements: pip install eth-account requests
 import json, sys, time, requests
 
 # CONFIG
-PRIVATE_KEY = '0x0339d448888cb7f122dfc130798719deb98bc7e3770e984905d9970bd302ea13a'
+PRIVATE_KEY = '0x53ad7edf5c9107ec768bd37d694787a20384a19248d9c06dbf02e271b1491c6e'
 WALLET      = '0x054C9189dE85c3D6E74614F1659867362FC74B1e'
 RPC_URL     = 'https://eth-sepolia.g.alchemy.com/v2/O9mAi2CXfFulnRl0XLZF5'
 API_KEY     = 'lnz1Q61M8J83WoesZpUIlgIBDLum9xUwONLS1VQrMUw'

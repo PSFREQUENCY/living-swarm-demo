@@ -1,0 +1,11 @@
+{
+  "txHash": "0x4629a52302a574fc91fdbc1dc8ee7ca29bf12b98a420b59b3dd39c15cbd9bf0a",
+  "wallet": "0x054C9189dE85c3D6E74614F1659867362FC74B1e",
+  "tokenIn": "ETH",
+  "tokenOut": "WETH",
+  "amount": "0.001",
+  "chain": "sepolia",
+  "routing": "UNKNOWN",
+  "timestamp": 1773520612,
+  "etherscan": "https://sepolia.etherscan.io/tx/0x4629a52302a574fc91fdbc1dc8ee7ca29bf12b98a420b59b3dd39c15cbd9bf0a"
+}

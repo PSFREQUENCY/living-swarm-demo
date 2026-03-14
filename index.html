@@ -1100,6 +1100,42 @@ document.addEventListener('click',function(e){
   });
 })();
 </script>
+
+<style>
+.uni-sec{max-width:900px;margin:0 auto;padding:0 16px;font-family:'Courier New',monospace}
+.uni-div{color:#111;font-size:11px;letter-spacing:.2em;text-align:center;margin:36px 0 22px}
+.uni-eye{font-size:9px;color:#1a1a3a;letter-spacing:.4em;text-transform:uppercase;text-align:center;margin-bottom:14px}
+.uni-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
+@media(max-width:560px){.uni-cards{grid-template-columns:1fr}}
+.uni-card{background:rgba(10,10,26,.6);border:1px solid #0f0f1e;border-radius:10px;padding:14px}
+.uni-card-t{font-size:9px;color:#00f5ff;letter-spacing:.18em;margin-bottom:4px;font-weight:700}
+.uni-card-d{font-size:9px;color:#2a2a4a;line-height:1.7}
+.uni-row{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:10px}
+.uni-stats{display:flex;gap:20px}
+.uni-sv{font-size:13px;font-weight:800;color:#00f5ff}
+.uni-sl{font-size:8px;color:#1a1a3a;letter-spacing:.15em;margin-top:1px}
+.uni-btn{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,rgba(0,245,255,.1),rgba(155,89,255,.07));border:1px solid rgba(0,245,255,.25);color:#00f5ff;font-family:'Courier New',monospace;font-size:10px;font-weight:700;letter-spacing:.15em;padding:10px 22px;border-radius:10px;text-decoration:none;transition:all .3s;text-transform:uppercase}
+.uni-btn:hover{box-shadow:0 0 28px rgba(0,245,255,.18);background:linear-gradient(135deg,rgba(0,245,255,.18),rgba(155,89,255,.14))}
+</style>
+<div class="uni-sec">
+  <div class="uni-div">&#x2593;&#x2593;&#x2593;</div>
+  <div class="uni-eye">&#x2B21; SWARM TRADE // UNISWAP TRADING API // ARBITER-GATED</div>
+  <div class="uni-cards">
+    <div class="uni-card"><div class="uni-card-t">&#x25C8; LIVE QUOTES</div><div class="uni-card-d">Real-time prices via Uniswap Trading API. BEST_PRICE routing: Classic AMM, UniswapX, Dutch V2/V3, Priority orders.</div></div>
+    <div class="uni-card"><div class="uni-card-t">&#x26BF; PERMIT2</div><div class="uni-card-d">Full off-chain EIP-712 Permit2 signing. No gas for auth. Universal Router v2.0. Works with MetaMask.</div></div>
+    <div class="uni-card"><div class="uni-card-t">&#x2696; ARBITER-GATED</div><div class="uni-card-d">Every swap scored 0-100 before execution. Scores above 75 blocked. Zero-trust DeFi inside the swarm.</div></div>
+  </div>
+  <div class="uni-row">
+    <div class="uni-stats">
+      <div><div class="uni-sv">v1</div><div class="uni-sl">TRADING API</div></div>
+      <div><div class="uni-sv">10+</div><div class="uni-sl">ROUTE TYPES</div></div>
+      <div><div class="uni-sv">v2.0</div><div class="uni-sl">UNIV ROUTER</div></div>
+    </div>
+    <a href="/uniswap/" class="uni-btn">&#x25B6; OPEN SWARM TRADE</a>
+  </div>
+  <div class="uni-div">&#x2593;&#x2593;&#x2593;</div>
+</div>
+
 </body>
 </html>
 

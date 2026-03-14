@@ -26,11 +26,12 @@ export async function POST(req: NextRequest) {
     const score = arbiterScore(body);
     const verdict = arbiterBand(score);
     if(verdict.action==='block') return NextResponse.json({error:'ARBITER_BLOCKED',score,verdict},{status:403});
-    const res = await fetch(UNI,{method:'POST',headers:{'Content-Type':'application/json','x-api-key':API_KEY,'x-universal-router-version':'2.0','origin':'https://app.uniswap.org'},body:JSON.stringify(body)});
-    const data = await res.json();
-    if(!res.ok) return NextResponse.json({error:'API_ERROR',status:res.status,details:data,arbiter:{score,verdict}},{status:res.status});
-    return NextResponse.json({...data,routingName:RN[data.routing]||'UNKNOWN',arbiter:{score,verdict}});
-  } catch(e:any) {
-    return NextResponse.json({error:e.message},{status:500});
-  }
+    const r = await fetch(UNI, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-api-key': API_KEY, 'x-universal-router-version': '2.0', 'origin': 'https://app.uniswap.org' },
+      body: JSON.stringify(body),
+    });
+    const d = await r.json();
+    return NextResponse.json({ ...d, routingName: RN[d.routing] || 'UNKNOWN', arbiter: {score, verdict} }, { status: r.status });
+  } catch(e: any) { return NextResponse.json({ error: e.message }, { status: 500 }); }
 }

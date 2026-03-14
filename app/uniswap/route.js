@@ -1,0 +1,1 @@
+export async function GET() { const html = "<h1>loading</h1>"; return new Response(html, { headers: { "content-type": "text/html; charset=utf-8" } }) }

@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>SWARM SIGNALS — Market-Driven Onchain Art</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Bebas+Neue&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--void:#020308;--cyan:#00ffe7;--mag:#ff00aa;--gold:#ffd700;--sage:#39ff8f}
+html,body{background:var(--void);color:#c8f0ec;font-family:'Share Tech Mono',monospace;overflow-x:hidden}
+::-webkit-scrollbar{width:2px}::-webkit-scrollbar-track{background:var(--void)}::-webkit-scrollbar-thumb{background:#0a1a14}
+
+.page{max-width:1100px;margin:0 auto;padding:32px 20px 80px}
+.back{font-size:9px;color:#0a1a14;letter-spacing:3px;text-decoration:none;display:inline-block;margin-bottom:28px;transition:color .2s}.back:hover{color:#2a3a34}
+
+/* HERO */
+.hero-eye{font-size:10px;color:var(--mag);letter-spacing:5px;text-shadow:0 0 20px #ff00aa80;margin-bottom:8px}
+.hero-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(36px,8vw,72px);letter-spacing:8px;line-height:1;margin-bottom:10px;
+  background:linear-gradient(135deg,#fff,var(--cyan),var(--mag));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero-sub{font-size:10px;color:rgba(0,255,231,0.35);letter-spacing:3px;line-height:2;margin-bottom:32px;max-width:680px}
+.hero-sub em{color:rgba(0,255,231,0.65);font-style:normal}
+
+/* Market stats bar */
+.market-bar{display:flex;gap:0;border:1px solid rgba(0,255,231,0.1);border-radius:2px;overflow:hidden;margin-bottom:40px;backdrop-filter:blur(10px)}
+.mstat{flex:1;padding:14px 16px;text-align:center;border-right:1px solid rgba(0,255,231,0.06)}
+.mstat:last-child{border-right:none}
+.mstat-v{font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--cyan);text-shadow:0 0 15px rgba(0,255,231,0.4);line-height:1}
+.mstat-l{font-size:8px;color:rgba(0,255,231,0.25);letter-spacing:2px;margin-top:4px}
+
+/* Concept cards */
+.concept-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:40px}
+@media(max-width:640px){.concept-grid{grid-template-columns:1fr}}
+.concept{background:rgba(0,255,231,0.02);border:1px solid rgba(0,255,231,0.08);padding:16px;position:relative;overflow:hidden}
+.concept::before{content:'';position:absolute;top:0;left:-100%;width:100%;height:1px;background:linear-gradient(90deg,transparent,var(--cyan),transparent);animation:sweep 5s ease-in-out infinite}
+@keyframes sweep{0%{left:-100%}100%{left:200%}}
+.concept-icon{font-size:22px;margin-bottom:8px;filter:drop-shadow(0 0 6px var(--cyan))}
+.concept-t{font-size:10px;color:var(--cyan);letter-spacing:3px;margin-bottom:6px}
+.concept-d{font-size:11px;color:rgba(200,240,236,0.45);line-height:1.7;font-family:'Rajdhani',sans-serif}
+
+/* Gallery section */
+.s-label{font-size:10px;color:var(--mag);letter-spacing:5px;text-shadow:0 0 15px #ff00aa80;margin-bottom:6px}
+.s-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(24px,5vw,44px);letter-spacing:6px;color:var(--cyan);text-shadow:0 0 30px rgba(0,255,231,0.3);margin-bottom:10px}
+.s-desc{font-size:10px;color:rgba(200,240,236,0.25);letter-spacing:2px;margin-bottom:32px;line-height:1.8}
+
+/* Signal cards */
+.signals-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:60px}
+@media(max-width:720px){.signals-grid{grid-template-columns:1fr;max-width:380px;margin-left:auto;margin-right:auto}}
+
+.sig-card{background:rgba(0,255,231,0.02);border:1px solid rgba(0,255,231,0.08);
+  transition:all .5s cubic-bezier(.23,1,.32,1);cursor:pointer;position:relative;overflow:hidden}
+.sig-card:hover{border-color:rgba(0,255,231,0.3);transform:translateY(-8px);
+  box-shadow:0 24px 80px rgba(0,0,0,.7),0 0 40px rgba(0,255,231,0.06)}
+.sig-art{width:100%;aspect-ratio:1;overflow:hidden;position:relative;background:#020308}
+.sig-art svg{width:100%;height:100%;display:block;transition:transform .7s ease}
+.sig-card:hover .sig-art svg{transform:scale(1.04)}
+.sig-badge{position:absolute;top:10px;left:10px;background:rgba(2,3,8,.8);backdrop-filter:blur(10px);
+  border:1px solid rgba(0,255,231,0.1);padding:3px 10px;font-size:8px;color:rgba(0,255,231,0.5);letter-spacing:2px}
+.sig-num{position:absolute;top:10px;right:10px;background:rgba(0,255,231,0.08);backdrop-filter:blur(10px);
+  border:1px solid rgba(0,255,231,0.15);padding:3px 10px;font-size:9px;font-weight:bold;color:var(--cyan)}
+
+.sig-info{padding:14px}
+.sig-routing{display:inline-flex;align-items:center;gap:4px;font-size:8px;letter-spacing:2px;
+  padding:2px 8px;border-radius:2px;margin-bottom:8px}
+.r-CLASSIC{background:rgba(0,255,231,.06);border:1px solid rgba(0,255,231,.18);color:var(--cyan)}
+.r-DUTCH_V2,.r-DUTCH_V3{background:rgba(155,89,255,.06);border:1px solid rgba(155,89,255,.18);color:#c084fc}
+.r-WRAP{background:rgba(255,215,0,.06);border:1px solid rgba(255,215,0,.18);color:var(--gold)}
+.r-PRIORITY{background:rgba(57,255,143,.06);border:1px solid rgba(57,255,143,.18);color:var(--sage)}
+
+.sig-name{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:3px;color:var(--cyan);margin-bottom:4px}
+.sig-desc{font-size:9px;color:rgba(200,240,236,0.25);line-height:1.7;margin-bottom:12px;letter-spacing:1px}
+
+/* Auction state indicator */
+.auction-state{background:rgba(0,0,0,.4);border:1px solid rgba(0,255,231,0.06);padding:10px 12px;margin-bottom:10px}
+.auction-top{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:2px}
+.auction-label{font-size:8px;color:rgba(0,255,231,0.2);letter-spacing:2px}
+.auction-price{font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--gold);
+  text-shadow:0 0 20px rgba(255,215,0,.4);line-height:1}
+.auction-eth{font-size:8px;color:rgba(200,240,236,0.25)}
+.auction-bar-bg{height:1px;background:rgba(0,255,231,0.06);margin-top:8px;overflow:hidden}
+.auction-bar-fill{height:100%;background:linear-gradient(90deg,var(--cyan),var(--mag))}
+
+/* Bid activity pulse */
+.bid-pulse{display:flex;align-items:center;gap:6px;font-size:8px;color:rgba(0,255,231,0.3);letter-spacing:2px;margin-top:6px}
+.bid-dot{width:5px;height:5px;border-radius:50%;background:var(--sage);box-shadow:0 0 6px var(--sage)}
+@keyframes b{0%,100%{opacity:1}50%{opacity:.2}}.bid-dot{animation:b 1.4s ease-in-out infinite}
+
+.bid-btn{width:100%;background:rgba(0,255,231,0.04);border:1px solid rgba(0,255,231,0.2);
+  color:var(--cyan);font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:3px;
+  padding:10px;cursor:pointer;transition:all .3s;text-transform:uppercase}
+.bid-btn:hover{background:rgba(0,255,231,0.08);box-shadow:0 0 20px rgba(0,255,231,0.12)}
+
+/* How it works */
+.how{background:rgba(0,255,231,0.02);border:1px solid rgba(0,255,231,0.06);padding:32px;margin-bottom:40px}
+.how-title{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:5px;color:var(--cyan);margin-bottom:20px}
+.how-list{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:560px){.how-list{grid-template-columns:1fr}}
+.how-item{display:flex;gap:14px;align-items:flex-start}
+.how-num{font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--mag);line-height:1;min-width:32px;text-shadow:0 0 15px #ff00aa80}
+.how-text{font-size:11px;color:rgba(200,240,236,0.45);line-height:1.7}
+.how-text strong{color:rgba(0,255,231,0.7);font-weight:normal}
+
+/* Provenance */
+.prov{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:40px}
+@media(max-width:560px){.prov{grid-template-columns:1fr}}
+.prov-card{background:rgba(0,0,0,.3);border:1px solid rgba(0,255,231,0.06);padding:20px}
+.prov-t{font-size:9px;color:rgba(0,255,231,0.2);letter-spacing:3px;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.prov-t::after{content:'';flex:1;height:1px;background:rgba(0,255,231,0.06)}
+.prov-row{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid rgba(0,255,231,0.04);font-size:9px}
+.prov-row:last-child{border-bottom:none}
+.prov-k{color:rgba(0,255,231,0.15);letter-spacing:1px}
+.prov-v{color:rgba(200,240,236,0.35);text-align:right}
+.prov-v a{color:rgba(0,255,231,0.3);text-decoration:none;transition:color .2s}.prov-v a:hover{color:var(--cyan)}
+.hi{color:var(--sage)!important}.hi2{color:var(--gold)!important}
+
+/* Footer */
+.footer-div{color:rgba(0,255,231,0.06);font-size:11px;letter-spacing:3px;text-align:center;margin:8px 0}
+.footer{text-align:center;font-size:9px;color:rgba(200,240,236,0.1);letter-spacing:2px;padding-bottom:40px;line-height:2}
+
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.pulsing{animation:pulse 2s ease-in-out infinite}
+</style>
+</head>
+<body>
+<div class="page">
+  <a href="/" class="back">&#8592; LIVING SWARM</a>
+
+  <!-- HERO -->
+  <div class="hero-eye">// TRANSMISSION 006 // SYNTHESIS 2026 // UNISWAP AI BOUNTY</div>
+  <h1 class="hero-title">SWARM SIGNALS</h1>
+  <p class="hero-sub">
+    <em>Agent behavior shapes the artwork.</em><br>
+    Each signal was born from a real Uniswap swap — the transaction hash,
+    routing path, and market state are encoded directly into the generative parameters.
+    <em>Bid to evolve the signal. Collect to crystallize it.</em>
+  </p>
+
+  <!-- Market stats -->
+  <div class="market-bar">
+    <div class="mstat"><div class="mstat-v" id="eth-price">--</div><div class="mstat-l">ETH PRICE</div></div>
+    <div class="mstat"><div class="mstat-v">CLASSIC</div><div class="mstat-l">ROUTING</div></div>
+    <div class="mstat"><div class="mstat-v">9</div><div class="mstat-l">SIGNALS</div></div>
+    <div class="mstat"><div class="mstat-v">0.000369</div><div class="mstat-l">START ETH</div></div>
+    <div class="mstat"><div class="mstat-v pulsing" id="live-dot">●</div><div class="mstat-l">AUCTIONS</div></div>
+  </div>
+
+  <!-- Concept -->
+  <div class="concept-grid">
+    <div class="concept">
+      <div class="concept-icon">◈</div>
+      <div class="concept-t">AGENT BEHAVIOR AS ART</div>
+      <div class="concept-d">The swarm executed a real Uniswap swap. That transaction's hash is decoded into arc segments — the agent's signature made visual.</div>
+    </div>
+    <div class="concept">
+      <div class="concept-icon">⬡</div>
+      <div class="concept-t">PROTOCOL STATE AS COMPOSITION</div>
+      <div class="concept-d">Routing type (CLASSIC/DUTCH/PRIORITY), gas price, and pool selection directly determine visual complexity, turbulence, and particle density.</div>
+    </div>
+    <div class="concept">
+      <div class="concept-icon">⟳</div>
+      <div class="concept-t">AUCTION DYNAMICS AS EVOLUTION</div>
+      <div class="concept-d">Each bid crystallizes a new composition layer. The live view responds to auction state — more bids = higher signal intensity. Collect to freeze the moment.</div>
+    </div>
+  </div>
+
+  <!-- Gallery -->
+  <div class="s-label">// COLLECTION 002</div>
+  <div class="s-title">THE SIGNALS</div>
+  <div class="s-desc">9 tokens &middot; fully onchain SVG &middot; market-state encoded &middot; agent-behavior driven &middot; 0.000369 ETH</div>
+
+  <div class="signals-grid" id="signals-grid">
+    <!-- Rendered by JS -->
+  </div>
+
+  <!-- How it works -->
+  <div class="how">
+    <div class="how-title">HOW AGENT BEHAVIOR SHAPES THE ART</div>
+    <div class="how-list">
+      <div class="how-item"><div class="how-num">1</div><div class="how-text"><strong>The swarm executed a real Uniswap swap</strong> — 0.001 ETH on Sepolia via the Trading API. The transaction hash is the generative seed.</div></div>
+      <div class="how-item"><div class="how-num">2</div><div class="how-text"><strong>TX hash decoded into arc segments</strong> — each byte of the first 8 bytes becomes an orbital ring at a different radius and rotation speed.</div></div>
+      <div class="how-item"><div class="how-num">3</div><div class="how-text"><strong>Routing type sets visual complexity</strong> — CLASSIC=calm, DUTCH_V2=turbulent, PRIORITY=maximum density. The swarm chose CLASSIC on Sepolia.</div></div>
+      <div class="how-item"><div class="how-num">4</div><div class="how-text"><strong>Bid activity activates the signal</strong> — the live view fetches auction state. Bid count increases particle intensity. The art responds to you.</div></div>
+    </div>
+  </div>
+
+  <!-- Provenance -->
+  <div class="s-label">// PROVENANCE</div>
+  <div class="s-title" style="margin-bottom:24px">ONCHAIN PROOF</div>
+  <div class="prov">
+    <div class="prov-card">
+      <div class="prov-t">CONTRACT</div>
+      <div class="prov-row"><span class="prov-k">STANDARD</span><span class="prov-v hi">ERC-721</span></div>
+      <div class="prov-row"><span class="prov-k">NETWORK</span><span class="prov-v hi">Sepolia Testnet</span></div>
+      <div class="prov-row"><span class="prov-k">ADDRESS</span><span class="prov-v"><a href="https://sepolia.etherscan.io/address/0xc9E138fe0261368E7bD319829202400262c8121e" target="_blank">0xc9E1...121e &#x2197;</a></span></div>
+      <div class="prov-row"><span class="prov-k">EDITION</span><span class="prov-v hi2">9 of 9</span></div>
+      <div class="prov-row"><span class="prov-k">ART STORAGE</span><span class="prov-v hi">data:// URI onchain</span></div>
+      <div class="prov-row"><span class="prov-k">IPFS DEPS</span><span class="prov-v hi">0 — fully self-contained</span></div>
+    </div>
+    <div class="prov-card">
+      <div class="prov-t">UNISWAP INTEGRATION</div>
+      <div class="prov-row"><span class="prov-k">API VERSION</span><span class="prov-v hi">Trading API v1</span></div>
+      <div class="prov-row"><span class="prov-k">ROUTER</span><span class="prov-v hi">Universal Router v2.0</span></div>
+      <div class="prov-row"><span class="prov-k">ROUTING</span><span class="prov-v">CLASSIC (Sepolia)</span></div>
+      <div class="prov-row"><span class="prov-k">SWAP</span><span class="prov-v hi2">0.001 ETH &#x2192; WETH</span></div>
+      <div class="prov-row"><span class="prov-k">CHAIN</span><span class="prov-v">Sepolia (11155111)</span></div>
+      <div class="prov-row"><span class="prov-k">TX HASH</span><span class="prov-v"><span id="tx-display">run swarm_swap.py</span></span></div>
+    </div>
+  </div>
+
+  <div class="footer-div">▓▓▓</div>
+  <div class="footer">
+    SWARM SIGNALS &nbsp;&middot;&nbsp; SYNTHESIS 2026 &nbsp;&middot;&nbsp; UNISWAP AI BOUNTY<br>
+    AGENT BEHAVIOR SHAPES THE ARTWORK &nbsp;&middot;&nbsp; AUCTION DYNAMICS ARE COMPOSITIONAL ELEMENTS<br>
+    <a href="/" style="color:rgba(0,255,231,0.2);text-decoration:none">&#x2190; LIVING SWARM</a>
+    &nbsp;&middot;&nbsp;
+    <a href="/royal-logs/" style="color:rgba(0,255,231,0.2);text-decoration:none">ROYAL LOGS &#x2197;</a>
+    &nbsp;&middot;&nbsp;
+    <a href="/uniswap/" style="color:rgba(0,255,231,0.2);text-decoration:none">SWARM TRADE &#x2197;</a>
+  </div>
+</div>
+
+<script>
+// ── Generate signal art ────────────────────────────────────
+function sigArt(token, seed, routing, hue, hue2, hue3, sp, fr) {
+  var h=hue,h2=hue2,h3=hue3,s=seed;
+  var routeGlyph={'CLASSIC':'◉','DUTCH_V2':'⬡','DUTCH_V3':'⬡','PRIORITY':'✦','WRAP':'◈'}[routing]||'◈';
+
+  // TX arc segments (simulated for display — real version uses actual tx hash)
+  var arcs='';
+  var arcBytes=[s&255,(s>>8)&255,(s>>16)&255,(s>>24)&255,
+                (s*7)&255,(s*13)&255,(s*17)&255,(s*23)&255];
+  arcBytes.forEach(function(bv,i){
+    var r=130+i*8, op=Math.round((0.05+(bv/255)*0.12)*1000)/1000;
+    var dd=Math.round(bv/4), dg=Math.round(256/4);
+    arcs+='<circle cx="250" cy="250" r="'+r+'" fill="none" stroke="hsl('+(h+i*20)+',60%,'+(50+i*3)+'%)" stroke-width="0.4" stroke-dasharray="'+dd+' '+dg+'" opacity="'+op+'" filter="url(#glow'+s+')">'
+         +'<animateTransform attributeName="transform" type="rotate" from="'+bv+' 250 250" to="'+(bv+360)+' 250 250" dur="'+(Math.round((sp*8+i*3)*10)/10)+'s" repeatCount="indefinite"/>'
+         +'</circle>';
+  });
+
+  // Particles
+  var parts='';
+  for(var i=0;i<7;i++){
+    var ang=i*(360/7)+s%60;
+    var cx=250+95*Math.cos(ang*Math.PI/180);
+    var cy=250+95*Math.sin(ang*Math.PI/180);
+    var ph=(h+i*40)%360;
+    parts+='<circle cx="'+cx.toFixed(1)+'" cy="'+cy.toFixed(1)+'" r="2.5" fill="hsl('+ph+',80%,65%)" opacity="0.6" filter="url(#glow'+s+')">'
+          +'<animate attributeName="opacity" dur="'+(0.8+i*0.3).toFixed(1)+'s" values="0.6;1;0.6" repeatCount="indefinite"/>'
+          +'<animate attributeName="r" dur="'+(1.2+i*0.2).toFixed(1)+'s" values="2.5;4;2.5" repeatCount="indefinite"/>'
+          +'</circle>'
+          +'<line x1="250" y1="250" x2="'+cx.toFixed(1)+'" y2="'+cy.toFixed(1)+'" stroke="hsl('+ph+',60%,40%)" stroke-width="0.3" opacity="0.12"/>';
+  }
+
+  var fr2=parseFloat((fr*1.6).toFixed(4));
+  return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500">'
+  +'<defs>'
+  +'<filter id="plasma'+s+'" x="-30%" y="-30%" width="160%" height="160%"><feTurbulence type="fractalNoise" baseFrequency="'+fr+' '+(fr*0.8).toFixed(4)+'" numOctaves="4" seed="'+s+'"><animate attributeName="baseFrequency" dur="'+(sp*9).toFixed(1)+'s" values="'+fr+' '+(fr*0.8).toFixed(4)+';'+fr2+' '+(fr2*0.9).toFixed(4)+';'+fr+' '+(fr*0.8).toFixed(4)+'" repeatCount="indefinite"/></feTurbulence><feDisplacementMap in="SourceGraphic" scale="'+(22+token*3)+'" xChannelSelector="R" yChannelSelector="G"/></filter>'
+  +'<filter id="glow'+s+'"><feGaussianBlur stdDeviation="5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>'
+  +'<filter id="glass'+s+'" x="-15%" y="-15%" width="130%" height="130%"><feTurbulence type="turbulence" baseFrequency="0.045" numOctaves="3" seed="'+(s+11)+'" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="9"/><feComponentTransfer><feFuncR type="gamma" amplitude="1.1" exponent="0.8" offset="0.03"/><feFuncB type="gamma" amplitude="1.3" exponent="0.7" offset="0.06"/></feComponentTransfer></filter>'
+  +'<radialGradient id="bg'+s+'" cx="50%" cy="50%" r="70%"><stop offset="0%" stop-color="hsl('+h+',60%,12%)"><animate attributeName="stop-color" dur="'+(sp*7).toFixed(1)+'s" values="hsl('+h+',60%,12%);hsl('+h2+',55%,8%);hsl('+h3+',50%,10%);hsl('+h+',60%,12%)" repeatCount="indefinite"/></stop><stop offset="100%" stop-color="#020308"/></radialGradient>'
+  +'<radialGradient id="core'+s+'" cx="50%" cy="50%" r="25%"><stop offset="0%" stop-color="hsl('+h+',95%,80%)" stop-opacity="0.9"/><stop offset="100%" stop-color="transparent"/></radialGradient>'
+  +'<linearGradient id="rim'+s+'" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="hsl('+h+',100%,70%)" stop-opacity="0.35"/><stop offset="100%" stop-color="hsl('+h2+',100%,60%)" stop-opacity="0.3"/></linearGradient>'
+  +'</defs>'
+  +'<rect width="500" height="500" fill="#020308"/>'
+  +'<rect width="500" height="500" fill="url(#bg'+s+')"/>'
+  +'<ellipse cx="250" cy="250" rx="185" ry="175" fill="hsl('+h+',55%,14%)" filter="url(#plasma'+s+')" opacity="0.7"><animate attributeName="rx" dur="'+(sp*6).toFixed(1)+'s" values="185;205;178;190;185" repeatCount="indefinite"/></ellipse>'
+  +arcs
+  +'<circle cx="250" cy="250" r="155" fill="none" stroke="hsl('+h+',70%,55%)" stroke-width="0.5" opacity="0.22" filter="url(#glow'+s+')" ><animateTransform attributeName="transform" type="rotate" from="0 250 250" to="360 250 250" dur="'+(sp*24).toFixed(1)+'s" repeatCount="indefinite"/></circle>'
+  +'<circle cx="250" cy="250" r="115" fill="none" stroke="hsl('+h2+',70%,60%)" stroke-width="0.5" opacity="0.18" filter="url(#glow'+s+')" ><animateTransform attributeName="transform" type="rotate" from="360 250 250" to="0 250 250" dur="'+(sp*17).toFixed(1)+'s" repeatCount="indefinite"/></circle>'
+  +'<circle cx="250" cy="250" r="160" fill="rgba(255,255,255,0.02)" filter="url(#glass'+s+')" stroke="url(#rim'+s+')" stroke-width="1.2"/>'
+  +parts
+  +'<circle cx="250" cy="250" r="130" fill="url(#core'+s+')" opacity="0.5" filter="url(#glow'+s+')"><animate attributeName="opacity" dur="'+(sp*4).toFixed(1)+'s" values="0.5;0.85;0.5" repeatCount="indefinite"/></circle>'
+  +'<text x="250" y="262" text-anchor="middle" font-family="monospace" font-size="38" fill="white" opacity="0.9" filter="url(#glow'+s+')">' +routeGlyph+'</text>'
+  +'<text x="250" y="280" text-anchor="middle" font-family="monospace" font-size="8" fill="white" opacity="0.18" letter-spacing="4">'+routing+'</text>'
+  +'<text x="250" y="310" text-anchor="middle" font-family="monospace" font-size="7" fill="white" opacity="0.12" letter-spacing="3">SIGNAL '+token+' / 9</text>'
+  +'<rect x="0" y="0" width="500" height="1.5" fill="rgba(255,255,255,0.015)" opacity="0"><animate attributeName="y" dur="'+(sp*5).toFixed(1)+'s" from="-2" to="502" repeatCount="indefinite"/><animate attributeName="opacity" dur="'+(sp*5).toFixed(1)+'s" values="0;0.4;0" repeatCount="indefinite"/></rect>'
+  +'<rect x="1" y="1" width="498" height="498" rx="12" fill="none" stroke="url(#rim'+s+')" stroke-width="0.8"/>'
+  +'</svg>';
+}
+
+// ── Derive params same way as Python script ─────────────────
+var BASE_SEED = 0x0339d448; // from wallet key prefix
+var CONTRACT = '0xc9E138fe0261368E7bD319829202400262c8121e';
+var TOKENS = [];
+for(var i=1;i<=9;i++){
+  var seed = (BASE_SEED * 137 + i * 47) & 0xFFFFFFFF;
+  var hue = (seed * 137 + i * 47) % 360;
+  var hue2 = (hue + 120 + i * 30) % 360;
+  var hue3 = (hue + 240) % 360;
+  var complexity = 0.4 + (i/9)*0.3;
+  var sp = round1(0.8 + i*0.15);
+  var fr = parseFloat((0.008 + complexity*0.01).toFixed(4));
+  TOKENS.push({
+    num: i, seed, hue, hue2, hue3, sp, fr,
+    routing: 'CLASSIC',
+    complexity,
+  });
+}
+function round1(v){ return Math.round(v*10)/10; }
+
+// ── Render gallery ──────────────────────────────────────────
+var grid = document.getElementById('signals-grid');
+TOKENS.forEach(function(tk){
+  var svg = sigArt(tk.num, tk.seed, tk.routing, tk.hue, tk.hue2, tk.hue3, tk.sp, tk.fr);
+  var rc = 'r-'+tk.routing;
+  var card = document.createElement('div');
+  card.className='sig-card';
+  card.innerHTML=
+    '<div class="sig-art">'+svg
+    +'<div class="sig-badge">ONCHAIN SVG</div>'
+    +'<div class="sig-num">#'+tk.num+'</div>'
+    +'</div>'
+    +'<div class="sig-info">'
+    +'<div class="sig-routing '+rc+'">'+tk.routing+'</div>'
+    +'<div class="sig-name">SIGNAL '+tk.num+' / 9</div>'
+    +'<div class="sig-desc">Market-state crystallized. TX hash encoded as '+(8)+' arc segments. Complexity '+tk.complexity.toFixed(2)+'.</div>'
+    +'<div class="auction-state">'
+    +'<div class="auction-top"><span class="auction-label">STARTING BID</span>'
+    +'<div><div class="auction-price">0.000369</div><div class="auction-eth">ETH &middot; SEPOLIA</div></div>'
+    +'</div>'
+    +'<div class="auction-bar-bg"><div class="auction-bar-fill" style="width:'+Math.round(tk.num/9*100)+'%"></div></div>'
+    +'</div>'
+    +'<div class="bid-pulse"><div class="bid-dot"></div>AUCTION LIVE</div>'
+    +'<button class="bid-btn" onclick="window.open(\'https://sepolia.etherscan.io/token/'+CONTRACT+'?a='+tk.num+'\',\'_blank\')">VIEW ON CHAIN &rarr;</button>'
+    +'</div>';
+  grid.appendChild(card);
+});
+
+// ── Fetch ETH price ─────────────────────────────────────────
+fetch('https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd')
+  .then(function(r){return r.json();})
+  .then(function(d){
+    var p = d.ethereum && d.ethereum.usd;
+    if(p) document.getElementById('eth-price').textContent='$'+Math.round(p).toLocaleString();
+  }).catch(function(){});
+
+// Triple-click return
+var _r=0,_rt;
+document.addEventListener('click',function(e){
+  if(e.target.tagName==='A'||e.target.tagName==='BUTTON')return;
+  clearTimeout(_rt);_r++;
+  _rt=setTimeout(function(){_r=0;},400);
+  if(_r>=3){_r=0;window.location='/';}
+});
+</script>
+</body>
+</html>

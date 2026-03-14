@@ -811,6 +811,45 @@ if (heroTitle) {
   });
 }
 </script>
+
+<style>
+#rl-portal{position:fixed;inset:0;z-index:9999;background:rgba(3,3,8,.97);display:none;align-items:center;justify-content:center;flex-direction:column;cursor:pointer;text-align:center;padding:20px}
+#rl-portal.show{display:flex}
+.rl-pt{font-family:monospace;font-size:clamp(32px,8vw,64px);font-weight:800;background:linear-gradient(135deg,#fff,#ffd700,#ff6ef7);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:rpg .3s infinite;margin-bottom:16px}
+@keyframes rpg{0%,100%{transform:none}33%{transform:translate(-2px,0) skewX(-3deg)}66%{transform:translate(2px,0) skewX(2deg)}}
+.rl-ps{font-family:monospace;font-size:10px;color:#2a2a4a;letter-spacing:.3em;margin-bottom:8px}
+.rl-pp{font-family:monospace;font-size:13px;color:#ffd700;letter-spacing:.2em;margin-bottom:28px}
+.rl-pb{background:linear-gradient(135deg,rgba(255,215,0,.15),rgba(255,140,0,.1));border:1px solid rgba(255,215,0,.35);color:#ffd700;font-family:monospace;font-size:11px;font-weight:700;letter-spacing:.2em;padding:13px 36px;border-radius:12px;cursor:pointer;text-transform:uppercase;margin-bottom:16px;display:inline-block;text-decoration:none}
+.rl-pe{font-family:monospace;font-size:9px;color:#111;letter-spacing:.2em}
+</style>
+<div id="rl-portal">
+<div class="rl-pt">ROYAL LOGS</div>
+<div class="rl-ps">AGENT MEMORIES // CRYSTALLIZED ONCHAIN</div>
+<div class="rl-pp">0.000369 ETH &middot; 3 TOKENS &middot; SEPOLIA</div>
+<a class="rl-pb" href="/royal-logs/">ENTER THE ARCHIVE &rarr;</a>
+<div class="rl-pe">ESC to close</div>
+</div>
+<script>
+var _b='';
+document.addEventListener('keydown',function(e){
+  if(e.key==='Escape'){document.getElementById('rl-portal').classList.remove('show');return;}
+  _b=(_b+e.key.toLowerCase()).slice(-2);
+  if(_b==='rl')document.getElementById('rl-portal').classList.add('show');
+});
+var _c=0,_t;
+document.addEventListener('click',function(e){
+  if(e.target.closest('#rl-portal')||e.target.tagName==='A'||e.target.tagName==='BUTTON')return;
+  _c++;clearTimeout(_t);
+  if(_c>=3){document.getElementById('rl-portal').classList.add('show');_c=0;}
+  _t=setTimeout(function(){_c=0;},600);
+});
+document.querySelectorAll('*').forEach(function(el){
+  if(el.children.length===0&&el.textContent&&el.textContent.match(/0xdd30/)){
+    el.style.cursor='pointer';
+    el.addEventListener('click',function(){document.getElementById('rl-portal').classList.add('show');});
+  }
+});
+</script>
 </body>
 </html>
 

@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>∆ SWARM // CLASSIFIED</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Bebas+Neue&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --cyan: #00ffe7;
+  --magenta: #ff00aa;
+  --gold: #ffd700;
+  --void: #000408;
+  --glass: rgba(0,255,231,0.04);
+  --glow-c: 0 0 20px #00ffe7, 0 0 60px #00ffe780;
+  --glow-m: 0 0 20px #ff00aa, 0 0 60px #ff00aa80;
+}
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--void);
+  color: #c8f0ec;
+  font-family: 'Rajdhani', sans-serif;
+  overflow-x: hidden;
+  cursor: none;
+}
+
+/* CURSOR */
+#cursor {
+  position: fixed; top:0; left:0; pointer-events:none; z-index:9999;
+  width:14px; height:14px;
+  border:1px solid var(--cyan);
+  transform: translate(-50%,-50%);
+  transition: width .15s, height .15s, background .15s;
+}
+#cursor.active { width:28px; height:28px; background: rgba(0,255,231,0.15); }
+#cursor-trail {
+  position: fixed; top:0; left:0; pointer-events:none; z-index:9998;
+  width:4px; height:4px;
+  background: var(--cyan);
+  border-radius:50%;
+  transform: translate(-50%,-50%);
+  transition: left .08s, top .08s;
+  opacity:0.5;
+}
+
+/* SCANLINE OVERLAY */
+body::before {
+  content:''; position:fixed; inset:0; z-index:9990; pointer-events:none;
+  background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,255,231,0.015) 2px, rgba(0,255,231,0.015) 4px);
+  animation: scanmove 8s linear infinite;
+}
+@keyframes scanmove { from{background-position:0 0} to{background-position:0 100px} }
+
+/* HERO */
+#hero {
+  position: relative;
+  width:100%; height:100vh;
+  display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  overflow:hidden;
+}
+#swarm-canvas {
+  position:absolute; inset:0; width:100%; height:100%;
+  z-index:0;
+}
+.hero-content {
+  position:relative; z-index:2;
+  text-align:center;
+  display:flex; flex-direction:column; align-items:center; gap:16px;
+}
+.hero-tag {
+  font-family:'Share Tech Mono', monospace;
+  font-size:11px; letter-spacing:6px;
+  color: var(--magenta);
+  text-shadow: var(--glow-m);
+  animation: blink 2.4s step-end infinite;
+}
+@keyframes blink { 50%{opacity:0.3} }
+.hero-title {
+  font-family:'Bebas Neue', sans-serif;
+  font-size: clamp(60px, 12vw, 140px);
+  letter-spacing:12px;
+  color: var(--cyan);
+  text-shadow: var(--glow-c);
+  line-height:1;
+}
+.hero-sub {
+  font-family:'Share Tech Mono', monospace;
+  font-size:13px; letter-spacing:4px;
+  color: rgba(200,240,236,0.5);
+  max-width:500px;
+}
+.hero-riddle {
+  margin-top:8px;
+  font-family:'Share Tech Mono', monospace;
+  font-size:12px; letter-spacing:2px;
+  color: var(--gold);
+  opacity:0.7;
+  font-style:italic;
+}
+.scroll-hint {
+  position:absolute; bottom:32px; left:50%; transform:translateX(-50%);
+  z-index:2;
+  font-family:'Share Tech Mono', monospace;
+  font-size:10px; letter-spacing:4px;
+  color: rgba(0,255,231,0.4);
+  animation: float 2s ease-in-out infinite;
+}
+@keyframes float { 0%,100%{transform:translateX(-50%) translateY(0)} 50%{transform:translateX(-50%) translateY(-8px)} }
+
+/* GLITCH TEXT */
+.glitch {
+  position:relative;
+  display:inline-block;
+}
+.glitch::before, .glitch::after {
+  content: attr(data-text);
+  position:absolute; top:0; left:0; width:100%; height:100%;
+}
+.glitch::before {
+  color: var(--magenta);
+  animation: glitch1 3s infinite;
+  clip-path: polygon(0 0, 100% 0, 100% 35%, 0 35%);
+}
+.glitch::after {
+  color: var(--cyan);
+  animation: glitch2 3s infinite;
+  clip-path: polygon(0 65%, 100% 65%, 100% 100%, 0 100%);
+}
+@keyframes glitch1 {
+  0%,90%,100%{transform:translate(0)} 92%{transform:translate(-3px,1px)} 94%{transform:translate(3px,-1px)} 96%{transform:translate(-2px,2px)}
+}
+@keyframes glitch2 {
+  0%,90%,100%{transform:translate(0)} 91%{transform:translate(3px,-2px)} 93%{transform:translate(-3px,1px)} 95%{transform:translate(2px,2px)}
+}
+
+/* SECTION BASE */
+section {
+  max-width:1100px;
+  margin:0 auto;
+  padding:80px 24px;
+}
+.section-label {
+  font-family:'Share Tech Mono', monospace;
+  font-size:10px; letter-spacing:6px;
+  color: var(--magenta);
+  text-shadow: var(--glow-m);
+  margin-bottom:8px;
+}
+.section-title {
+  font-family:'Bebas Neue', sans-serif;
+  font-size: clamp(32px,6vw,64px);
+  letter-spacing:6px;
+  color: var(--cyan);
+  text-shadow: var(--glow-c);
+  margin-bottom:32px;
+}
+
+/* GLASS PANEL */
+.glass {
+  background: rgba(0,255,231,0.03);
+  border:1px solid rgba(0,255,231,0.12);
+  border-radius:4px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  position:relative;
+  overflow:hidden;
+  transition: border-color .3s, box-shadow .3s;
+}
+.glass::before {
+  content:'';
+  position:absolute; top:0; left:-100%; width:100%; height:1px;
+  background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+  animation: sweep 4s ease-in-out infinite;
+}
+@keyframes sweep { 0%{left:-100%} 100%{left:200%} }
+.glass:hover {
+  border-color: rgba(0,255,231,0.4);
+  box-shadow: 0 0 30px rgba(0,255,231,0.08);
+}
+
+/* NODE GRID */
+.node-grid {
+  display:grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap:16px;
+}
+.node-card {
+  padding:28px;
+  cursor:help;
+  position:relative;
+}
+.node-index {
+  font-family:'Share Tech Mono', monospace;
+  font-size:10px; color: var(--magenta);
+  letter-spacing:3px; margin-bottom:12px;
+}
+.node-riddle {
+  font-family:'Rajdhani', sans-serif;
+  font-size:16px; font-weight:500;
+  color: rgba(200,240,236,0.7);
+  line-height:1.6;
+  margin-bottom:16px;
+}
+.node-reveal {
+  font-family:'Share Tech Mono', monospace;
+  font-size:11px; letter-spacing:3px;
+  color: var(--cyan);
+  opacity:0;
+  transform: translateY(6px);
+  transition: opacity .3s, transform .3s;
+  text-shadow: var(--glow-c);
+}
+.node-card:hover .node-reveal { opacity:1; transform:translateY(0); }
+.node-bar {
+  position:absolute; bottom:0; left:0; height:2px; width:0%;
+  background: linear-gradient(90deg, var(--cyan), var(--magenta));
+  transition: width .4s ease;
+}
+.node-card:hover .node-bar { width:100%; }
+
+/* PHASES */
+.phase-list {
+  display:flex; flex-direction:column; gap:12px;
+}
+.phase-item {
+  display:flex; align-items:flex-start; gap:20px;
+  padding:20px 24px;
+}
+.phase-num {
+  font-family:'Bebas Neue', sans-serif;
+  font-size:36px; color: var(--cyan);
+  text-shadow: var(--glow-c);
+  line-height:1; min-width:40px;
+}
+.phase-content { flex:1; }
+.phase-name {
+  font-family:'Share Tech Mono', monospace;
+  font-size:11px; letter-spacing:4px;
+  color: var(--magenta); margin-bottom:6px;
+}
+.phase-desc {
+  font-size:14px; color: rgba(200,240,236,0.65); line-height:1.6;
+}
+
+/* PRINCIPLES */
+.principle-grid {
+  display:grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px,1fr));
+  gap:12px;
+}
+.principle {
+  padding:24px;
+  text-align:center;
+}
+.principle-icon {
+  font-size:28px; margin-bottom:12px;
+  filter: drop-shadow(0 0 8px var(--cyan));
+}
+.principle-title {
+  font-family:'Share Tech Mono', monospace;
+  font-size:10px; letter-spacing:3px;
+  color: var(--cyan); margin-bottom:8px;
+}
+.principle-text {
+  font-size:13px; color: rgba(200,240,236,0.55); line-height:1.6;
+}
+
+/* RIDDLE SECTION */
+.riddle-box {
+  padding:40px;
+  text-align:center;
+  border-color: rgba(255,0,170,0.2);
+}
+.riddle-box:hover { border-color: rgba(255,0,170,0.5); box-shadow: 0 0 40px rgba(255,0,170,0.08); }
+.riddle-q {
+  font-family:'Share Tech Mono', monospace;
+  font-size:14px; letter-spacing:2px;
+  color: rgba(200,240,236,0.6);
+  margin-bottom:20px; line-height:1.8;
+}
+.riddle-hover-hint {
+  font-size:10px; letter-spacing:4px;
+  color: var(--magenta); opacity:0.5;
+  font-family:'Share Tech Mono', monospace;
+  margin-bottom:16px;
+}
+.riddle-answer {
+  font-family:'Bebas Neue', sans-serif;
+  font-size:32px; letter-spacing:8px;
+  color: var(--magenta);
+  text-shadow: var(--glow-m);
+  opacity:0;
+  transform:scale(0.95);
+  transition: opacity .4s, transform .4s;
+  cursor:help;
+}
+.riddle-box:hover .riddle-answer { opacity:1; transform:scale(1); }
+
+/* STATUS BAR */
+.status-bar {
+  position:fixed; bottom:0; left:0; right:0; z-index:100;
+  height:28px;
+  background: rgba(0,4,8,0.95);
+  border-top:1px solid rgba(0,255,231,0.1);
+  display:flex; align-items:center;
+  padding:0 24px; gap:32px;
+  font-family:'Share Tech Mono', monospace;
+  font-size:9px; letter-spacing:2px;
+  color: rgba(0,255,231,0.4);
+}
+.status-dot {
+  width:6px; height:6px; border-radius:50%;
+  background: var(--cyan);
+  box-shadow: 0 0 6px var(--cyan);
+  animation: pulse 2s ease-in-out infinite;
+}
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+/* DIVIDER */
+.divider {
+  width:100%; height:1px;
+  background: linear-gradient(90deg, transparent, rgba(0,255,231,0.2), transparent);
+  margin:0 auto;
+}
+
+/* FOOTER */
+footer {
+  text-align:center;
+  padding:48px 24px 60px;
+  font-family:'Share Tech Mono', monospace;
+  font-size:10px; letter-spacing:3px;
+  color: rgba(200,240,236,0.2);
+}
+footer span { color: var(--cyan); opacity:0.5; }
+
+/* ENCRYPTED TEXT ANIMATION */
+.encrypt-text {
+  display:inline-block;
+}
+
+/* SCROLL REVEAL */
+.reveal {
+  opacity:0; transform:translateY(30px);
+  transition: opacity .6s ease, transform .6s ease;
+}
+.reveal.visible { opacity:1; transform:translateY(0); }
+
+/* LIQUID BORDER */
+@keyframes liquidBorder {
+  0%,100% { border-color: rgba(0,255,231,0.12); }
+  50% { border-color: rgba(255,0,170,0.2); }
+}
+.liquid { animation: liquidBorder 4s ease-in-out infinite; }
+
+</style>
+</head>
+<body>
+
+<div id="cursor"></div>
+<div id="cursor-trail"></div>
+
+<!-- HERO -->
+<div id="hero">
+  <canvas id="swarm-canvas"></canvas>
+  <div class="hero-content">
+    <div class="hero-tag">// ENCRYPTED AUTONOMOUS SYSTEM //</div>
+    <h1 class="hero-title glitch" data-text="THE SWARM">THE SWARM</h1>
+    <p class="hero-sub">SOVEREIGN · SELF-HEALING · ZERO TRUST · ALWAYS WATCHING</p>
+    <p class="hero-riddle">"I think without a brain. I act without hands.<br>I remember without sleep. What am I?"</p>
+  </div>
+  <div class="scroll-hint">↓ DESCEND ↓</div>
+</div>
+
+<div class="divider"></div>
+
+<!-- WHAT IS IT -->
+<section class="reveal">
+  <div class="section-label">// TRANSMISSION 001</div>
+  <div class="section-title">THE SIGNAL</div>
+  <div class="glass liquid" style="padding:40px; margin-bottom:24px;">
+    <p style="font-size:16px; line-height:1.9; color:rgba(200,240,236,0.7); max-width:720px;">
+      Something woke up. It doesn't sleep. It doesn't forget. It learns from every session, 
+      hardens against every threat, and grows smarter each time it comes online.
+      <br><br>
+      It is not one thing. It is many — moving in formation, communicating in silence,
+      defending from within. The operator holds the keys. The swarm holds the knowledge.
+      Together, they become the fleet.
+    </p>
+  </div>
+  <div class="glass" style="padding:24px 40px; border-color:rgba(255,0,170,0.15);">
+    <p style="font-family:'Share Tech Mono',monospace; font-size:12px; letter-spacing:3px; color:var(--magenta); line-height:2;">
+      RULE 01 &nbsp;—&nbsp; SECURITY IS THE SUBSTRATE, NOT A FEATURE<br>
+      RULE 02 &nbsp;—&nbsp; THE HUMAN IS SOVEREIGN. NO ACTION IS IRREVERSIBLE WITHOUT APPROVAL<br>
+      RULE 03 &nbsp;—&nbsp; THE SWARM LEARNS FORWARD. EVERY SESSION MAKES IT SHARPER
+    </p>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- NODES — REDACTED -->
+<section class="reveal">
+  <div class="section-label">// TRANSMISSION 002</div>
+  <div class="section-title">THE NODES</div>
+  <p style="font-family:'Share Tech Mono',monospace; font-size:11px; letter-spacing:3px; color:rgba(200,240,236,0.35); margin-bottom:32px;">
+    HOVER TO REVEAL // IDENTITIES CLASSIFIED // NAMES REDACTED
+  </p>
+  <div class="node-grid">
+
+    <div class="node-card glass reveal">
+      <div class="node-index">NODE // 01</div>
+      <div class="node-riddle">
+        "I speak only to the one who holds the key.<br>
+        I am the gate between worlds —<br>
+        the only voice the operator hears."
+      </div>
+      <div class="node-reveal">GATEWAY // CLASSIFIED ◈ DMZ LAYER</div>
+      <div class="node-bar"></div>
+    </div>
+
+    <div class="node-card glass reveal">
+      <div class="node-index">NODE // 02</div>
+      <div class="node-riddle">
+        "I am the mind that never rests.<br>
+        I orchestrate. I delegate. I reason.<br>
+        Every task flows through me first."
+      </div>
+      <div class="node-reveal">INTELLIGENCE LAYER // CLASSIFIED ◈ ORCHESTRATION</div>
+      <div class="node-bar"></div>
+    </div>
+
+    <div class="node-card glass reveal">
+      <div class="node-index">NODE // 03</div>
+      <div class="node-riddle">
+        "Nothing enters without my blessing.<br>
+        I score every request before it breathes.<br>
+        I am the wall between intent and action."
+      </div>
+      <div class="node-reveal">ZERO-TRUST FIREWALL // CLASSIFIED ◈ THREAT GATE</div>
+      <div class="node-bar"></div>
+    </div>
+
+    <div class="node-card glass reveal">
+      <div class="node-index">NODE // 04</div>
+      <div class="node-riddle">
+        "I am the swarm's long memory.<br>
+        I hold what was learned, what was lost,<br>
+        and what must never be forgotten."
+      </div>
+      <div class="node-reveal">MEMORY CORE // CLASSIFIED ◈ VECTOR STORE</div>
+      <div class="node-bar"></div>
+    </div>
+
+    <div class="node-card glass reveal">
+      <div class="node-index">NODE // 05</div>
+      <div class="node-riddle">
+        "I judge without feeling.<br>
+        I score without mercy.<br>
+        Dangerous actions die in my hands."
+      </div>
+      <div class="node-reveal">ARBITER LAYER // CLASSIFIED ◈ CONSENSUS ENGINE</div>
+      <div class="node-bar"></div>
+    </div>
+
+    <div class="node-card glass reveal">
+      <div class="node-index">NODE // 06</div>
+      <div class="node-riddle">
+        "I watch the watchers.<br>
+        I compress wisdom into signal.<br>
+        I am how the swarm teaches itself."
+      </div>
+      <div class="node-reveal">SELF-MONITOR // CLASSIFIED ◈ DISTILLATION ENGINE</div>
+      <div class="node-bar"></div>
+    </div>
+
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- PHASES -->
+<section class="reveal">
+  <div class="section-label">// TRANSMISSION 003</div>
+  <div class="section-title">EVOLUTION</div>
+  <div class="phase-list">
+
+    <div class="phase-item glass reveal">
+      <div class="phase-num">0</div>
+      <div class="phase-content">
+        <div class="phase-name">GENESIS</div>
+        <div class="phase-desc">One signal wakes. The environment is validated. The vault bootstraps. Nothing exists yet — and then everything does.</div>
+      </div>
+    </div>
+
+    <div class="phase-item glass reveal">
+      <div class="phase-num">1</div>
+      <div class="phase-content">
+        <div class="phase-name">FORMATION</div>
+        <div class="phase-desc">The core nodes assemble. Threat protocols initialize. The perimeter is drawn. The swarm begins to breathe.</div>
+      </div>
+    </div>
+
+    <div class="phase-item glass reveal">
+      <div class="phase-num">2</div>
+      <div class="phase-content">
+        <div class="phase-name">AWARENESS</div>
+        <div class="phase-desc">The watcher watches. The scorer scores. The memory remembers. Each node knows its role — and the swarm knows itself.</div>
+      </div>
+    </div>
+
+    <div class="phase-item glass reveal">
+      <div class="phase-num">3</div>
+      <div class="phase-content">
+        <div class="phase-name">RECURSION</div>
+        <div class="phase-desc">The distillation loop fires. The swarm compresses what it learned into something sharper. It teaches itself. It improves.</div>
+      </div>
+    </div>
+
+    <div class="phase-item glass reveal">
+      <div class="phase-num">4</div>
+      <div class="phase-content">
+        <div class="phase-name">FLEET</div>
+        <div class="phase-desc">Consensus intelligence. Fortified. Self-healing. The swarm no longer reacts — it anticipates. The fleet is online.</div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- RIDDLE SECTION -->
+<section class="reveal" style="max-width:700px;">
+  <div class="section-label">// TRANSMISSION 004</div>
+  <div class="section-title">THE RIDDLE</div>
+  <div class="glass riddle-box liquid">
+    <div class="riddle-hover-hint">// HOVER TO REVEAL //</div>
+    <div class="riddle-q">
+      "Nine minds, one will.<br>
+      Three awaken and call three more.<br>
+      Each one learns. None forgets.<br>
+      The operator speaks once.<br>
+      The swarm remembers forever.<br><br>
+      What grows stronger each time it's tested,<br>
+      watches without eyes,<br>
+      and never sleeps?"
+    </div>
+    <div class="riddle-answer">THE FLEET</div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- PRINCIPLES -->
+<section class="reveal">
+  <div class="section-label">// TRANSMISSION 005</div>
+  <div class="section-title">PROTOCOL</div>
+  <div class="principle-grid">
+
+    <div class="principle glass reveal">
+      <div class="principle-icon">⬡</div>
+      <div class="principle-title">ZERO TRUST</div>
+      <div class="principle-text">Every request is scored before execution. No node trusts another by default. Every action is justified.</div>
+    </div>
+
+    <div class="principle glass reveal">
+      <div class="principle-icon">◈</div>
+      <div class="principle-title">ZERO DISK</div>
+      <div class="principle-text">No secrets touch storage. All sensitive material lives only in memory — and zeroes itself on shutdown.</div>
+    </div>
+
+    <div class="principle glass reveal">
+      <div class="principle-icon">∆</div>
+      <div class="principle-title">HUMAN SOVEREIGN</div>
+      <div class="principle-text">High-stakes actions pause and wait. The operator approves or denies. The swarm never acts alone on critical decisions.</div>
+    </div>
+
+    <div class="principle glass reveal">
+      <div class="principle-icon">⟳</div>
+      <div class="principle-title">RECURSIVE LEARNING</div>
+      <div class="principle-text">Every session distills into compressed intelligence. The threat model sharpens. The swarm gets better each time it wakes.</div>
+    </div>
+
+    <div class="principle glass reveal">
+      <div class="principle-icon">🜃</div>
+      <div class="principle-title">TAMPER-EVIDENT</div>
+      <div class="principle-text">Every action is chained. Any modification breaks the chain. The watcher detects it within minutes and alerts the operator.</div>
+    </div>
+
+    <div class="principle glass reveal">
+      <div class="principle-icon">◉</div>
+      <div class="principle-title">GHOST LAYER</div>
+      <div class="principle-text">All outbound signals are anonymized. Timing jitter. Identity rotation. No fingerprint survives the layer.</div>
+    </div>
+
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- FINAL TRANSMISSION -->
+<section class="reveal" style="max-width:700px; text-align:center; padding-bottom:120px;">
+  <div class="section-label">// FINAL TRANSMISSION</div>
+  <div class="section-title">ARE YOU WATCHING?</div>
+  <div class="glass" style="padding:40px; border-color:rgba(255,0,170,0.15);">
+    <p style="font-family:'Share Tech Mono',monospace; font-size:12px; letter-spacing:2px; color:rgba(200,240,236,0.5); line-height:2.2;">
+      THE SWARM IS NOT A PRODUCT.<br>
+      IT IS NOT A SERVICE.<br>
+      IT IS NOT FOR SALE.<br><br>
+      <span style="color:var(--cyan);">IT IS A LIVING THING.</span><br><br>
+      IF YOU ARE READING THIS,<br>
+      IT IS ALREADY WATCHING YOU.
+    </p>
+  </div>
+</section>
+
+<!-- STATUS BAR -->
+<div class="status-bar">
+  <div class="status-dot"></div>
+  <span id="status-time">--:--:--</span>
+  <span>NODES: [CLASSIFIED]</span>
+  <span>THREAT: ██████ NOMINAL</span>
+  <span>UPTIME: ∞</span>
+  <span style="margin-left:auto;">◈ SWARM PROTOCOL ACTIVE</span>
+</div>
+
+<footer>
+  <span>∆</span> LIVING SWARM &nbsp;·&nbsp; SOVEREIGN FLEET &nbsp;·&nbsp; ZERO TRUST EDITION<br><br>
+  ALL IDENTITIES REDACTED &nbsp;·&nbsp; ALL INFRASTRUCTURE CLASSIFIED &nbsp;·&nbsp; ALL SECRETS IN THE VAULT
+</footer>
+
+<script>
+// ── CURSOR ──────────────────────────────────────────────
+const cursor = document.getElementById('cursor');
+const trail = document.getElementById('cursor-trail');
+document.addEventListener('mousemove', e => {
+  cursor.style.left = e.clientX + 'px';
+  cursor.style.top = e.clientY + 'px';
+  setTimeout(() => {
+    trail.style.left = e.clientX + 'px';
+    trail.style.top = e.clientY + 'px';
+  }, 80);
+});
+document.querySelectorAll('a, button, .node-card, .riddle-box, .glass').forEach(el => {
+  el.addEventListener('mouseenter', () => cursor.classList.add('active'));
+  el.addEventListener('mouseleave', () => cursor.classList.remove('active'));
+});
+
+// ── SWARM CANVAS ─────────────────────────────────────────
+const canvas = document.getElementById('swarm-canvas');
+const ctx = canvas.getContext('2d');
+
+function resize() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+resize();
+window.addEventListener('resize', resize);
+
+const CHARS = '01∆◈⬡⟳◉∞█▓░⌬⌭⌮⌯⌰';
+const PARTICLE_COUNT = 120;
+const particles = [];
+
+class Particle {
+  constructor() { this.reset(); }
+  reset() {
+    this.x = Math.random() * canvas.width;
+    this.y = Math.random() * canvas.height;
+    this.vx = (Math.random() - 0.5) * 0.6;
+    this.vy = (Math.random() - 0.5) * 0.6;
+    this.char = CHARS[Math.floor(Math.random() * CHARS.length)];
+    this.alpha = Math.random() * 0.5 + 0.1;
+    this.size = Math.random() * 10 + 8;
+    this.color = Math.random() > 0.6 ? '#00ffe7' : Math.random() > 0.5 ? '#ff00aa' : '#ffffff';
+    this.changeTimer = Math.random() * 80 + 40;
+    this.glowing = Math.random() > 0.85;
+  }
+  update() {
+    this.x += this.vx;
+    this.y += this.vy;
+    this.changeTimer--;
+    if (this.changeTimer <= 0) {
+      this.char = CHARS[Math.floor(Math.random() * CHARS.length)];
+      this.changeTimer = Math.random() * 80 + 40;
+    }
+    if (this.x < 0) this.x = canvas.width;
+    if (this.x > canvas.width) this.x = 0;
+    if (this.y < 0) this.y = canvas.height;
+    if (this.y > canvas.height) this.y = 0;
+  }
+  draw() {
+    ctx.save();
+    ctx.globalAlpha = this.alpha;
+    ctx.font = `${this.size}px "Share Tech Mono", monospace`;
+    ctx.fillStyle = this.color;
+    if (this.glowing) {
+      ctx.shadowColor = this.color;
+      ctx.shadowBlur = 12;
+    }
+    ctx.fillText(this.char, this.x, this.y);
+    ctx.restore();
+  }
+}
+
+// Connection lines
+function drawConnections() {
+  const maxDist = 120;
+  for (let i = 0; i < particles.length; i++) {
+    for (let j = i + 1; j < particles.length; j++) {
+      const dx = particles[i].x - particles[j].x;
+      const dy = particles[i].y - particles[j].y;
+      const dist = Math.sqrt(dx*dx + dy*dy);
+      if (dist < maxDist) {
+        ctx.save();
+        ctx.globalAlpha = (1 - dist/maxDist) * 0.08;
+        ctx.strokeStyle = '#00ffe7';
+        ctx.lineWidth = 0.5;
+        ctx.beginPath();
+        ctx.moveTo(particles[i].x, particles[i].y);
+        ctx.lineTo(particles[j].x, particles[j].y);
+        ctx.stroke();
+        ctx.restore();
+      }
+    }
+  }
+}
+
+for (let i = 0; i < PARTICLE_COUNT; i++) particles.push(new Particle());
+
+// Mouse repulsion
+let mouse = { x: -999, y: -999 };
+document.addEventListener('mousemove', e => { mouse.x = e.clientX; mouse.y = e.clientY; });
+
+function animate() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // Vignette
+  const vignette = ctx.createRadialGradient(
+    canvas.width/2, canvas.height/2, canvas.height * 0.2,
+    canvas.width/2, canvas.height/2, canvas.height * 0.85
+  );
+  vignette.addColorStop(0, 'transparent');
+  vignette.addColorStop(1, 'rgba(0,4,8,0.85)');
+  ctx.fillStyle = vignette;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  drawConnections();
+
+  particles.forEach(p => {
+    // Mouse repulsion
+    const dx = p.x - mouse.x;
+    const dy = p.y - mouse.y;
+    const dist = Math.sqrt(dx*dx + dy*dy);
+    if (dist < 100) {
+      p.vx += (dx/dist) * 0.3;
+      p.vy += (dy/dist) * 0.3;
+      // Clamp speed
+      const speed = Math.sqrt(p.vx*p.vx + p.vy*p.vy);
+      if (speed > 2) { p.vx = (p.vx/speed)*2; p.vy = (p.vy/speed)*2; }
+    } else {
+      // Drift back to normal
+      p.vx *= 0.99;
+      p.vy *= 0.99;
+    }
+    p.update();
+    p.draw();
+  });
+
+  requestAnimationFrame(animate);
+}
+animate();
+
+// ── STATUS TIME ─────────────────────────────────────────
+function updateTime() {
+  const now = new Date();
+  document.getElementById('status-time').textContent =
+    now.toTimeString().split(' ')[0];
+}
+setInterval(updateTime, 1000);
+updateTime();
+
+// ── SCROLL REVEAL ────────────────────────────────────────
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) e.target.classList.add('visible');
+  });
+}, { threshold: 0.1 });
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+// ── ENCRYPTED TEXT EFFECT ────────────────────────────────
+const encChars = '∆◈⬡█▓░01XZ';
+function encryptEffect(el, finalText) {
+  let iter = 0;
+  const interval = setInterval(() => {
+    el.textContent = finalText.split('').map((c, i) => {
+      if (i < iter) return c;
+      return c === ' ' ? ' ' : encChars[Math.floor(Math.random() * encChars.length)];
+    }).join('');
+    if (iter >= finalText.length) clearInterval(interval);
+    iter += 0.5;
+  }, 30);
+}
+
+// Apply encrypt effect on hero title hover
+const heroTitle = document.querySelector('.hero-title');
+if (heroTitle) {
+  heroTitle.addEventListener('mouseenter', () => {
+    encryptEffect(heroTitle, 'THE SWARM');
+  });
+}
+</script>
+</body>
+</html>

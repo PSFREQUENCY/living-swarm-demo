@@ -1,0 +1,28 @@
+{
+  "name": "royal-logs",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "setup:rare": "npm install -g @rareprotocol/rare-cli && echo '✅ Rare CLI installed. Run: rare configure --chain sepolia --private-key 0x... --rpc-url https://...'",
+    "deploy:collection": "rare deploy erc721 'Royal Logs' 'RLOG' --chain sepolia && echo '✅ Copy contract address to RARE_CONTRACT_ADDRESS in .env.local'"
+  },
+  "dependencies": {
+    "next": "^16.1.6",
+    "react": "^18",
+    "react-dom": "^18",
+    "three": "^0.165.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "@types/three": "^0.165.0",
+    "autoprefixer": "^10",
+    "postcss": "^8",
+    "tailwindcss": "^3",
+    "typescript": "^5"
+  }
+}

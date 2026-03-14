@@ -1,0 +1,38 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: #030308;
+  color: #c8f0ec;
+  cursor: crosshair;
+}
+
+/* Scanlines */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    0deg, transparent, transparent 2px,
+    rgba(0,245,255,0.012) 2px, rgba(0,245,255,0.012) 4px
+  );
+}
+
+@keyframes spin-slow { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+@keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+
+.animate-spin-slow { animation: spin-slow 8s linear infinite; }
+.animate-float     { animation: float 4s ease-in-out infinite; }
+
+::selection { background: rgba(0,245,255,0.2); color: #00f5ff; }
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: #030308; }
+::-webkit-scrollbar-thumb { background: rgba(0,245,255,0.2); }
+::-webkit-scrollbar-thumb:hover { background: rgba(0,245,255,0.4); }

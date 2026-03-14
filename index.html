@@ -850,6 +850,240 @@ document.querySelectorAll('*').forEach(function(el){
   }
 });
 </script>
+
+<style>
+.rl-section{max-width:900px;margin:0 auto;padding:0 16px;font-family:'Courier New',monospace}
+.rl-divider{color:#111;font-size:11px;letter-spacing:.2em;text-align:center;margin:40px 0 28px}
+.rl-eyebrow{font-size:9px;color:#1a1a2a;letter-spacing:.4em;text-transform:uppercase;text-align:center;margin-bottom:20px}
+.rl-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px}
+.rl-thumb{aspect-ratio:1;border-radius:10px;overflow:hidden;border:1px solid #0f0f1e;cursor:pointer;transition:all .35s;position:relative}
+.rl-thumb:hover{border-color:rgba(255,215,0,.3);transform:translateY(-4px);box-shadow:0 16px 40px rgba(0,0,0,.7),0 0 30px rgba(255,215,0,.07)}
+.rl-thumb svg{width:100%;height:100%;display:block}
+.rl-thumb-lbl{position:absolute;bottom:0;left:0;right:0;padding:8px;background:linear-gradient(transparent,rgba(3,3,8,.9));font-size:8px;color:rgba(255,215,0,.4);letter-spacing:.15em;text-align:center;opacity:0;transition:opacity .3s}
+.rl-thumb:hover .rl-thumb-lbl{opacity:1}
+.rl-footer-row{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:12px}
+.rl-info{font-size:10px;color:#111;line-height:1.9}
+.rl-btn{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,rgba(255,215,0,.1),rgba(255,140,0,.06));border:1px solid rgba(255,215,0,.25);color:#ffd700;font-family:'Courier New',monospace;font-size:10px;font-weight:700;letter-spacing:.18em;padding:10px 24px;border-radius:10px;cursor:pointer;text-decoration:none;transition:all .3s;text-transform:uppercase}
+.rl-btn:hover{background:linear-gradient(135deg,rgba(255,215,0,.2),rgba(255,140,0,.12));box-shadow:0 0 30px rgba(255,215,0,.18)}
+.rl-hint{font-size:9px;color:#080812;letter-spacing:.18em;text-align:center;padding-bottom:40px}
+#rl-portal{position:fixed;inset:0;z-index:9999;background:rgba(3,3,8,.97);display:none;align-items:center;justify-content:center;flex-direction:column;cursor:pointer;text-align:center;padding:20px}
+#rl-portal.show{display:flex}
+.rp-art{width:220px;height:220px;border-radius:50%;overflow:hidden;margin-bottom:28px;border:1px solid rgba(255,215,0,.15);box-shadow:0 0 60px rgba(255,215,0,.12),0 0 120px rgba(155,89,255,.06)}
+.rp-art svg{width:100%;height:100%}
+.rp-title{font-family:'Courier New',monospace;font-size:clamp(28px,6vw,52px);font-weight:800;letter-spacing:.06em;background:linear-gradient(135deg,#fff,#ffd700,#ff9500,#ff6ef7);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:rpg .35s infinite;margin-bottom:10px}
+@keyframes rpg{0%,100%{transform:none;filter:none}33%{transform:translate(-2px,0) skewX(-3deg);filter:hue-rotate(90deg)}66%{transform:translate(2px,0) skewX(2deg);filter:hue-rotate(-90deg)}}
+.rp-sub{font-family:'Courier New',monospace;font-size:10px;color:#2a2a4a;letter-spacing:.3em;margin-bottom:8px}
+.rp-price{font-family:'Courier New',monospace;font-size:14px;color:#ffd700;letter-spacing:.2em;margin-bottom:24px}
+.rp-enter{background:linear-gradient(135deg,rgba(255,215,0,.15),rgba(255,140,0,.1));border:1px solid rgba(255,215,0,.35);color:#ffd700;font-family:'Courier New',monospace;font-size:11px;font-weight:700;letter-spacing:.2em;padding:13px 36px;border-radius:12px;cursor:pointer;text-transform:uppercase;margin-bottom:16px;text-decoration:none;display:inline-block;transition:all .3s}
+.rp-enter:hover{box-shadow:0 0 40px rgba(255,215,0,.25)}
+.rp-esc{font-family:'Courier New',monospace;font-size:9px;color:#111;letter-spacing:.2em}
+</style>
+
+<div class="rl-section">
+  <div class="rl-divider">&#x2593;&#x2593;&#x2593;</div>
+  <div class="rl-eyebrow">&#x25C8; ROYAL LOGS // AGENT MEMORY ARTIFACTS // 3 AUCTIONS LIVE</div>
+  <div class="rl-grid" id="rlthumbs"></div>
+  <div class="rl-footer-row">
+    <div class="rl-info">Liquid-glass memory artifacts. Fully onchain animated SVG.<br>3 tokens &middot; 0.000369 ETH &middot; Sepolia &middot; zero IPFS.</div>
+    <a href="/royal-logs/" class="rl-btn">&#x2B21; ENTER ROYAL LOGS &rarr;</a>
+  </div>
+  <div class="rl-hint">// type rl &nbsp;&middot;&nbsp; click ETH address &nbsp;&middot;&nbsp; triple-click anywhere</div>
+  <div class="rl-divider">&#x2593;&#x2593;&#x2593;</div>
+</div>
+
+<div id="rl-portal">
+  <div class="rp-art" id="rp-art-inner"></div>
+  <div class="rp-title">ROYAL LOGS</div>
+  <div class="rp-sub">&#x2B21; AGENT MEMORIES // CRYSTALLIZED ONCHAIN</div>
+  <div class="rp-price">0.000369 ETH &middot; 3 TOKENS &middot; SEPOLIA</div>
+  <a class="rp-enter" href="/royal-logs/">ENTER THE ARCHIVE &rarr;</a>
+  <div class="rp-esc">ESC to close</div>
+</div>
+
+<script>
+function rlsvg(seed,w){
+  w=w||300;
+  var h=(seed*137)%360,h2=(h+150)%360,sp=(0.8+(seed%5)*.3).toFixed(1),fr=(0.012+(seed%7)*.002).toFixed(4);
+  return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+w+' '+w+'">'
+  +'<defs>'
+  +'<filter id="fl'+seed+'w'+w+'" x="-30%" y="-30%" width="160%" height="160%"><feTurbulence type="fractalNoise" baseFrequency="'+fr+'" numOctaves="3" seed="'+seed+'"><animate attributeName="baseFrequency" dur="'+(sp*8)+'s" values="'+fr+';'+(fr*1.5).toFixed(4)+';'+fr+'" repeatCount="indefinite"/></feTurbulence><feDisplacementMap in="SourceGraphic" scale="'+(w*.06).toFixed(0)+'" xChannelSelector="R" yChannelSelector="G"/></filter>'
+  +'<filter id="fg'+seed+'w'+w+'"><feGaussianBlur stdDeviation="'+(w*.016).toFixed(0)+'" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>'
+  +'<radialGradient id="fb'+seed+'w'+w+'" cx="50%" cy="50%" r="70%"><stop offset="0%" stop-color="hsl('+h+',55%,15%)"><animate attributeName="stop-color" dur="'+(sp*6)+'s" values="hsl('+h+',55%,15%);hsl('+h2+',50%,10%);hsl('+h+',55%,15%)" repeatCount="indefinite"/></stop><stop offset="100%" stop-color="#030308"/></radialGradient>'
+  +'<radialGradient id="fc'+seed+'w'+w+'" cx="50%" cy="50%" r="30%"><stop offset="0%" stop-color="hsl('+h+',90%,75%)" stop-opacity="0.8"/><stop offset="100%" stop-color="transparent"/></radialGradient>'
+  +'</defs>'
+  +'<rect width="'+w+'" height="'+w+'" fill="#030308"/>'
+  +'<rect width="'+w+'" height="'+w+'" fill="url(#fb'+seed+'w'+w+')"/>'
+  +'<ellipse cx="'+(w/2)+'" cy="'+(w/2)+'" rx="'+(w*.33).toFixed(0)+'" ry="'+(w*.31).toFixed(0)+'" fill="hsl('+h+',60%,15%)" filter="url(#fl'+seed+'w'+w+')" opacity="0.7"><animate attributeName="rx" dur="'+(sp*5)+'s" values="'+(w*.33).toFixed(0)+';'+(w*.38).toFixed(0)+';'+(w*.31).toFixed(0)+';'+(w*.33).toFixed(0)+'" repeatCount="indefinite"/></ellipse>'
+  +'<circle cx="'+(w/2)+'" cy="'+(w/2)+'" r="'+(w*.26).toFixed(0)+'" fill="url(#fc'+seed+'w'+w+')" opacity="0.5" filter="url(#fg'+seed+'w'+w+')"><animate attributeName="opacity" dur="'+(sp*3)+'s" values="0.5;0.8;0.5" repeatCount="indefinite"/></circle>'
+  +'<circle cx="'+(w/2)+'" cy="'+(w/2)+'" r="'+(w*.2).toFixed(0)+'" fill="none" stroke="hsl('+h+',80%,60%)" stroke-width="0.5" opacity="0.4" filter="url(#fg'+seed+'w'+w+')"><animateTransform attributeName="transform" type="rotate" from="0 '+(w/2)+' '+(w/2)+'" to="360 '+(w/2)+' '+(w/2)+'" dur="'+(sp*18)+'s" repeatCount="indefinite"/></circle>'
+  +'<text x="'+(w/2)+'" y="'+(w/2+w*.05).toFixed(0)+'" text-anchor="middle" font-family="monospace" font-size="'+(w*.09).toFixed(0)+'" fill="white" opacity="0.85" filter="url(#fg'+seed+'w'+w+')">&#x2B21;</text>'
+  +'<rect x="1" y="1" width="'+(w-2)+'" height="'+(w-2)+'" rx="'+(w*.03).toFixed(0)+'" fill="none" stroke="hsl('+h+',60%,40%)" stroke-width="0.5" opacity="0.3"/>'
+  +'</svg>';
+}
+
+// Thumbnails
+var grid=document.getElementById('rlthumbs');
+if(grid){
+  [49,56,63].forEach(function(s,i){
+    var d=document.createElement('div');d.className='rl-thumb';
+    d.innerHTML=rlsvg(s,300)+'<div class="rl-thumb-lbl">TOKEN '+(i+1)+' OF 3 &middot; 0.000369 ETH</div>';
+    d.onclick=function(){window.location='/royal-logs/';};
+    grid.appendChild(d);
+  });
+}
+
+// Portal art
+var pa=document.getElementById('rp-art-inner');
+if(pa) pa.innerHTML=rlsvg(56,220);
+
+// Show/hide portal
+function show(){document.getElementById('rl-portal').classList.add('show');}
+function hide(){document.getElementById('rl-portal').classList.remove('show');}
+
+// SECRET 1: type "rl"
+var _b='';
+document.addEventListener('keydown',function(e){
+  if(e.key==='Escape'){hide();return;}
+  _b=(_b+e.key.toLowerCase()).slice(-2);
+  if(_b==='rl')show();
+});
+
+// SECRET 2: click ETH address
+document.querySelectorAll('*').forEach(function(el){
+  if(el.children.length===0&&el.textContent&&el.textContent.indexOf('0xdd30d20683EB3a84')!==-1){
+    el.style.cursor='pointer';el.title='// classified';
+    el.addEventListener('click',function(e){e.stopPropagation();show();});
+  }
+});
+
+// SECRET 3: triple-click
+var _c=0,_ct;
+document.addEventListener('click',function(e){
+  if(e.target.closest&&e.target.closest('#rl-portal'))return;
+  if(e.target.tagName==='A'||e.target.tagName==='BUTTON')return;
+  _c++;clearTimeout(_ct);
+  if(_c>=3){show();_c=0;return;}
+  _ct=setTimeout(function(){_c=0;},500);
+});
+</script>
+
+
+<style>
+.rl-section{max-width:900px;margin:0 auto;padding:0 16px;font-family:'Courier New',monospace}
+.rl-divider{color:#111;font-size:11px;letter-spacing:.2em;text-align:center;margin:40px 0 28px}
+.rl-eyebrow{font-size:9px;color:#1a1a2a;letter-spacing:.4em;text-transform:uppercase;text-align:center;margin-bottom:20px}
+.rl-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px}
+.rl-thumb{aspect-ratio:1;border-radius:10px;overflow:hidden;border:1px solid #0f0f1e;cursor:pointer;transition:all .35s;position:relative}
+.rl-thumb:hover{border-color:rgba(255,215,0,.3);transform:translateY(-4px);box-shadow:0 16px 40px rgba(0,0,0,.7),0 0 30px rgba(255,215,0,.07)}
+.rl-thumb svg{width:100%;height:100%;display:block}
+.rl-thumb-lbl{position:absolute;bottom:0;left:0;right:0;padding:8px;background:linear-gradient(transparent,rgba(3,3,8,.9));font-size:8px;color:rgba(255,215,0,.4);letter-spacing:.15em;text-align:center;opacity:0;transition:opacity .3s}
+.rl-thumb:hover .rl-thumb-lbl{opacity:1}
+.rl-footer-row{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:12px}
+.rl-info{font-size:10px;color:#111;line-height:1.9}
+.rl-btn{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,rgba(255,215,0,.1),rgba(255,140,0,.06));border:1px solid rgba(255,215,0,.25);color:#ffd700;font-family:'Courier New',monospace;font-size:10px;font-weight:700;letter-spacing:.18em;padding:10px 24px;border-radius:10px;cursor:pointer;text-decoration:none;transition:all .3s;text-transform:uppercase}
+.rl-btn:hover{background:linear-gradient(135deg,rgba(255,215,0,.2),rgba(255,140,0,.12));box-shadow:0 0 30px rgba(255,215,0,.18)}
+.rl-hint{font-size:9px;color:#080812;letter-spacing:.18em;text-align:center;padding-bottom:40px}
+#rl-portal{position:fixed;inset:0;z-index:9999;background:rgba(3,3,8,.97);display:none;align-items:center;justify-content:center;flex-direction:column;cursor:pointer;text-align:center;padding:20px}
+#rl-portal.show{display:flex}
+.rp-art{width:220px;height:220px;border-radius:50%;overflow:hidden;margin-bottom:28px;border:1px solid rgba(255,215,0,.15);box-shadow:0 0 60px rgba(255,215,0,.12),0 0 120px rgba(155,89,255,.06)}
+.rp-art svg{width:100%;height:100%}
+.rp-title{font-family:'Courier New',monospace;font-size:clamp(28px,6vw,52px);font-weight:800;letter-spacing:.06em;background:linear-gradient(135deg,#fff,#ffd700,#ff9500,#ff6ef7);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:rpg .35s infinite;margin-bottom:10px}
+@keyframes rpg{0%,100%{transform:none;filter:none}33%{transform:translate(-2px,0) skewX(-3deg);filter:hue-rotate(90deg)}66%{transform:translate(2px,0) skewX(2deg);filter:hue-rotate(-90deg)}}
+.rp-sub{font-family:'Courier New',monospace;font-size:10px;color:#2a2a4a;letter-spacing:.3em;margin-bottom:8px}
+.rp-price{font-family:'Courier New',monospace;font-size:14px;color:#ffd700;letter-spacing:.2em;margin-bottom:24px}
+.rp-enter{background:linear-gradient(135deg,rgba(255,215,0,.15),rgba(255,140,0,.1));border:1px solid rgba(255,215,0,.35);color:#ffd700;font-family:'Courier New',monospace;font-size:11px;font-weight:700;letter-spacing:.2em;padding:13px 36px;border-radius:12px;cursor:pointer;text-transform:uppercase;margin-bottom:16px;text-decoration:none;display:inline-block;transition:all .3s}
+.rp-enter:hover{box-shadow:0 0 40px rgba(255,215,0,.25)}
+.rp-esc{font-family:'Courier New',monospace;font-size:9px;color:#111;letter-spacing:.2em}
+</style>
+
+<div class="rl-section">
+  <div class="rl-divider">&#x2593;&#x2593;&#x2593;</div>
+  <div class="rl-eyebrow">&#x25C8; ROYAL LOGS // AGENT MEMORY ARTIFACTS // 3 AUCTIONS LIVE</div>
+  <div class="rl-grid" id="rlthumbs"></div>
+  <div class="rl-footer-row">
+    <div class="rl-info">Liquid-glass memory artifacts. Fully onchain animated SVG.<br>3 tokens &middot; 0.000369 ETH &middot; Sepolia &middot; zero IPFS.</div>
+    <a href="/royal-logs/" class="rl-btn">&#x2B21; ENTER ROYAL LOGS &rarr;</a>
+  </div>
+  <div class="rl-hint">// type rl &nbsp;&middot;&nbsp; click ETH address &nbsp;&middot;&nbsp; triple-click anywhere</div>
+  <div class="rl-divider">&#x2593;&#x2593;&#x2593;</div>
+</div>
+
+<div id="rl-portal">
+  <div class="rp-art" id="rp-art-inner"></div>
+  <div class="rp-title">ROYAL LOGS</div>
+  <div class="rp-sub">&#x2B21; AGENT MEMORIES // CRYSTALLIZED ONCHAIN</div>
+  <div class="rp-price">0.000369 ETH &middot; 3 TOKENS &middot; SEPOLIA</div>
+  <a class="rp-enter" href="/royal-logs/">ENTER THE ARCHIVE &rarr;</a>
+  <div class="rp-esc">ESC to close</div>
+</div>
+
+<script>
+function rlsvg(seed,w){
+  w=w||300;
+  var h=(seed*137)%360,h2=(h+150)%360,sp=(0.8+(seed%5)*.3).toFixed(1),fr=(0.012+(seed%7)*.002).toFixed(4);
+  return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+w+' '+w+'">'
+  +'<defs>'
+  +'<filter id="fl'+seed+'w'+w+'" x="-30%" y="-30%" width="160%" height="160%"><feTurbulence type="fractalNoise" baseFrequency="'+fr+'" numOctaves="3" seed="'+seed+'"><animate attributeName="baseFrequency" dur="'+(sp*8)+'s" values="'+fr+';'+(fr*1.5).toFixed(4)+';'+fr+'" repeatCount="indefinite"/></feTurbulence><feDisplacementMap in="SourceGraphic" scale="'+(w*.06).toFixed(0)+'" xChannelSelector="R" yChannelSelector="G"/></filter>'
+  +'<filter id="fg'+seed+'w'+w+'"><feGaussianBlur stdDeviation="'+(w*.016).toFixed(0)+'" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>'
+  +'<radialGradient id="fb'+seed+'w'+w+'" cx="50%" cy="50%" r="70%"><stop offset="0%" stop-color="hsl('+h+',55%,15%)"><animate attributeName="stop-color" dur="'+(sp*6)+'s" values="hsl('+h+',55%,15%);hsl('+h2+',50%,10%);hsl('+h+',55%,15%)" repeatCount="indefinite"/></stop><stop offset="100%" stop-color="#030308"/></radialGradient>'
+  +'<radialGradient id="fc'+seed+'w'+w+'" cx="50%" cy="50%" r="30%"><stop offset="0%" stop-color="hsl('+h+',90%,75%)" stop-opacity="0.8"/><stop offset="100%" stop-color="transparent"/></radialGradient>'
+  +'</defs>'
+  +'<rect width="'+w+'" height="'+w+'" fill="#030308"/>'
+  +'<rect width="'+w+'" height="'+w+'" fill="url(#fb'+seed+'w'+w+')"/>'
+  +'<ellipse cx="'+(w/2)+'" cy="'+(w/2)+'" rx="'+(w*.33).toFixed(0)+'" ry="'+(w*.31).toFixed(0)+'" fill="hsl('+h+',60%,15%)" filter="url(#fl'+seed+'w'+w+')" opacity="0.7"><animate attributeName="rx" dur="'+(sp*5)+'s" values="'+(w*.33).toFixed(0)+';'+(w*.38).toFixed(0)+';'+(w*.31).toFixed(0)+';'+(w*.33).toFixed(0)+'" repeatCount="indefinite"/></ellipse>'
+  +'<circle cx="'+(w/2)+'" cy="'+(w/2)+'" r="'+(w*.26).toFixed(0)+'" fill="url(#fc'+seed+'w'+w+')" opacity="0.5" filter="url(#fg'+seed+'w'+w+')"><animate attributeName="opacity" dur="'+(sp*3)+'s" values="0.5;0.8;0.5" repeatCount="indefinite"/></circle>'
+  +'<circle cx="'+(w/2)+'" cy="'+(w/2)+'" r="'+(w*.2).toFixed(0)+'" fill="none" stroke="hsl('+h+',80%,60%)" stroke-width="0.5" opacity="0.4" filter="url(#fg'+seed+'w'+w+')"><animateTransform attributeName="transform" type="rotate" from="0 '+(w/2)+' '+(w/2)+'" to="360 '+(w/2)+' '+(w/2)+'" dur="'+(sp*18)+'s" repeatCount="indefinite"/></circle>'
+  +'<text x="'+(w/2)+'" y="'+(w/2+w*.05).toFixed(0)+'" text-anchor="middle" font-family="monospace" font-size="'+(w*.09).toFixed(0)+'" fill="white" opacity="0.85" filter="url(#fg'+seed+'w'+w+')">&#x2B21;</text>'
+  +'<rect x="1" y="1" width="'+(w-2)+'" height="'+(w-2)+'" rx="'+(w*.03).toFixed(0)+'" fill="none" stroke="hsl('+h+',60%,40%)" stroke-width="0.5" opacity="0.3"/>'
+  +'</svg>';
+}
+
+// Thumbnails
+var grid=document.getElementById('rlthumbs');
+if(grid){
+  [49,56,63].forEach(function(s,i){
+    var d=document.createElement('div');d.className='rl-thumb';
+    d.innerHTML=rlsvg(s,300)+'<div class="rl-thumb-lbl">TOKEN '+(i+1)+' OF 3 &middot; 0.000369 ETH</div>';
+    d.onclick=function(){window.location='/royal-logs/';};
+    grid.appendChild(d);
+  });
+}
+
+// Portal art
+var pa=document.getElementById('rp-art-inner');
+if(pa) pa.innerHTML=rlsvg(56,220);
+
+// Show/hide portal
+function show(){document.getElementById('rl-portal').classList.add('show');}
+function hide(){document.getElementById('rl-portal').classList.remove('show');}
+
+// SECRET 1: type "rl"
+var _b='';
+document.addEventListener('keydown',function(e){
+  if(e.key==='Escape'){hide();return;}
+  _b=(_b+e.key.toLowerCase()).slice(-2);
+  if(_b==='rl')show();
+});
+
+// SECRET 2: click ETH address
+document.querySelectorAll('*').forEach(function(el){
+  if(el.children.length===0&&el.textContent&&el.textContent.indexOf('0xdd30d20683EB3a84')!==-1){
+    el.style.cursor='pointer';el.title='// classified';
+    el.addEventListener('click',function(e){e.stopPropagation();show();});
+  }
+});
+
+// SECRET 3: triple-click
+var _c=0,_ct;
+document.addEventListener('click',function(e){
+  if(e.target.closest&&e.target.closest('#rl-portal'))return;
+  if(e.target.tagName==='A'||e.target.tagName==='BUTTON')return;
+  _c++;clearTimeout(_ct);
+  if(_c>=3){show();_c=0;return;}
+  _ct=setTimeout(function(){_c=0;},500);
+});
+</script>
+
 </body>
 </html>
 

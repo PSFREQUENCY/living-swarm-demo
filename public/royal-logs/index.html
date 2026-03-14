@@ -811,5 +811,18 @@ if (heroTitle) {
   });
 }
 </script>
+
+<script>
+// Triple-click anywhere on museum page = return to swarm
+var _rc=0,_rt;
+document.addEventListener('click',function(e){
+  if(e.target.tagName==='A'||e.target.tagName==='BUTTON')return;
+  clearTimeout(_rt);
+  _rc++;
+  _rt=setTimeout(function(){_rc=0;},400);
+  if(_rc>=3){_rc=0;window.location='/';}
+});
+</script>
+
 </body>
 </html>

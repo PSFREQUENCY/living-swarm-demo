@@ -1,9 +1,10 @@
-import { readFileSync } from 'fs'
-import { join } from 'path'
+import {{ readFileSync }} from 'fs'
+import {{ join }} from 'path'
+import {{ NextResponse }} from 'next/server'
 
-export function GET() {
-  const html = readFileSync(join(process.cwd(), 'public/royal-logs/index.html'), 'utf8')
-  return new Response(html, {
-    headers: { 'Content-Type': 'text/html; charset=utf-8' }
-  })
-}
+export async function GET() {{
+  const html = readFileSync(join(process.cwd(), 'public/royal-logs/index.html'))
+  return new NextResponse(html, {{
+    headers: {{ 'content-type': 'text/html; charset=utf-8' }}
+  }})
+}}

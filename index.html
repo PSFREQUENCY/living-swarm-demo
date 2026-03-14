@@ -1086,6 +1086,20 @@ document.addEventListener('click',function(e){
 });
 </script>
 
+
+<script>
+// Override: triple-click opens Royal Logs portal
+(function(){
+  var _c=0,_ct;
+  document.addEventListener('click',function(e){
+    if(document.getElementById('rl-portal')&&document.getElementById('rl-portal').contains(e.target))return;
+    if(e.target.tagName==='A'||e.target.tagName==='BUTTON')return;
+    clearTimeout(_ct);_c++;
+    _ct=setTimeout(function(){_c=0;},400);
+    if(_c>=3){_c=0;if(document.getElementById('rl-portal'))document.getElementById('rl-portal').classList.add('show');}
+  });
+})();
+</script>
 </body>
 </html>
 

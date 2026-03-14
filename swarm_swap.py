@@ -54,7 +54,7 @@ quote_res = requests.post(
         'tokenInChainId': CHAIN_ID,
         'tokenOutChainId': CHAIN_ID,
         'swapper': WALLET,
-        'routingPreference': 'CLASSIC',
+        'routingPreference': 'BEST_PRICE',
         'autoSlippage': 'DEFAULT',
         'urgency': 'urgent',
     }
@@ -69,8 +69,7 @@ print(f'  ✓ Quote received — routing: {routing}')
 print(f'  requestId: {q.get("requestId","")[:20]}...')
 
 # Extract the quote object
-inner = (q.get('classicQuote') or q.get('wrapUnwrapQuote') or
-         q.get('dutchLimitV2Quote') or q.get('dutchLimitQuote'))
+inner = q.get('quote') or q.get('classicQuote') or q.get('wrapUnwrapQuote') or q.get('dutchLimitV2Quote') or q.get('dutchLimitQuote')
 if not inner:
     print('  ERROR: no inner quote found')
     print('  Full response keys:', list(q.keys()))

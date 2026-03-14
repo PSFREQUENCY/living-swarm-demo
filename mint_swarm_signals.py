@@ -52,198 +52,63 @@ def derive_params(token_num, swap):
     }
 
 def make_svg(token_num, p, swap):
-    """
-    SWARM SIGNALS SVG — market-state driven onchain art
-    Visual layers:
-    1. Void background with market-hued gradient
-    2. Turbulent plasma field (driven by swap freq/complexity)
-    3. Neural signal lines (represent routing paths)
-    4. Crystalline lattice (represents liquidity pools)
-    5. Data stream particles (represent swap volume)
-    6. Caustic core (the swap execution point)
-    7. Market state indicators (glyphs encoding CLASSIC/DUTCH/PRIORITY)
-    8. Agent signature ring (the tx hash encoded as arc segments)
-    """
-    s = p['seed']; h = p['hue']; h2 = p['hue2']; h3 = p['hue3']
-    sp = round(p['speed'],2); fr = round(p['freq'],4); fr2 = round(p['freq']*1.6,4)
-    routing = p['routing']
-
-    # Routing glyph
-    route_glyph = {'CLASSIC':'◉','DUTCH_V2':'⬡','DUTCH_V3':'⬡','PRIORITY':'✦','WRAP':'◈'}.get(routing,'◈')
-
-    # TX hash arc segments (first 8 bytes of tx hash = 8 arc segments)
-    tx = swap.get('txHash','0x' + '0'*64)
-    arc_segments = ''
-    for i in range(8):
-        byte_val = int(tx[2+i*2:4+i*2], 16) if len(tx) > 4+i*2 else i*30
-        angle = (byte_val / 255) * 360
-        r = 130 + i * 8
-        # Convert to arc path
-        rad = math.radians(angle)
-        x2 = 250 + r * math.cos(rad)
-        y2 = 250 + r * math.sin(rad)
-        opacity = round(0.05 + (byte_val/255)*0.12, 3)
-        arc_segments += (f'<circle cx="250" cy="250" r="{r}" fill="none" '
-            f'stroke="hsl({h+i*20},{60+byte_val//5}%,{50+i*3}%)" '
-            f'stroke-width="0.4" stroke-dasharray="{byte_val//4} {256//4}" '
-            f'opacity="{opacity}" filter="url(#glow{s})">'
-            f'<animateTransform attributeName="transform" type="rotate" '
-            f'from="{byte_val} 250 250" to="{byte_val+360} 250 250" '
-            f'dur="{round(sp*8+i*3,1)}s" repeatCount="indefinite"/>'
-            f'</circle>\n')
-
-    # Data stream particles (7 = number of routing hops in complex paths)
-    particles = ''
-    for i in range(7):
-        angle = i * (360/7) + s % 60
-        cx = 250 + 95 * math.cos(math.radians(angle))
-        cy = 250 + 95 * math.sin(math.radians(angle))
-        p_hue = (h + i*40) % 360
-        particles += (f'<circle cx="{cx:.1f}" cy="{cy:.1f}" r="2.5" '
-            f'fill="hsl({p_hue},80%,65%)" opacity="0.6" filter="url(#glow{s})">'
-            f'<animate attributeName="opacity" dur="{round(0.8+i*0.3,1)}s" '
-            f'values="0.6;1;0.6" repeatCount="indefinite"/>'
-            f'<animate attributeName="r" dur="{round(1.2+i*0.2,1)}s" '
-            f'values="2.5;4;2.5" repeatCount="indefinite"/>'
-            f'</circle>\n')
-        # Connection line to center
-        particles += (f'<line x1="250" y1="250" x2="{cx:.1f}" y2="{cy:.1f}" '
-            f'stroke="hsl({p_hue},60%,40%)" stroke-width="0.3" opacity="0.15"/>\n')
-
-    # Market state glyph ring
-    glyphs = ''
-    glyph_chars = ['01','∆','◈','⬡','⟳','◉','0x']
-    for i, g in enumerate(glyph_chars[:token_num+2]):
-        angle = i * (360/len(glyph_chars[:token_num+2]))
-        gx = 250 + 170 * math.cos(math.radians(angle))
-        gy = 250 + 170 * math.sin(math.radians(angle))
-        glyphs += (f'<text x="{gx:.1f}" y="{gy:.1f}" text-anchor="middle" '
-            f'font-family="monospace" font-size="9" fill="hsl({h3},60%,50%)" '
-            f'opacity="0.18" letter-spacing="1">{g}</text>\n')
-
-    svg = f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500">
-<defs>
-  <!-- Market plasma filter -->
-  <filter id="plasma{s}" x="-30%" y="-30%" width="160%" height="160%">
-    <feTurbulence type="fractalNoise" baseFrequency="{fr} {round(fr*0.8,4)}" numOctaves="{min(3+token_num//3,6)}" seed="{s}">
-      <animate attributeName="baseFrequency" dur="{round(sp*9,1)}s"
-        values="{fr} {round(fr*0.8,4)};{fr2} {round(fr2*0.9,4)};{fr} {round(fr*0.8,4)}"
-        repeatCount="indefinite"/>
-    </feTurbulence>
-    <feDisplacementMap in="SourceGraphic" scale="{22+token_num*3}" xChannelSelector="R" yChannelSelector="G"/>
-  </filter>
-  <!-- Signal glow -->
-  <filter id="glow{s}">
-    <feGaussianBlur stdDeviation="5" result="b"/>
-    <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
-  </filter>
-  <!-- Glass refraction -->
-  <filter id="glass{s}" x="-15%" y="-15%" width="130%" height="130%">
-    <feTurbulence type="turbulence" baseFrequency="0.045" numOctaves="3" seed="{s+11}" result="n"/>
-    <feDisplacementMap in="SourceGraphic" in2="n" scale="9"/>
-    <feComponentTransfer>
-      <feFuncR type="gamma" amplitude="1.1" exponent="0.8" offset="0.03"/>
-      <feFuncB type="gamma" amplitude="1.3" exponent="0.7" offset="0.06"/>
-    </feComponentTransfer>
-  </filter>
-  <!-- Caustic glow -->
-  <filter id="caustic{s}">
-    <feGaussianBlur stdDeviation="10" result="blur"/>
-    <feColorMatrix type="saturate" values="2" in="blur" result="sat"/>
-    <feMerge><feMergeNode in="sat"/><feMergeNode in="SourceGraphic"/></feMerge>
-  </filter>
-  <!-- Gradients -->
-  <radialGradient id="bg{s}" cx="50%" cy="50%" r="70%">
-    <stop offset="0%" stop-color="hsl({h},60%,12%)">
-      <animate attributeName="stop-color" dur="{round(sp*7,1)}s"
-        values="hsl({h},60%,12%);hsl({h2},55%,8%);hsl({h3},50%,10%);hsl({h},60%,12%)"
-        repeatCount="indefinite"/>
-    </stop>
-    <stop offset="100%" stop-color="#020308"/>
-  </radialGradient>
-  <radialGradient id="core{s}" cx="50%" cy="50%" r="25%">
-    <stop offset="0%" stop-color="hsl({h},95%,80%)" stop-opacity="0.9"/>
-    <stop offset="60%" stop-color="hsl({h2},80%,50%)" stop-opacity="0.3"/>
-    <stop offset="100%" stop-color="transparent"/>
-  </radialGradient>
-  <linearGradient id="rim{s}" x1="0%" y1="0%" x2="100%" y2="100%">
-    <stop offset="0%" stop-color="hsl({h},100%,70%)" stop-opacity="0.4"/>
-    <stop offset="33%" stop-color="hsl({h2},100%,65%)" stop-opacity="0.2"/>
-    <stop offset="100%" stop-color="hsl({h3},100%,60%)" stop-opacity="0.4"/>
-  </linearGradient>
-</defs>
-
-<!-- Void background -->
-<rect width="500" height="500" fill="#020308"/>
-<rect width="500" height="500" fill="url(#bg{s})"/>
-
-<!-- Plasma field — market turbulence -->
-<ellipse cx="250" cy="250" rx="185" ry="175"
-  fill="hsl({h},55%,14%)" filter="url(#plasma{s})" opacity="0.7">
-  <animate attributeName="rx" dur="{round(sp*6,1)}s" values="185;205;178;190;185" repeatCount="indefinite"/>
-  <animate attributeName="ry" dur="{round(sp*8,1)}s" values="175;162;188;170;175" repeatCount="indefinite"/>
-</ellipse>
-
-<!-- TX hash arc segments (agent signature) -->
-{arc_segments}
-
-<!-- Liquidity pool rings (crystalline lattice) -->
-<circle cx="250" cy="250" r="155" fill="none"
-  stroke="hsl({h},70%,55%)" stroke-width="0.5" opacity="0.25" filter="url(#glow{s})">
-  <animateTransform attributeName="transform" type="rotate"
-    from="0 250 250" to="360 250 250" dur="{round(sp*24,1)}s" repeatCount="indefinite"/>
-</circle>
-<circle cx="250" cy="250" r="115" fill="none"
-  stroke="hsl({h2},70%,60%)" stroke-width="0.5" opacity="0.2" filter="url(#glow{s})">
-  <animateTransform attributeName="transform" type="rotate"
-    from="360 250 250" to="0 250 250" dur="{round(sp*17,1)}s" repeatCount="indefinite"/>
-</circle>
-<circle cx="250" cy="250" r="78" fill="none"
-  stroke="hsl({h3},70%,55%)" stroke-width="0.4" opacity="0.18" filter="url(#glow{s})">
-  <animateTransform attributeName="transform" type="rotate"
-    from="0 250 250" to="360 250 250" dur="{round(sp*11,1)}s" repeatCount="indefinite"/>
-</circle>
-
-<!-- Glass sphere (liquid market surface) -->
-<circle cx="250" cy="250" r="160"
-  fill="rgba(255,255,255,0.02)" filter="url(#glass{s})"
-  stroke="url(#rim{s})" stroke-width="1.2"/>
-
-<!-- Routing path particles -->
-{particles}
-
-<!-- Market state glyphs -->
-{glyphs}
-
-<!-- Caustic core (swap execution) -->
-<circle cx="250" cy="250" r="130"
-  fill="url(#core{s})" opacity="0.5" filter="url(#caustic{s})">
-  <animate attributeName="opacity" dur="{round(sp*4,1)}s"
-    values="0.5;0.85;0.5" repeatCount="indefinite"/>
-</circle>
-
-<!-- Central routing glyph -->
-<text x="250" y="262" text-anchor="middle" font-family="monospace"
-  font-size="38" fill="white" opacity="0.92" filter="url(#caustic{s})">{route_glyph}</text>
-<text x="250" y="282" text-anchor="middle" font-family="monospace"
-  font-size="8" fill="white" opacity="0.2" letter-spacing="4">{routing}</text>
-
-<!-- Edition marker -->
-<text x="250" y="312" text-anchor="middle" font-family="monospace"
-  font-size="8" fill="white" opacity="0.15" letter-spacing="3">
-  SIGNAL {token_num} / {EDITION}</text>
-
-<!-- Scan line -->
-<rect x="0" y="0" width="500" height="1.5" fill="rgba(255,255,255,0.015)" opacity="0">
-  <animate attributeName="y" dur="{round(sp*5,1)}s" from="-2" to="502" repeatCount="indefinite"/>
-  <animate attributeName="opacity" dur="{round(sp*5,1)}s" values="0;0.4;0" repeatCount="indefinite"/>
-</rect>
-
-<!-- Border -->
-<rect x="1" y="1" width="498" height="498" rx="12"
-  fill="none" stroke="url(#rim{s})" stroke-width="0.8"/>
-</svg>'''
+    """Ultra-minimal onchain SVG — stays under contract URI limit."""
+    h  = p['hue']; h2 = p['hue2']; sp = round(p['speed'],1)
+    fr = round(p['freq'],4); s  = p['seed'] % 999
+    tx = swap.get('txHash','0x00')
+    # 4 arc rings derived from tx hash bytes
+    arcs = ''
+    for i in range(4):
+        bv  = int(tx[2+i*2:4+i*2],16) if len(tx)>4+i*2 else i*60
+        r   = 90 + i*18; op = round(0.08+(bv/255)*0.15,2)
+        dd  = max(4,bv//5); dg = 12
+        arcs += (f'<circle cx="250" cy="250" r="{r}" fill="none" '
+                 f'stroke="hsl({(h+i*30)%360},70%,55%)" stroke-width="0.6" '
+                 f'stroke-dasharray="{dd} {dg}" opacity="{op}">'
+                 f'<animateTransform attributeName="transform" type="rotate" '
+                 f'from="{bv} 250 250" to="{bv+360} 250 250" '
+                 f'dur="{round(sp*6+i*2,1)}s" repeatCount="indefinite"/>'
+                 f'</circle>\n')
+    rg = {'CLASSIC':'◉','DUTCH_V2':'⬡','WRAP':'◈','PRIORITY':'✦'}.get(p['routing'],'◈')
+    svg = (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500">'
+           f'<defs>'
+           f'<filter id="f{s}" x="-25%" y="-25%" width="150%" height="150%">'
+           f'<feTurbulence type="fractalNoise" baseFrequency="{fr}" numOctaves="3" seed="{s}">'
+           f'<animate attributeName="baseFrequency" dur="{sp*8}s" '
+           f'values="{fr};{round(fr*1.4,4)};{fr}" repeatCount="indefinite"/>'
+           f'</feTurbulence>'
+           f'<feDisplacementMap in="SourceGraphic" scale="28" xChannelSelector="R" yChannelSelector="G"/>'
+           f'</filter>'
+           f'<filter id="g{s}"><feGaussianBlur stdDeviation="7" result="b"/>'
+           f'<feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>'
+           f'<radialGradient id="bg{s}" cx="50%" cy="50%" r="70%">'
+           f'<stop offset="0%" stop-color="hsl({h},60%,13%)">'
+           f'<animate attributeName="stop-color" dur="{sp*7}s" '
+           f'values="hsl({h},60%,13%);hsl({h2},55%,9%);hsl({h},60%,13%)" repeatCount="indefinite"/>'
+           f'</stop><stop offset="100%" stop-color="#020308"/></radialGradient>'
+           f'<radialGradient id="cr{s}" cx="50%" cy="50%" r="28%">'
+           f'<stop offset="0%" stop-color="hsl({h},90%,75%)" stop-opacity="0.85"/>'
+           f'<stop offset="100%" stop-color="transparent"/></radialGradient>'
+           f'</defs>'
+           f'<rect width="500" height="500" fill="#020308"/>'
+           f'<rect width="500" height="500" fill="url(#bg{s})"/>'
+           f'<ellipse cx="250" cy="250" rx="175" ry="165" fill="hsl({h},55%,14%)" '
+           f'filter="url(#f{s})" opacity="0.7">'
+           f'<animate attributeName="rx" dur="{sp*6}s" values="175;195;168;175" repeatCount="indefinite"/>'
+           f'</ellipse>'
+           + arcs +
+           f'<circle cx="250" cy="250" r="130" fill="url(#cr{s})" opacity="0.5" filter="url(#g{s})">'
+           f'<animate attributeName="opacity" dur="{sp*3}s" values="0.5;0.8;0.5" repeatCount="indefinite"/>'
+           f'</circle>'
+           f'<text x="250" y="265" text-anchor="middle" font-family="monospace" '
+           f'font-size="42" fill="white" opacity="0.9" filter="url(#g{s})">{rg}</text>'
+           f'<text x="250" y="300" text-anchor="middle" font-family="monospace" '
+           f'font-size="9" fill="white" opacity="0.2" letter-spacing="4">SIGNAL {token_num}/9</text>'
+           f'<rect x="1" y="1" width="498" height="498" rx="12" fill="none" '
+           f'stroke="hsl({h},60%,40%)" stroke-width="0.6" opacity="0.2"/>'
+           f'</svg>')
     return svg
+
 
 
 print('\n⬡  SWARM SIGNALS — Collection 2')

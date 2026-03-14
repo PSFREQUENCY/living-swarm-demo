@@ -440,5 +440,147 @@ document.addEventListener('click',function(e){
 });
 // triple-click-return
 </script>
+
+<!-- SWARM SIGNALS SECTION -->
+<style>
+.ss-wrap{max-width:900px;margin:60px auto 0;padding:0 16px;font-family:'Courier New',monospace}
+.ss-eye{font-size:9px;color:#ff00aa;letter-spacing:4px;text-transform:uppercase;margin-bottom:10px;text-shadow:0 0 15px #ff00aa80}
+.ss-title{font-family:'Bebas Neue','Impact',sans-serif;font-size:clamp(22px,5vw,42px);letter-spacing:6px;margin-bottom:8px;background:linear-gradient(135deg,#fff,#00ffe7,#ff00aa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.ss-desc{font-size:9px;color:rgba(200,240,236,0.25);letter-spacing:2px;line-height:1.9;margin-bottom:24px;max-width:600px}
+.ss-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px}
+@media(max-width:580px){.ss-grid{grid-template-columns:1fr}}
+.ss-card{border:1px solid rgba(0,255,231,0.08);border-radius:6px;overflow:hidden;cursor:pointer;transition:all .4s;position:relative}
+.ss-card:hover{border-color:rgba(0,255,231,0.3);transform:translateY(-4px);box-shadow:0 12px 40px rgba(0,0,0,.7),0 0 20px rgba(0,255,231,0.06)}
+.ss-art{width:100%;aspect-ratio:1;background:#020308;position:relative;overflow:hidden}
+.ss-art canvas{width:100%;height:100%;display:block}
+.ss-info{padding:10px;background:rgba(0,4,8,0.8)}
+.ss-sig{font-size:7px;color:rgba(0,255,231,0.25);letter-spacing:2px;margin-bottom:3px}
+.ss-price{font-size:11px;color:#00ffe7;font-weight:bold}
+.ss-routing{font-size:7px;color:rgba(0,255,231,0.3);letter-spacing:2px}
+.ss-tx{font-size:7px;color:rgba(200,240,236,0.15);margin-top:4px;word-break:break-all}
+.ss-footer{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:8px}
+.ss-info-text{font-size:9px;color:rgba(200,240,236,0.2);line-height:1.8;letter-spacing:1px}
+.ss-btn{display:inline-flex;align-items:center;gap:8px;background:rgba(0,255,231,0.04);border:1px solid rgba(0,255,231,0.2);color:#00ffe7;font-family:'Courier New',monospace;font-size:9px;letter-spacing:3px;padding:9px 20px;text-decoration:none;transition:all .3s;text-transform:uppercase}
+.ss-btn:hover{background:rgba(0,255,231,0.08);box-shadow:0 0 20px rgba(0,255,231,0.12)}
+/* HIDDEN QUEUE — 3000 particle swarm reveals next collection */
+#hidden-queue{width:100%;height:220px;border:1px solid rgba(0,255,231,0.04);position:relative;overflow:hidden;cursor:pointer;margin-top:20px;background:#000408}
+#hq-canvas{width:100%;height:100%;display:block}
+#hq-reveal{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none}
+#hq-text{font-family:'Courier New',monospace;font-size:9px;letter-spacing:4px;color:rgba(0,255,231,0);text-transform:uppercase;transition:color 1s}
+#hq-sub{font-family:'Courier New',monospace;font-size:7px;letter-spacing:3px;color:rgba(0,255,231,0);margin-top:6px;transition:color 1s 0.3s}
+#hidden-queue.revealed #hq-text{color:rgba(0,255,231,0.6)}
+#hidden-queue.revealed #hq-sub{color:rgba(0,255,231,0.25)}
+#hidden-queue.revealed{border-color:rgba(0,255,231,0.15)}
+</style>
+
+<div class="ss-wrap">
+  <div style="color:#111;font-size:11px;letter-spacing:.2em;text-align:center;margin:0 0 28px;font-family:'Courier New',monospace">&#x2593;&#x2593;&#x2593;</div>
+  <div class="ss-eye">// COLLECTION 002 // MARKET-DRIVEN // AGENT BEHAVIOR AS ART</div>
+  <div class="ss-title">SWARM SIGNALS</div>
+  <div class="ss-desc">9 tokens. Each encodes a real Uniswap swap. The transaction hash decoded into arc segments. Routing type sets visual complexity. Bid to evolve.</div>
+  <div class="ss-grid" id="ss-grid"></div>
+  <div class="ss-footer">
+    <div class="ss-info-text">9 tokens &middot; 0.000369 ETH &middot; fully onchain<br>Mint tx: <a href="https://sepolia.etherscan.io/tx/0xeede68ed33cdae36e641e3ecbd87f525ab0c87c8290a899a5f4cd5f6a2e6facb" target="_blank" style="color:rgba(0,255,231,0.3);text-decoration:none">0xeede68ed33cdae36e6... &#x2197;</a></div>
+    <a href="/swarm-signals/" class="ss-btn">&#x25B6; VIEW ALL SIGNALS &#x2192;</a>
+  </div>
+
+  <!-- HIDDEN QUEUE — move your cursor in to disturb the swarm and reveal what's next -->
+  <div id="hidden-queue" title="// CLASSIFIED">
+    <canvas id="hq-canvas"></canvas>
+    <div id="hq-reveal">
+      <div id="hq-text">// COLLECTION 003 — CLASSIFIED //</div>
+      <div id="hq-sub">move into the swarm to reveal</div>
+    </div>
+  </div>
+  <div style="color:#111;font-size:11px;letter-spacing:.2em;text-align:center;margin:28px 0 0;font-family:'Courier New',monospace">&#x2593;&#x2593;&#x2593;</div>
+</div>
+
+<script>
+// ── Swarm Signals mini art ───────────────────────────────────
+function ssArt(tokenId, seed, w) {
+  var h=(seed*137)%360,h2=(h+150)%360,sp=(0.8+(seed%5)*.3).toFixed(1),fr=(0.008+(seed%7)*.002).toFixed(4);
+  var arcs='';
+  [tokenId*37, tokenId*73, tokenId*111, tokenId*149].forEach(function(bv,i){
+    bv=bv%256; var r=60+i*14,op=(0.08+bv/255*0.14).toFixed(2),dd=Math.max(3,Math.round(bv/6)),dg=8;
+    arcs+='<circle cx="'+w/2+'" cy="'+w/2+'" r="'+r+'" fill="none" stroke="hsl('+(h+i*30)%360+',70%,55%)" stroke-width="0.5" stroke-dasharray="'+dd+' '+dg+'" opacity="'+op+'"><animateTransform attributeName="transform" type="rotate" from="'+bv+' '+w/2+' '+w/2+'" to="'+(bv+360)+' '+w/2+' '+w/2+'" dur="'+(8+i*2)+'s" repeatCount="indefinite"/></circle>';
+  });
+  return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+w+' '+w+'">'
+    +'<defs>'
+    +'<filter id="sf'+seed+'" x="-25%" y="-25%" width="150%" height="150%"><feTurbulence type="fractalNoise" baseFrequency="'+fr+'" numOctaves="3" seed="'+seed+'"><animate attributeName="baseFrequency" dur="'+sp*8+'s" values="'+fr+';'+(parseFloat(fr)*1.4).toFixed(4)+';'+fr+'" repeatCount="indefinite"/></feTurbulence><feDisplacementMap in="SourceGraphic" scale="16" xChannelSelector="R" yChannelSelector="G"/></filter>'
+    +'<filter id="sg'+seed+'"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>'
+    +'<radialGradient id="sbg'+seed+'" cx="50%" cy="50%" r="70%"><stop offset="0%" stop-color="hsl('+h+',60%,12%)"><animate attributeName="stop-color" dur="'+sp*7+'s" values="hsl('+h+',60%,12%);hsl('+h2+',55%,8%);hsl('+h+',60%,12%)" repeatCount="indefinite"/></stop><stop offset="100%" stop-color="#000408"/></radialGradient>'
+    +'<radialGradient id="scr'+seed+'" cx="50%" cy="50%" r="28%"><stop offset="0%" stop-color="hsl('+h+',90%,75%)" stop-opacity="0.85"/><stop offset="100%" stop-color="transparent"/></radialGradient>'
+    +'</defs>'
+    +'<rect width="'+w+'" height="'+w+'" fill="#000408"/><rect width="'+w+'" height="'+w+'" fill="url(#sbg'+seed+')"/>'
+    +'<ellipse cx="'+w/2+'" cy="'+w/2+'" rx="'+(w*.35|0)+'" ry="'+(w*.32|0)+'" fill="hsl('+h+',55%,13%)" filter="url(#sf'+seed+')" opacity="0.7"><animate attributeName="rx" dur="'+sp*6+'s" values="'+(w*.35|0)+';'+(w*.39|0)+';'+(w*.33|0)+';'+(w*.35|0)+'" repeatCount="indefinite"/></ellipse>'
+    +arcs
+    +'<circle cx="'+w/2+'" cy="'+w/2+'" r="'+(w*.27|0)+'" fill="url(#scr'+seed+')" opacity="0.5" filter="url(#sg'+seed+')" ><animate attributeName="opacity" dur="'+sp*3+'s" values="0.5;0.8;0.5" repeatCount="indefinite"/></circle>'
+    +'<text x="'+w/2+'" y="'+(w/2+(w*.06|0))+'" text-anchor="middle" font-family="monospace" font-size="'+(w*.1|0)+'" fill="white" opacity="0.85" filter="url(#sg'+seed+')">&#x25C9;</text>'
+    +'<text x="'+w/2+'" y="'+(w*.88|0)+'" text-anchor="middle" font-family="monospace" font-size="'+(w*.04|0)+'" fill="white" opacity="0.18" letter-spacing="2">SIG '+tokenId+'</text>'
+    +'</svg>';
+}
+
+var SIGS=[{id:4,seed:70,tx:'0x692800d318e2b54b55'},{id:5,seed:77,tx:'0xe0935ed1cb032cb992'},{id:6,seed:84,tx:'0xe64fe558839be0fe8d'},{id:7,seed:91,tx:'0xbecefaed840ad70dfa'},{id:8,seed:98,tx:'0x4c9a85b02e7741a7fc'},{id:9,seed:105,tx:'0x7032eca3715aa48b74'},{id:10,seed:112,tx:'0x110441c48d1cdab9ac'},{id:11,seed:119,tx:'0x09ae9a0cc6c6da53f1'},{id:12,seed:126,tx:'0x6aa84c7e136f5b9b9f'}];
+var CON='0xc9E138fe0261368E7bD319829202400262c8121e';
+var grid=document.getElementById('ss-grid');
+if(grid){
+  SIGS.slice(0,9).forEach(function(s){
+    var d=document.createElement('div');d.className='ss-card';
+    d.innerHTML='<div class="ss-art">'+ssArt(s.id,s.seed,200)+'</div>'
+      +'<div class="ss-info"><div class="ss-sig">SIGNAL '+s.id+'/9 &middot; ONCHAIN SVG</div>'
+      +'<div class="ss-price">0.000369 ETH</div>'
+      +'<div class="ss-routing">ROUTING: CLASSIC &middot; UNISWAP API</div>'
+      +'<div class="ss-tx">'+s.tx+'...</div></div>';
+    d.onclick=function(){window.open('https://sepolia.etherscan.io/token/'+CON+'?a='+s.id,'_blank');};
+    grid.appendChild(d);
+  });
+}
+
+// ── HIDDEN QUEUE — 3000 particle swarm hides Collection 003 ──
+(function(){
+  if(typeof THREE==='undefined')return;
+  var el=document.getElementById('hidden-queue');
+  var cv=document.getElementById('hq-canvas');
+  if(!el||!cv)return;
+  var W=function(){return el.clientWidth;},H=function(){return el.clientHeight||220;};
+  var R=new THREE.WebGLRenderer({canvas:cv,alpha:false,antialias:false});
+  R.setPixelRatio(Math.min(devicePixelRatio,1.5));R.setClearColor(0x000408,1);
+  var sc=new THREE.Scene(),cam=new THREE.PerspectiveCamera(60,W()/H(),.01,100);
+  cam.position.z=3.5;
+  var mx=new THREE.Vector2(),revealed=false,hovered=false;
+  el.addEventListener('mousemove',function(e){
+    var r=el.getBoundingClientRect();
+    mx.x=(e.clientX-r.left)/W()*2-1;
+    mx.y=-((e.clientY-r.top)/H()*2-1);
+    if(!revealed){revealed=true;el.classList.add('revealed');}
+  });
+  el.addEventListener('mouseleave',function(){revealed=false;el.classList.remove('revealed');});
+
+  var VERT='uniform float u_t;uniform vec2 u_m;attribute float a_ph,a_tr;attribute vec3 a_or;varying float vt,va;float h(float n){return fract(sin(n)*43758.5453);}float ns(vec3 p){vec3 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);float n=i.x+i.y*57.+i.z*113.;return mix(mix(mix(h(n),h(n+1.),f.x),mix(h(n+57.),h(n+58.),f.x),f.y),mix(mix(h(n+113.),h(n+114.),f.x),mix(h(n+170.),h(n+171.),f.x),f.y),f.z);}void main(){float t=u_t*(.2+a_tr*.1);vec3 p=a_or;p+=vec3(ns(p*1.8+vec3(t*.4,t*.3,t*.5)),ns(p*3.2-vec3(t*.2,t*.5,t*.3)),ns(p*5.5+vec3(t*.6,t*.2,t*.4)))*.15;vec3 md=p-vec3(u_m*.6,0.);float rep=smoothstep(.7,.0,length(md))*.4;p+=normalize(md+.001)*rep;p*=1.+sin(u_t*.6+a_ph)*.04;vt=a_tr;va=(.3+a_tr*.4)*(1.-smoothstep(1.2,2.2,length(p)));vec4 mv=modelViewMatrix*vec4(p,1.);gl_Position=projectionMatrix*mv;gl_PointSize=clamp((1.5+a_tr*2.)*(2./(-mv.z)),1.,8.);}';
+  var FRAG='precision highp float;uniform float u_t;varying float vt,va;void main(){vec2 uv=gl_PointCoord-.5;if(length(uv)>.5)discard;vec3 c0=vec3(1.,0.,.67),c1=vec3(0.,1.,.91),c2=vec3(.94,.43,.97);vec3 col=vt<.5?mix(c0,c1,vt*2.):mix(c1,c2,(vt-.5)*2.);col*=.6+.4*sin(u_t*3.+vt*6.28);gl_FragColor=vec4(col,va*.8);}';
+
+  var N=3000,pos=new Float32Array(N*3),ph=new Float32Array(N),tr=new Float32Array(N),or=new Float32Array(N*3);
+  for(var i=0;i<N;i++){
+    var r=Math.random()<.65?Math.random():1+Math.random()*.4;
+    var th=Math.random()*Math.PI*2,phi=Math.acos(2*Math.random()-1);
+    var x=r*Math.sin(phi)*Math.cos(th)*1.8,y=r*Math.sin(phi)*Math.sin(th)*.5,z=r*Math.cos(phi)*.4;
+    or[i*3]=x;or[i*3+1]=y;or[i*3+2]=z;pos[i*3]=x;pos[i*3+1]=y;pos[i*3+2]=z;
+    ph[i]=Math.random()*Math.PI*2;tr[i]=Math.random();
+  }
+  var geo=new THREE.BufferGeometry();
+  geo.setAttribute('position',new THREE.BufferAttribute(pos,3));
+  geo.setAttribute('a_ph',new THREE.BufferAttribute(ph,1));
+  geo.setAttribute('a_tr',new THREE.BufferAttribute(tr,1));
+  geo.setAttribute('a_or',new THREE.BufferAttribute(or,3));
+  var uni={u_t:{value:0},u_m:{value:new THREE.Vector2()}};
+  var mat=new THREE.ShaderMaterial({uniforms:uni,vertexShader:VERT,fragmentShader:FRAG,transparent:true,depthWrite:false,blending:THREE.AdditiveBlending});
+  var pts=new THREE.Points(geo,mat);sc.add(pts);
+  window.addEventListener('resize',function(){R.setSize(W(),H());cam.aspect=W()/H();cam.updateProjectionMatrix();});
+  R.setSize(W(),H());
+  var start=Date.now();
+  (function loop(){requestAnimationFrame(loop);var t=(Date.now()-start)/1e3;uni.u_t.value=t;uni.u_m.value.set(mx.x,mx.y);pts.rotation.y=t*.04+mx.x*.2;pts.rotation.x=Math.sin(t*.03)*.06+mx.y*.1;R.render(sc,cam);})();
+})();
+</script>
+
 </body>
 </html>

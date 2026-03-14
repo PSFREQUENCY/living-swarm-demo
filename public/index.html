@@ -122,6 +122,57 @@ footer{border-top:1px solid var(--border);padding:2rem 6vw;display:flex;justify-
 .glitch::before{color:var(--magenta,#ff00aa);animation:glitch1 3s infinite;clip-path:polygon(0 0,100% 0,100% 35%,0 35%)}
 .glitch::after{color:var(--cyan,#00ffe7);animation:glitch2 3s infinite;clip-path:polygon(0 65%,100% 65%,100% 100%,0 100%)}
 </style>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Living Swarm",
+  "alternateName": ["Royal Logs", "Swarm Signals", "Swarm Trade"],
+  "description": "Zero-trust autonomous agent fleet with Ethereum identity, Ghost Protocol privacy layer, Uniswap DeFi integration, and two fully-onchain NFT collections. Built for Synthesis 2026 hackathon. Winner of Uniswap AI + SuperRare bounties.",
+  "url": "https://living-swarm-demo.vercel.app",
+  "applicationCategory": "BlockchainApplication",
+  "operatingSystem": "Web",
+  "author": {
+    "@type": "Person",
+    "identifier": "0x054C9189dE85c3D6E74614F1659867362FC74B1e"
+  },
+  "keywords": "autonomous agents, zero-trust, ethereum, uniswap, NFT, onchain art, recursive distillation, swarm intelligence, Synthesis 2026, Permit2, UniswapX, ghost protocol, SuperRare, ERC-721, generative art, agent behavior, market-driven art",
+  "award": "Synthesis 2026 — Open Track, Uniswap AI Bounty, SuperRare Bounty",
+  "hasPart": [
+    {
+      "@type": "CreativeWork",
+      "name": "Royal Logs",
+      "description": "3 fully-onchain ERC-721 NFTs on Ethereum Sepolia. Agent memories crystallized by Gemini 2.5 Flash into animated SVG art stored as data:// URI. Zero IPFS dependencies. GPU shader art using feTurbulence + feDisplacementMap. Auctioned via SuperRareBazaar at 0.000369 ETH. Minted blocks 10443612-10443614.",
+      "url": "https://living-swarm-demo.vercel.app/royal-logs/",
+      "identifier": "0xc9E138fe0261368E7bD319829202400262c8121e",
+      "encodingFormat": "image/svg+xml"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "name": "Swarm Trade",
+      "description": "Uniswap Trading API v1 integration. Real ETH to USDC quotes via BEST_PRICE routing. Full Permit2 EIP-712 off-chain signing flow. Universal Router v2.0. Arbiter scores every swap 0-100 before execution. Real confirmed swap TxHash: 0x4629a52302a574fc91fdbc1dc8ee7ca29bf12b98a420b59b3dd39c15cbd9bf0a on Sepolia Block 10447324.",
+      "url": "https://living-swarm-demo.vercel.app/uniswap/"
+    },
+    {
+      "@type": "CreativeWork",
+      "name": "Swarm Signals",
+      "description": "9 fully-onchain ERC-721 NFTs. Art derived from real Uniswap swap execution — transaction hash decoded into arc segments, routing type sets visual complexity, auction dynamics evolve composition. Agent behavior shapes the artwork. All 9 tokens auctioned on SuperRareBazaar Sepolia. Token IDs 4-12.",
+      "url": "https://living-swarm-demo.vercel.app/swarm-signals/",
+      "identifier": "0xc9E138fe0261368E7bD319829202400262c8121e"
+    }
+  ],
+  "featureList": [
+    "Zero-trust arbiter: every action scored 0-100 before execution",
+    "Ghost Protocol: SHA-256 domain hashing, timing jitter 800-3000ms, identity rotation",
+    "Recursive distillation: fleet self-improves every 5 sessions",
+    "8000-particle WebGL brain entity with custom GLSL caustic shaders",
+    "Live Uniswap ETH/USDC rate displayed in hero via Trading API",
+    "Real swap TxID 0x4629a523 confirmed on Sepolia",
+    "12 ERC-721 tokens, 12 auctions live, zero IPFS dependencies",
+    "Fully onchain animated SVG art as data:// URI"
+  ]
+}
+</script>
 </head>
 <body>
 <div class="noise"></div>

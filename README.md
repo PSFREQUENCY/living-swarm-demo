@@ -167,6 +167,70 @@ Live art loads directly from chain via `eth_call` → ABI decode → iframe src.
 
 ---
 
+## Rare Protocol Integration
+
+**[rare.xyz](https://rare.xyz) — Every crystallized memory becomes a tradeable onchain artifact.**
+
+Royal Logs uses Rare Protocol as the minting and auction layer for agent memories. When a memory is crystallized, it can be minted as an ERC-721 edition and immediately listed at auction — all from the Royal Logs UI.
+
+### Mint Route — `POST /api/mint`
+
+Mints a crystallized memory as a Rare Protocol ERC-721 edition on Sepolia.
+
+```bash
+curl -X POST https://living-swarm-demo.vercel.app/api/mint \
+  -H "Content-Type: application/json" \
+  -d '{
+    "memory": { ...crystallized memory object... },
+    "editionIndex": 0
+  }'
+```
+
+- Builds full NFT metadata (name, description, attributes: tier, wisdom score, edition size, haiku, keywords, shader seed)
+- Mints via `rare mint` CLI with `--tag royal-logs` + tier/interaction tags
+- Returns `tokenId`, `txHash`, Etherscan link, and `rare.xyz/token/{contract}/{tokenId}` URL
+- Edition sizes: 1 (ANCIENT) · 3 (ELDER) · 5 (MATURE) · 7 (YOUTH) · 9 (NEWBORN)
+
+### Auction Route — `POST /api/auction`
+
+Lists a minted token at auction via Rare Protocol.
+
+```bash
+curl -X POST https://living-swarm-demo.vercel.app/api/auction \
+  -H "Content-Type: application/json" \
+  -d '{ "tokenId": 1, "contractAddress": "0x..." }'
+```
+
+- Starting price: **0.000369 ETH** (the Royal Logs signature price)
+- Duration: **24 hours**
+- Chain: Sepolia testnet
+- `GET /api/auction?tokenId=1&contract=0x...` — check live auction status
+
+### Royal Logs × Rare — The Full Flow
+
+```
+Agent memory input (Royal Logs UI)
+      │
+      ▼
+/api/crystallize or /api/venice/crystallize
+  Venice llama-3.3-70b  →  title · haiku · essence · palette
+      │
+      ▼
+/api/mint  →  Rare Protocol ERC-721
+  metadata: tier, wisdom, haiku, keywords, shader seed
+      │
+      ▼
+/api/auction  →  Rare Protocol auction
+  0.000369 ETH · 24h · Sepolia
+      │
+      ▼
+rare.xyz/token/{contract}/{tokenId}  ←  live tradeable artifact
+```
+
+The Royal Logs page (`/royal-logs/`) features 3 live auction cards with real-time pricing, bid buttons, and direct links to rare.xyz.
+
+---
+
 ## Uniswap Integration
 
 **`POST /api/uniswap/quote`** — Live Ethereum mainnet
@@ -191,6 +255,7 @@ Live art loads directly from chain via `eth_call` → ABI decode → iframe src.
 | Secondary inference | Gemini 2.5 Flash Lite (standard crystallize) |
 | Blockchain | Ethers.js v6, Sepolia testnet |
 | Smart contracts | Custom ERC-721 (no OpenZeppelin), ArbitersLedger |
+| NFT Minting | **Rare Protocol** (`rare mint`, `rare auction`) — ERC-721 editions |
 | DeFi | Uniswap Trade API v2, UniswapX, Permit2, Universal Router |
 | Cryptography | AES-256-GCM, HKDF, HMAC-SHA256, `eth_personal_sign` |
 | Runtime | Vercel Edge Runtime (middleware), Node.js (API routes) |
@@ -214,6 +279,9 @@ Live art loads directly from chain via `eth_call` → ABI decode → iframe src.
 | POST | `/api/venice/crystallize` | **Venice AI** private memory crystallization |
 | POST | `/api/crystallize` | Gemini memory crystallization |
 | POST | `/api/private-crystallize` | Gemini + PII stripping |
+| POST | `/api/mint` | Rare Protocol ERC-721 mint from crystallized memory |
+| POST | `/api/auction` | Rare Protocol auction at 0.000369 ETH / 24h |
+| GET | `/api/auction` | Live auction status |
 | POST | `/api/uniswap/quote` | Live Uniswap quote + arbiter score |
 | POST | `/api/uniswap/swap` | Universal Router calldata |
 | POST | `/api/uniswap/approval` | Permit2 EIP-712 approval |

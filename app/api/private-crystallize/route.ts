@@ -77,7 +77,12 @@ Rules:
     try {
       const cleaned = rawText.replace(/^```(?:json)?\s*/i, '').replace(/```\s*$/, '').trim();
       const jsonMatch = cleaned.match(/\{[\s\S]*\}/);
-      crystallized = JSON.parse(jsonMatch?.[0] ?? cleaned);
+      const jsonStr = jsonMatch?.[0] ?? cleaned;
+      // Sanitize literal newlines inside JSON string values (Gemini sometimes emits them)
+      const sanitized = jsonStr.replace(/"((?:[^"\\]|\\.)*)"/gs, (_m, inner) =>
+        `"${inner.replace(/\n/g, '\\n').replace(/\r/g, '')}"`
+      );
+      crystallized = JSON.parse(sanitized);
     } catch {
       return NextResponse.json({ error: 'Failed to parse Gemini crystallization', raw: rawText }, { status: 500 });
     }

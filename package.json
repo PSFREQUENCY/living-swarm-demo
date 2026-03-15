@@ -10,6 +10,7 @@
     "deploy:collection": "rare deploy erc721 'Royal Logs' 'RLOG' --chain sepolia && echo '✅ Copy contract address to RARE_CONTRACT_ADDRESS in .env.local'"
   },
   "dependencies": {
+    "ethers": "^6.16.0",
     "next": "^16.1.6",
     "react": "^18",
     "react-dom": "^18",

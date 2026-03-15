@@ -151,3 +151,29 @@ export function clearMemories(): void {
   if (typeof window === 'undefined') return;
   localStorage.removeItem(STORAGE_KEY);
 }
+
+// ─── Gap 3: Encrypted memory store ───────────────────────────────────────────
+// Uses the session CryptoKey from lib/session-key.ts (AES-256-GCM).
+// Call saveMemoryEncrypted / loadMemoriesDecrypted instead of the plaintext variants.
+
+const ENC_STORAGE_KEY = 'living-swarm-memories-enc';
+
+export async function saveMemoryEncrypted(memory: MemorySnapshot, key: CryptoKey): Promise<void> {
+  if (typeof window === 'undefined') return;
+  const { aesEncrypt } = await import('./session-key');
+  const existing = await loadMemoriesDecrypted(key);
+  const updated = [memory, ...existing].slice(0, 99);
+  const hex = await aesEncrypt(key, JSON.stringify(updated));
+  localStorage.setItem(ENC_STORAGE_KEY, hex);
+}
+
+export async function loadMemoriesDecrypted(key: CryptoKey): Promise<MemorySnapshot[]> {
+  if (typeof window === 'undefined') return [];
+  try {
+    const hex = localStorage.getItem(ENC_STORAGE_KEY);
+    if (!hex) return [];
+    const { aesDecrypt } = await import('./session-key');
+    const json = await aesDecrypt(key, hex);
+    return JSON.parse(json);
+  } catch { return []; }
+}

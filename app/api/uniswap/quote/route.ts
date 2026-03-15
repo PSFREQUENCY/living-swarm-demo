@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { attestScore } from '@/lib/arbiter-ledger';
 
 const API_KEY = process.env.UNISWAP_API_KEY || 'UNISWAP_KEY_REDACTED';
 const UNI = 'https://trade-api.gateway.uniswap.org/v1/quote';
@@ -32,6 +33,10 @@ export async function POST(req: NextRequest) {
       body: JSON.stringify(body),
     });
     const d = await r.json();
+    // Gap 4: fire-and-forget onchain attestation
+    const bandChar = verdict.band[0] as 'P' | 'L' | 'H' | 'B';
+    const inputKey = `${body.tokenIn}:${body.tokenOut}:${body.amount}`;
+    attestScore(inputKey, score, bandChar);
     return NextResponse.json({ ...d, routingName: RN[d.routing] || d.routing || 'UNKNOWN', arbiter: {score, verdict} }, { status: r.status });
   } catch(e: any) { return NextResponse.json({ error: e.message }, { status: 500 }); }
 }

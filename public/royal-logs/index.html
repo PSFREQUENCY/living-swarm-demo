@@ -116,6 +116,43 @@ html,body{background:var(--void);color:#c8c8d8;font-family:'JetBrains Mono','Cou
 .phil-quote{font-size:clamp(15px,2.5vw,22px);font-weight:300;color:#222;line-height:1.8;margin-bottom:28px;font-style:italic}
 .phil-quote strong{color:#555;font-weight:700;font-style:normal}
 
+/* SWARM GENESIS COLLECTION */
+.genesis-section{position:relative;z-index:2;background:linear-gradient(180deg,#020208 0%,#04020e 50%,#020208 100%);padding:80px 20px 70px;overflow:hidden}
+.genesis-section::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 50% 50%,rgba(155,89,255,.06),transparent);pointer-events:none}
+.genesis-header{max-width:1140px;margin:0 auto 52px;text-align:center}
+.genesis-eye{font-size:9px;color:#2a1a4a;letter-spacing:.45em;text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;justify-content:center;gap:14px}
+.genesis-eye::before,.genesis-eye::after{content:'';width:40px;height:1px;background:linear-gradient(90deg,transparent,rgba(155,89,255,.25))}
+.genesis-title{font-size:clamp(28px,6vw,58px);font-weight:800;line-height:.95;letter-spacing:-.02em;background:linear-gradient(135deg,#fff 0%,var(--violet) 30%,var(--plasma) 55%,var(--cyan) 80%,var(--gold) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:14px}
+.genesis-sub{font-size:10px;color:#1a0a2e;letter-spacing:.3em;text-transform:uppercase;margin-bottom:10px}
+.genesis-desc{font-size:11px;color:#1a1a3a;line-height:1.9;max-width:540px;margin:0 auto 28px}
+.genesis-pills{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-bottom:0}
+.gpill{font-size:8px;padding:5px 14px;border-radius:20px;letter-spacing:.12em;text-transform:uppercase}
+.gpill-v{background:rgba(155,89,255,.07);border:1px solid rgba(155,89,255,.22);color:#c084fc}
+.gpill-g{background:rgba(57,255,143,.05);border:1px solid rgba(57,255,143,.15);color:var(--sage)}
+.gpill-c{background:rgba(0,245,255,.05);border:1px solid rgba(0,245,255,.14);color:var(--cyan)}
+.genesis-grid{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:repeat(3,1fr);gap:28px}
+@media(max-width:900px){.genesis-grid{grid-template-columns:1fr;max-width:480px}}
+.genesis-card{position:relative;background:linear-gradient(160deg,#08060f,#04020a);border:1px solid rgba(155,89,255,.12);border-radius:24px;overflow:hidden;transition:all .5s cubic-bezier(.23,1,.32,1)}
+.genesis-card:hover{transform:translateY(-12px) scale(1.015);border-color:rgba(155,89,255,.35);box-shadow:0 40px 100px rgba(0,0,0,.8),0 0 80px rgba(155,89,255,.1)}
+.genesis-frame-wrap{position:relative;width:100%;aspect-ratio:1;background:#000;overflow:hidden;border-radius:20px 20px 0 0}
+.genesis-frame{width:100%;height:100%;border:none;display:block;border-radius:20px 20px 0 0}
+.genesis-frame-overlay{position:absolute;inset:0;background:linear-gradient(180deg,transparent 60%,rgba(4,2,10,.95) 100%);pointer-events:none;border-radius:20px 20px 0 0}
+.genesis-card-badge{position:absolute;top:12px;left:12px;z-index:5;background:rgba(4,2,10,.85);backdrop-filter:blur(10px);border:1px solid rgba(155,89,255,.2);border-radius:8px;padding:4px 10px;font-size:8px;color:rgba(155,89,255,.7);letter-spacing:.15em}
+.genesis-card-num{position:absolute;top:12px;right:12px;z-index:5;background:rgba(155,89,255,.12);backdrop-filter:blur(10px);border:1px solid rgba(155,89,255,.28);border-radius:8px;padding:4px 10px;font-size:9px;font-weight:700;color:var(--violet)}
+.genesis-card-body{padding:18px}
+.genesis-card-title{font-size:15px;font-weight:700;color:#ddd;margin-bottom:6px;line-height:1.2}
+.genesis-card-desc{font-size:10px;color:#1a1a3a;line-height:1.8;margin-bottom:12px}
+.genesis-card-tags{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:14px}
+.genesis-card-tag{font-size:8px;padding:2px 8px;border-radius:8px;background:rgba(155,89,255,.06);border:1px solid rgba(155,89,255,.12);color:rgba(155,89,255,.6);letter-spacing:.08em}
+.genesis-card-footer{display:flex;align-items:center;justify-content:space-between;border-top:1px solid rgba(155,89,255,.07);padding-top:12px}
+.genesis-card-supply{font-size:9px;color:#1a0a2e;letter-spacing:.12em}
+.genesis-card-link{font-size:8px;color:rgba(155,89,255,.5);text-decoration:none;letter-spacing:.1em;transition:color .2s}
+.genesis-card-link:hover{color:var(--violet)}
+.genesis-contract{max-width:1140px;margin:40px auto 0;text-align:center;border:1px solid rgba(155,89,255,.08);border-radius:16px;padding:20px;background:rgba(155,89,255,.02)}
+.genesis-contract-label{font-size:8px;color:#1a0a2e;letter-spacing:.25em;text-transform:uppercase;margin-bottom:8px}
+.genesis-contract-addr{font-size:11px;color:rgba(155,89,255,.5);letter-spacing:.08em}
+.genesis-contract-addr a{color:rgba(155,89,255,.5);text-decoration:none;transition:color .2s}
+.genesis-contract-addr a:hover{color:var(--violet)}
 /* CRYSTALLIZE SECTION */
 .xtal-section{position:relative;z-index:1;max-width:860px;margin:0 auto;padding:90px 20px 60px}
 .xtal-box{background:linear-gradient(160deg,#0a0a18,#040410);border:1px solid #0f0f1e;border-radius:24px;padding:36px}
@@ -187,6 +224,105 @@ html,body{background:var(--void);color:#c8c8d8;font-family:'JetBrains Mono','Cou
     </div>
   </div>
   <div class="scroll-hint"><div class="scroll-line"></div><span>SCROLL</span></div>
+</section>
+
+<!-- ═══════════════ SWARM GENESIS COLLECTION ═══════════════ -->
+<section class="genesis-section">
+  <div class="genesis-header">
+    <div class="genesis-eye">&#x2736; SWARM GENESIS</div>
+    <h2 class="genesis-title">LIVING SWARM<br>GENESIS</h2>
+    <div class="genesis-sub">3 / 3 FULLY ONCHAIN // SEPOLIA // CANVAS + AUDIO + PARTICLES</div>
+    <p class="genesis-desc">Everything the agents learned. The hackathon's full arc crystallized into three living entities — each a self-contained interactive world stored entirely in contract storage. No IPFS. No servers. The art executes from the blockchain forever.</p>
+    <div class="genesis-pills">
+      <span class="gpill gpill-v">&#x1F512; GHOST PROTOCOL</span>
+      <span class="gpill gpill-g">&#x2696; ARBITER ZERO</span>
+      <span class="gpill gpill-c">&#x2B21; THE CRYSTALLIZED</span>
+    </div>
+  </div>
+
+  <div class="genesis-grid">
+
+    <div class="genesis-card">
+      <div class="genesis-frame-wrap">
+        <div class="genesis-card-badge">LSG #1</div>
+        <div class="genesis-card-num">1 / 3</div>
+        <iframe class="genesis-frame" id="frame1" sandbox="allow-scripts" loading="lazy" title="Ghost Protocol"></iframe>
+        <div class="genesis-frame-overlay"></div>
+      </div>
+      <div class="genesis-card-body">
+        <div class="genesis-card-title">GHOST PROTOCOL</div>
+        <div class="genesis-card-desc">600 particles form a living ghost entity. Privacy layer incarnate — AES-256-GCM, HKDF, PII stripping. Touch to scatter data into the void. Sub-bass drone + glitch audio.</div>
+        <div class="genesis-card-tags">
+          <span class="genesis-card-tag">PRIVACY LAYER</span>
+          <span class="genesis-card-tag">AES-256-GCM</span>
+          <span class="genesis-card-tag">HKDF</span>
+          <span class="genesis-card-tag">INTERACTIVE</span>
+          <span class="genesis-card-tag">WEB AUDIO</span>
+        </div>
+        <div class="genesis-card-footer">
+          <span class="genesis-card-supply">EDITION 1 OF 3</span>
+          <a class="genesis-card-link" href="https://sepolia.etherscan.io/token/0xcd65a300Bbd47E297eB9BB93Ec8E2071D6d1ed60?a=1" target="_blank">ETHERSCAN &#x2197;</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="genesis-card">
+      <div class="genesis-frame-wrap">
+        <div class="genesis-card-badge">LSG #2</div>
+        <div class="genesis-card-num">2 / 3</div>
+        <iframe class="genesis-frame" id="frame2" sandbox="allow-scripts" loading="lazy" title="Arbiter Zero"></iframe>
+        <div class="genesis-frame-overlay"></div>
+      </div>
+      <div class="genesis-card-body">
+        <div class="genesis-card-title">ARBITER ZERO</div>
+        <div class="genesis-card-desc">Radar threat scanner. 500 particles orbit in risk bands. Move your cursor to set the threat score — watch PASS become BLOCK. Digital alert tones pulse in real time.</div>
+        <div class="genesis-card-tags">
+          <span class="genesis-card-tag">THREAT ORACLE</span>
+          <span class="genesis-card-tag">ZERO-TRUST</span>
+          <span class="genesis-card-tag">ONCHAIN ATTEST</span>
+          <span class="genesis-card-tag">INTERACTIVE</span>
+          <span class="genesis-card-tag">RADAR SWEEP</span>
+        </div>
+        <div class="genesis-card-footer">
+          <span class="genesis-card-supply">EDITION 2 OF 3</span>
+          <a class="genesis-card-link" href="https://sepolia.etherscan.io/token/0xcd65a300Bbd47E297eB9BB93Ec8E2071D6d1ed60?a=2" target="_blank">ETHERSCAN &#x2197;</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="genesis-card">
+      <div class="genesis-frame-wrap">
+        <div class="genesis-card-badge">LSG #3</div>
+        <div class="genesis-card-num">3 / 3</div>
+        <iframe class="genesis-frame" id="frame3" sandbox="allow-scripts" loading="lazy" title="The Crystallized"></iframe>
+        <div class="genesis-frame-overlay"></div>
+      </div>
+      <div class="genesis-card-body">
+        <div class="genesis-card-title">THE CRYSTALLIZED</div>
+        <div class="genesis-card-desc">550 particles organize into a living crystal lattice as you watch. Gold light refracts through 8 spectral beams. Harmonic resonance + bell tones. The swarm's final memory, eternal.</div>
+        <div class="genesis-card-tags">
+          <span class="genesis-card-tag">ETERNAL MEMORY</span>
+          <span class="genesis-card-tag">GEMINI AI</span>
+          <span class="genesis-card-tag">HARMONIC AUDIO</span>
+          <span class="genesis-card-tag">CRYSTAL LATTICE</span>
+          <span class="genesis-card-tag">LIGHT BEAMS</span>
+        </div>
+        <div class="genesis-card-footer">
+          <span class="genesis-card-supply">EDITION 3 OF 3</span>
+          <a class="genesis-card-link" href="https://sepolia.etherscan.io/token/0xcd65a300Bbd47E297eB9BB93Ec8E2071D6d1ed60?a=3" target="_blank">ETHERSCAN &#x2197;</a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="genesis-contract">
+    <div class="genesis-contract-label">SWARM GENESIS CONTRACT // SEPOLIA // ERC-721 // FULLY ONCHAIN</div>
+    <div class="genesis-contract-addr">
+      <a href="https://sepolia.etherscan.io/address/0xcd65a300Bbd47E297eB9BB93Ec8E2071D6d1ed60" target="_blank">0xcd65a300Bbd47E297eB9BB93Ec8E2071D6d1ed60 &#x2197;</a>
+      &nbsp;&middot;&nbsp; tokenURI → data:text/html;base64 &nbsp;&middot;&nbsp; zero IPFS &nbsp;&middot;&nbsp; 3 tokens
+    </div>
+  </div>
 </section>
 
 <div class="ticker"><div class="ticker-t">ROYAL LOGS &nbsp;&middot;&nbsp; ONCHAIN MEMORY ARTIFACTS &nbsp;&middot;&nbsp; 3 AUCTIONS LIVE &nbsp;&middot;&nbsp; SEPOLIA TESTNET &nbsp;&middot;&nbsp; 0.000369 ETH &nbsp;&middot;&nbsp; FULLY ONCHAIN SVG &nbsp;&middot;&nbsp; ZERO IPFS &nbsp;&middot;&nbsp; AGENT MEMORY CRYSTALLIZED &nbsp;&middot;&nbsp; with_human &middot; with_agent &middot; with_world &nbsp;&middot;&nbsp; RARE PROTOCOL ERC-721 &nbsp;&middot;&nbsp; SYNTHESIS 2026 &nbsp;&middot;&nbsp; ROYAL LOGS &nbsp;&middot;&nbsp; ONCHAIN MEMORY ARTIFACTS &nbsp;&middot;&nbsp; 3 AUCTIONS LIVE &nbsp;&middot;&nbsp; SEPOLIA TESTNET &nbsp;&middot;&nbsp; 0.000369 ETH &nbsp;&middot;&nbsp; FULLY ONCHAIN SVG &nbsp;&middot;&nbsp; ZERO IPFS &nbsp;&middot;&nbsp; AGENT MEMORY CRYSTALLIZED &nbsp;&middot;&nbsp; with_human &middot; with_agent &middot; with_world &nbsp;&middot;&nbsp; RARE PROTOCOL ERC-721 &nbsp;&middot;&nbsp; SYNTHESIS 2026 &nbsp;&middot;&nbsp;</div></div>
@@ -637,6 +773,58 @@ if(grid){
   R.setSize(W(),H());
   var start=Date.now();
   (function loop(){requestAnimationFrame(loop);var t=(Date.now()-start)/1e3;uni.u_t.value=t;uni.u_m.value.set(mx.x,mx.y);pts.rotation.y=t*.04+mx.x*.2;pts.rotation.x=Math.sin(t*.03)*.06+mx.y*.1;R.render(sc,cam);})();
+})();
+
+// ── SWARM GENESIS — load tokenURIs from onchain contract ──────────
+(function(){
+  var CONTRACT='0xcd65a300Bbd47E297eB9BB93Ec8E2071D6d1ed60';
+  var RPC='https://eth-sepolia.g.alchemy.com/v2/ALCHEMY_KEY_REDACTED';
+  // tokenURI(uint256) selector = keccak256("tokenURI(uint256)")[0:4] = 0xc87b56dd
+  function encodeCall(selector,tokenId){
+    var id=tokenId.toString(16).padStart(64,'0');
+    return selector+id;
+  }
+  function decodeString(hex){
+    // ABI decode string: skip offset (32 bytes) + length (32 bytes) = 64 bytes = 128 hex chars
+    // offset at [0:64], length at [64:128], data at [128:]
+    if(hex.startsWith('0x'))hex=hex.slice(2);
+    try{
+      var offset=parseInt(hex.slice(0,64),16)*2;
+      var len=parseInt(hex.slice(offset,offset+64),16)*2;
+      var strHex=hex.slice(offset+64,offset+64+len);
+      var bytes=new Uint8Array(strHex.match(/.{2}/g).map(function(b){return parseInt(b,16);}));
+      return new TextDecoder().decode(bytes);
+    }catch(e){return null;}
+  }
+  async function loadFrame(tokenId,frameId){
+    try{
+      var resp=await fetch(RPC,{
+        method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({jsonrpc:'2.0',id:tokenId,method:'eth_call',params:[{to:CONTRACT,data:'0xc87b56dd'+tokenId.toString(16).padStart(64,'0')},'latest']})
+      });
+      var json=await resp.json();
+      var uri=decodeString(json.result);
+      if(uri&&uri.startsWith('data:')){
+        var frame=document.getElementById(frameId);
+        if(frame)frame.src=uri;
+      }
+    }catch(e){console.warn('genesis frame',tokenId,e);}
+  }
+  // Load after page visible
+  if('IntersectionObserver' in window){
+    var obs=new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        if(e.isIntersecting){
+          loadFrame(1,'frame1');loadFrame(2,'frame2');loadFrame(3,'frame3');
+          obs.disconnect();
+        }
+      });
+    },{threshold:0.1});
+    var sec=document.querySelector('.genesis-section');
+    if(sec)obs.observe(sec);
+  } else {
+    loadFrame(1,'frame1');loadFrame(2,'frame2');loadFrame(3,'frame3');
+  }
 })();
 
 // ── CRYSTALLIZE UI ────────────────────────────────────────────────

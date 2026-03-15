@@ -9,7 +9,7 @@ import {
   selectEditionSize, InteractionType,
 } from '@/lib/memoryEngine';
 
-const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-001:generateContent';
+const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent';
 
 export async function POST(req: NextRequest) {
   try {
@@ -98,7 +98,7 @@ Rules:
         colorPalette: palette,
         geometryParams: geometry,
         metadata: {
-          model: 'gemini-2.0-flash-001',
+          model: 'gemini-2.5-flash-lite',
           tokensUsed,
           crystallizedAt: timestamp,
           privateMode: true,

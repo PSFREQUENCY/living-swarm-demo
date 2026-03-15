@@ -9,7 +9,7 @@ import {
   selectEditionSize, InteractionType,
 } from '@/lib/memoryEngine';
 
-const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
+const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-001:generateContent';
 
 export async function POST(req: NextRequest) {
   try {
@@ -62,7 +62,7 @@ Rules:
         generationConfig: {
           temperature: 0.9,
           topP: 0.95,
-          maxOutputTokens: 1024,
+          maxOutputTokens: 2048,
         },
       }),
     });
@@ -101,7 +101,7 @@ Rules:
         colorPalette: palette,
         geometryParams: geometry,
         metadata: {
-          model: 'gemini-2.5-flash',
+          model: 'gemini-2.0-flash-001',
           tokensUsed,
           crystallizedAt: timestamp,
         },

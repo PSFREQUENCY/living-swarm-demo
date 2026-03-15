@@ -83,7 +83,7 @@ Rules:
       const jsonMatch = cleaned.match(/\{[\s\S]*\}/);
       const jsonStr = jsonMatch?.[0] ?? cleaned;
       // Sanitize literal newlines inside JSON string values (Gemini sometimes emits them)
-      const sanitized = jsonStr.replace(/"((?:[^"\\]|\\.)*)"/gs, (_m, inner) =>
+      const sanitized = jsonStr.replace(/"((?:[^"\\]|\\.)*)"/g, (_m: string, inner: string) =>
         `"${inner.replace(/\n/g, '\\n').replace(/\r/g, '')}"`
       );
       crystallized = JSON.parse(sanitized);

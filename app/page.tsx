@@ -466,7 +466,32 @@ setInterval(fetchPrice,30000);setInterval(fetchUniRate,60000);
       <div><div class="uni-sv">10+</div><div class="uni-sl">ROUTE TYPES</div></div>
       <div><div class="uni-sv">V2</div><div class="uni-sl">UNIV ROUTER</div></div>
     </div>
-    <a href="/uniswap/" class="ebtn ecyan">&#x25B6; OPEN SWARM TRADE &#x2192;</a>
+    <a href="/swap/" class="ebtn ecyan">&#x25B6; OPEN SWARM TRADE &#x2192;</a>
+  </div>
+</div>
+<div class="sdiv">&#x2593;&#x2593;&#x2593;</div>
+
+<div class="uni-s" style="border-color:rgba(155,89,255,.18)">
+  <div class="rl-ey" style="color:rgba(155,89,255,.6)">&#x1F512; GHOST PROTOCOL — PRIVACY STACK — 6 GAPS CLOSED</div>
+  <div class="uni-hrow">
+    <div class="gx" style="background:linear-gradient(135deg,rgba(155,89,255,.18),rgba(240,171,252,.1));border-color:rgba(155,89,255,.35);color:#c084fc">PRIVACY LAYER</div>
+    <div class="rl-meta">AES-256-GCM &middot; <span>HMAC-SHA256</span> &middot; PII stripping &middot; <span>onchain attestation</span></div>
+  </div>
+  <div class="uni-cards">
+    <div class="uni-card" style="border-color:rgba(155,89,255,.12)"><div class="uni-ct" style="color:#c084fc">&#x1F511; GAP 1 — SESSION KEY</div><div class="uni-cd">eth_personal_sign → HKDF → AES-256-GCM. Non-extractable key, lives only in browser heap. Signs once per session.</div></div>
+    <div class="uni-card" style="border-color:rgba(155,89,255,.12)"><div class="uni-ct" style="color:#c084fc">&#x1F576; GAP 2 — PRIVATE INFERENCE</div><div class="uni-cd">ETH addresses, TX hashes, email, phone, SSN stripped before Gemini. Raw input preserved locally. /api/private-crystallize.</div></div>
+    <div class="uni-card" style="border-color:rgba(155,89,255,.12)"><div class="uni-ct" style="color:#c084fc">&#x1F510; GAP 3 — ENCRYPTED MEMORY</div><div class="uni-cd">saveMemoryEncrypted / loadMemoriesDecrypted — AES-256-GCM localStorage. Session key required to read.</div></div>
+    <div class="uni-card" style="border-color:rgba(155,89,255,.12)"><div class="uni-ct" style="color:#c084fc">&#x26D3; GAP 4 — ONCHAIN ARBITER</div><div class="uni-cd">ArbitersLedger.sol deployed Sepolia 0x4A6d6f8B23bf3ECD8EebeA73dcB582db6380Fc94. Every quote score attested onchain, fire-and-forget.</div></div>
+    <div class="uni-card" style="border-color:rgba(155,89,255,.12)"><div class="uni-ct" style="color:#c084fc">&#x1F6AA; GAP 5 — DATA ROOM</div><div class="uni-cd">Wallet-gated intel. Server issues nonce → wallet signs → ethers.verifyMessage → HMAC access token issued. 5min TTL.</div></div>
+    <div class="uni-card" style="border-color:rgba(155,89,255,.12)"><div class="uni-ct" style="color:#c084fc">&#x1F6E1; GAP 6 — SENTRY-03 HMAC</div><div class="uni-cd">HMAC-SHA256 inter-agent signing on all /api/swarm/* routes. 30s replay window. X-Swarm-Sig header required.</div></div>
+  </div>
+  <div class="uni-frow">
+    <div class="uni-stats">
+      <div><div class="uni-sv" style="color:#c084fc">6</div><div class="uni-sl">GAPS CLOSED</div></div>
+      <div><div class="uni-sv" style="color:#c084fc">AES</div><div class="uni-sl">256-GCM</div></div>
+      <div><div class="uni-sv" style="color:#c084fc">HMAC</div><div class="uni-sl">SHA-256</div></div>
+    </div>
+    <a href="/data-room/" class="ebtn" style="background:linear-gradient(135deg,rgba(155,89,255,.14),rgba(240,171,252,.08));border-color:rgba(155,89,255,.35);color:#c084fc">&#x1F512; ENTER DATA ROOM &#x2192;</a>
   </div>
 </div>
 <div class="sdiv" style="padding-bottom:40px">&#x2593;&#x2593;&#x2593;</div>
@@ -582,6 +607,13 @@ setInterval(fetchPrice,30000);setInterval(fetchUniRate,60000);
 <footer>
   <div class="f-m">▓▓▓</div>
   <div>SYNTHESIS 2026 // MARCH 13–22 // synthesis.md</div>
+  <div style="display:flex;gap:20px;justify-content:center;flex-wrap:wrap;margin:12px 0;font-size:9px;letter-spacing:.2em">
+    <a href="/royal-logs/" style="color:rgba(255,215,0,.4);text-decoration:none">ROYAL LOGS</a>
+    <a href="/swap/" style="color:rgba(0,245,255,.4);text-decoration:none">SWARM TRADE</a>
+    <a href="/data-room/" style="color:rgba(155,89,255,.4);text-decoration:none">DATA ROOM</a>
+    <a href="https://sepolia.etherscan.io/address/0x4A6d6f8B23bf3ECD8EebeA73dcB582db6380Fc94" target="_blank" style="color:rgba(57,255,143,.4);text-decoration:none">ARBITER CONTRACT &#x2197;</a>
+    <a href="https://github.com/PSFREQUENCY/living-swarm-demo" target="_blank" style="color:rgba(255,255,255,.2);text-decoration:none">GITHUB &#x2197;</a>
+  </div>
   <div>INFRASTRUCTURE: ████████████</div>
 </footer>
 

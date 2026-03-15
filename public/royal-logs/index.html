@@ -9,7 +9,7 @@
 @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;700;800&display=swap');
 *{margin:0;padding:0;box-sizing:border-box}
 :root{--void:#030308;--gold:#ffd700;--gold2:#ff9500;--cyan:#00f5ff;--violet:#9b59ff;--plasma:#ff6ef7;--sage:#39ff8f}
-html,body{background:var(--void);color:#c8c8d8;font-family:'JetBrains Mono','Courier New',monospace;overflow-x:hidden}
+html,body{padding-top:44px;background:var(--void);color:#c8c8d8;font-family:'JetBrains Mono','Courier New',monospace;overflow-x:hidden}
 ::-webkit-scrollbar{width:2px}::-webkit-scrollbar-track{background:var(--void)}::-webkit-scrollbar-thumb{background:#1a1a3e}
 
 .hero{position:relative;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 20px 60px;text-align:center;overflow:hidden}
@@ -194,6 +194,7 @@ html,body{background:var(--void);color:#c8c8d8;font-family:'JetBrains Mono','Cou
 </style>
 </head>
 <body>
+<nav style="position:fixed;top:0;left:0;right:0;z-index:9999;height:44px;background:rgba(0,3,8,.92);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid rgba(0,255,231,.1);display:flex;align-items:center;justify-content:space-between;padding:0 20px;font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:3px;box-sizing:border-box;"><a href="/" style="color:rgba(0,255,231,.55);text-decoration:none;font-size:10px;letter-spacing:4px;font-weight:bold;transition:color .2s;flex-shrink:0" onmouseenter="this.style.color='#00ffe7'" onmouseleave="this.style.color='rgba(0,255,231,.55)'">▓ LIVING SWARM</a><div style="display:flex;align-items:center;gap:16px;overflow-x:auto;"><a href="/royal-logs/" style="color:#00ffe7;text-decoration:none;transition:color .2s;white-space:nowrap" >ROYAL LOGS</a><span style="color:rgba(0,255,231,.1);">·</span><a href="/swap/" style="color:rgba(0,255,231,.35);text-decoration:none;transition:color .2s;white-space:nowrap" onmouseenter="this.style.color='#00ffe7'" onmouseleave="this.style.color='rgba(0,255,231,.35)'">SWARM TRADE</a><span style="color:rgba(0,255,231,.1);">·</span><a href="/data-room" style="color:rgba(160,100,255,.5);text-decoration:none;transition:color .2s;white-space:nowrap" onmouseenter="this.style.color='#c084fc'" onmouseleave="this.style.color='rgba(160,100,255,.5)'">DATA ROOM</a><span style="color:rgba(0,255,231,.1);">·</span><a href="/swarm-signals/" style="color:rgba(0,255,231,.35);text-decoration:none;transition:color .2s;white-space:nowrap" onmouseenter="this.style.color='#00ffe7'" onmouseleave="this.style.color='rgba(0,255,231,.35)'">SIGNALS</a></div></nav>
 <div class="scanlines"></div>
 <div class="vignette"></div>
 

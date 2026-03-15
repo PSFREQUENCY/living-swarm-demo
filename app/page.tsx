@@ -184,7 +184,7 @@ footer{border-top:1px solid var(--border);padding:2rem 6vw;display:flex;justify-
 
 <div class="status">
   <div class="s-l"><span class="bl">▮</span>&nbsp;SYN-2026 // NODES: ██ // UP: <span id="uptime">00:00:00</span></div>
-  <div class="s-r">INFRASTRUCTURE: ████████████ // ALL URLS: ████████</div>
+  <div class="s-r" style="display:flex;gap:18px;align-items:center;"><a href="/royal-logs/" style="color:rgba(0,255,231,.38);text-decoration:none;transition:color .2s;cursor:pointer" onmouseenter="this.style.color='#00ffe7'" onmouseleave="this.style.color='rgba(0,255,231,.38)'">ROYAL LOGS</a><a href="/swap/" style="color:rgba(0,255,231,.38);text-decoration:none;transition:color .2s;cursor:pointer" onmouseenter="this.style.color='#00ffe7'" onmouseleave="this.style.color='rgba(0,255,231,.38)'">SWARM TRADE</a><a href="/data-room" style="color:rgba(160,100,255,.45);text-decoration:none;transition:color .2s;cursor:pointer" onmouseenter="this.style.color='#c084fc'" onmouseleave="this.style.color='rgba(160,100,255,.45)'">DATA ROOM</a><a href="/swarm-signals/" style="color:rgba(0,255,231,.38);text-decoration:none;transition:color .2s;cursor:pointer" onmouseenter="this.style.color='#00ffe7'" onmouseleave="this.style.color='rgba(0,255,231,.38)'">SIGNALS</a></div>
 </div>
 
 <section class="hero" style="position:relative;overflow:hidden;min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding:0;align-items:center;">

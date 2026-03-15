@@ -51,8 +51,34 @@ export default function DataRoomPage() {
     }
   }
 
+  const navLink = (href: string, label: string, active = false, purple = false) => ({
+    color: active ? '#fbbf24' : purple ? 'rgba(160,100,255,.5)' : 'rgba(0,255,231,.38)',
+    textDecoration: 'none' as const,
+    fontSize: '9px',
+    letterSpacing: '3px',
+    whiteSpace: 'nowrap' as const,
+    fontFamily: 'monospace',
+    transition: 'color .2s',
+  });
+
   return (
-    <main style={{ fontFamily: 'monospace', background: '#0a0a0a', color: '#e2e8f0', minHeight: '100vh', padding: '2rem' }}>
+    <>
+    <nav style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 9999, height: 44,
+      background: 'rgba(0,3,8,.92)', backdropFilter: 'blur(14px)', WebkitBackdropFilter: 'blur(14px)',
+      borderBottom: '1px solid rgba(0,255,231,.1)', display: 'flex', alignItems: 'center',
+      justifyContent: 'space-between', padding: '0 20px', boxSizing: 'border-box' }}>
+      <a href="/" style={{ color: 'rgba(0,255,231,.55)', textDecoration: 'none', fontSize: '10px', letterSpacing: '4px', fontFamily: 'monospace' }}>▓ LIVING SWARM</a>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 16, overflowX: 'auto' }}>
+        <a href="/royal-logs/" style={navLink('/royal-logs/', 'ROYAL LOGS')}>ROYAL LOGS</a>
+        <span style={{ color: 'rgba(0,255,231,.1)', fontSize: 9 }}>·</span>
+        <a href="/swap/" style={navLink('/swap/', 'SWARM TRADE')}>SWARM TRADE</a>
+        <span style={{ color: 'rgba(0,255,231,.1)', fontSize: 9 }}>·</span>
+        <a href="/data-room" style={navLink('/data-room', 'DATA ROOM', true)}>DATA ROOM</a>
+        <span style={{ color: 'rgba(0,255,231,.1)', fontSize: 9 }}>·</span>
+        <a href="/swarm-signals/" style={navLink('/swarm-signals/', 'SIGNALS')}>SIGNALS</a>
+      </div>
+    </nav>
+    <main style={{ fontFamily: 'monospace', background: '#0a0a0a', color: '#e2e8f0', minHeight: '100vh', padding: '4rem 2rem 2rem' }}>
       <div style={{ maxWidth: 800, margin: '0 auto' }}>
         <div style={{ borderBottom: '1px solid #1a1a2e', paddingBottom: '1rem', marginBottom: '2rem' }}>
           <div style={{ color: '#f59e0b', fontSize: '0.7rem', letterSpacing: '0.2em' }}>LIVING SWARM</div>
@@ -105,5 +131,6 @@ export default function DataRoomPage() {
         )}
       </div>
     </main>
+    </>
   );
 }

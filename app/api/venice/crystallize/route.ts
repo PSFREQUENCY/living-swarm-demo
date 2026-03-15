@@ -103,7 +103,7 @@ Return exactly this JSON structure:
     }
 
     const memory = {
-      id: generateMemoryId(),
+      id: generateMemoryId(Date.now(), seed),
       timestamp: Date.now(),
       ageTier,
       interaction: interactionType,
@@ -111,11 +111,11 @@ Return exactly this JSON structure:
       shaderSeed: seed,
       wisdomScore,
       collectionIndex: 0,
-      editionSize: selectEditionSize(ageTier),
+      editionSize: selectEditionSize(wisdomScore),
       mintedTokenIds: [] as number[],
       privacy: {
         piiFound,
-        redactions: redactions.map(r => `${r.type}×${r.count}`),
+        redactions,
         strippedForInference: stripped,
       },
       crystallized: {
@@ -133,7 +133,7 @@ Return exactly this JSON structure:
       },
     };
 
-    return NextResponse.json({ memory, redactionLog: redactions.map(r => `${r.type}×${r.count}`) });
+    return NextResponse.json({ memory, redactionLog: redactions });
 
   } catch (e: any) {
     return NextResponse.json({ error: e.message }, { status: 500 });

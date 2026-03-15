@@ -11,6 +11,7 @@ export async function POST(req: NextRequest) {
       body: JSON.stringify(payload),
     });
     const d = await r.json();
+    if (!r.ok) return NextResponse.json({ error: d.errorCode || d.detail || d.message || 'SWAP_FAILED', details: d }, { status: r.status });
     return NextResponse.json(d, { status: r.status });
   } catch(e: any) { return NextResponse.json({ error: e.message }, { status: 500 }); }
 }

@@ -268,7 +268,7 @@ async function executeSwap(){
   try{
     var r=await fetch('/api/uniswap/swap',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({quote,signature:sig||undefined,permitData:sig?pd:undefined,urgency:'urgent'})});
     var sd=await r.json();
-    if(!r.ok||sd.error){log('le','SWAP_ERR',JSON.stringify(sd.error||'').slice(0,80));btn.disabled=false;return;}
+    if(!r.ok||sd.error){log('le','SWAP_ERR',(sd.error||JSON.stringify(sd).slice(0,120)));btn.disabled=false;return;}
     var tx=sd.swap||sd;log('lok','TX_BUILT','Ready');log('la','TO',(tx&&tx.to)||'--');
     if(sd.txFailureReasons&&sd.txFailureReasons.length)log('lw','SIM_WARN',sd.txFailureReasons.join(', '));
     else log('lok','SIMULATION','Passed');

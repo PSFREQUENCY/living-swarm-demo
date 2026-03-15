@@ -86,8 +86,8 @@ html,body{background:var(--void);color:#c8c8d8;font-family:'JetBrains Mono','Cou
       <div><div style="font-size:8px;color:#333;letter-spacing:.15em;margin-bottom:4px">ADDRESS</div><div class="waddr" id="waddr">NOT CONNECTED</div></div>
       <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
         <div class="nettog">
-          <button class="netbtn active" id="net-mainnet" onclick="setNetwork('mainnet')">MAINNET</button>
-          <button class="netbtn" id="net-sepolia" onclick="setNetwork('sepolia')">SEPOLIA</button>
+          <button class="netbtn" id="net-mainnet" onclick="setNetwork('mainnet')">MAINNET</button>
+          <button class="netbtn active" id="net-sepolia" onclick="setNetwork('sepolia')">SEPOLIA</button>
         </div>
         <button class="wcbtn" id="wcbtn" onclick="connectWallet()">CONNECT</button>
       </div>
@@ -195,7 +195,7 @@ var CHAINS={
     {a:'0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238',s:'USDC',d:6}
   ]}
 };
-var S={wallet:null,quoteData:null,chain:CHAINS.mainnet};
+var S={wallet:null,quoteData:null,chain:CHAINS.sepolia};
 function setNetwork(n){
   S.chain=CHAINS[n];S.quoteData=null;
   document.getElementById('net-mainnet').className='netbtn'+(n==='mainnet'?' active':'');
@@ -316,6 +316,7 @@ async function executeSwap(){
   }catch(e){log('le','ERR',e.message);btn.disabled=false;btn.textContent='&#x2B21; EXECUTE SWAP';}
 }
 window.addEventListener('load',function(){
+  setNetwork('sepolia');
   if(window.ethereum)window.ethereum.request({method:'eth_accounts'}).then(function(a){if(a&&a[0]){S.wallet=a[0];document.getElementById('waddr').textContent=a[0].slice(0,6)+'...'+a[0].slice(-4);document.getElementById('wcbtn').textContent='CONNECTED';document.getElementById('wcbtn').style.color='var(--sage)';log('lok','AUTO_CONNECT',a[0]);}}).catch(function(){});
   log('ld','READY','Click GET LIVE QUOTE to start');
 });

@@ -75,8 +75,9 @@ Rules:
 
     let crystallized;
     try {
-      const jsonMatch = rawText.match(/\{[\s\S]*\}/);
-      crystallized = JSON.parse(jsonMatch?.[0] ?? rawText);
+      const cleaned = rawText.replace(/^```(?:json)?\s*/i, '').replace(/```\s*$/, '').trim();
+      const jsonMatch = cleaned.match(/\{[\s\S]*\}/);
+      crystallized = JSON.parse(jsonMatch?.[0] ?? cleaned);
     } catch {
       return NextResponse.json({ error: 'Failed to parse Gemini crystallization', raw: rawText }, { status: 500 });
     }

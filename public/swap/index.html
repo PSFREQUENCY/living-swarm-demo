@@ -173,6 +173,7 @@ html,body{background:var(--void);color:#c8c8d8;font-family:'JetBrains Mono','Cou
 
 </div>
 <script>
+function log(cls,key,msg){var t=new Date().toTimeString().slice(0,8);var el=document.createElement('div');el.className='ll';el.innerHTML='<span class="lts">['+t+']</span> <span class="'+cls+'">'+key+'</span> <span class="ld">'+msg+'</span>';var term=document.getElementById('term');term.appendChild(el);term.scrollTop=term.scrollHeight;}
 var S={wallet:null,quoteData:null};
 var SYMS={'0x0000000000000000000000000000000000000000':{s:'ETH',d:18},'0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48':{s:'USDC',d:6},'0xdac17f958d2ee523a2206206994597c13d831ec7':{s:'USDT',d:6},'0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2':{s:'WETH',d:18},'0x6b175474e89094c44da98b954eedeac495271d0f':{s:'DAI',d:18}};
 var RN={0:'CLASSIC',1:'DUTCH_LIMIT',2:'DUTCH_V2',3:'LIMIT_ORDER',4:'WRAP',5:'UNWRAP',6:'BRIDGE',7:'PRIORITY',8:'DUTCH_V3',9:'QUICKROUTE',10:'CHAINED'};
@@ -194,7 +195,7 @@ async function getQuote(){
     var r=await fetch('/api/uniswap/quote',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(qpayload)});
     var d=await r.json();
     // client-side arbiter
-var _score=5;try{var _a=BigInt(body.amount||'0'),_E=BigInt('1000000000000000000');if(_a>_E*BigInt(10))_score+=40;else if(_a>_E)_score+=20;}catch(e){}
+var _score=5;try{var _a=BigInt(qpayload.amount||'0'),_E=BigInt('1000000000000000000');if(_a>_E*BigInt(10))_score+=40;else if(_a>_E)_score+=20;}catch(e){}
 var _band=_score<=25?'PASS':_score<=50?'LOG':_score<=75?'HOLD':'BLOCK';
 d.arbiter={score:_score,verdict:{band:_band,action:_band==='BLOCK'?'block':_band==='HOLD'?'hold':_band==='LOG'?'log':'execute'}};
 d.routingName={0:'CLASSIC',1:'DUTCH_LIMIT',2:'DUTCH_V2',4:'WRAP',5:'UNWRAP',6:'BRIDGE',7:'PRIORITY',8:'DUTCH_V3'}[d.routing]||'UNKNOWN';

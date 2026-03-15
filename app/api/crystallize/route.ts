@@ -62,7 +62,7 @@ Rules:
         generationConfig: {
           temperature: 0.9,
           topP: 0.95,
-          maxOutputTokens: 512,
+          maxOutputTokens: 1024,
         },
       }),
     });

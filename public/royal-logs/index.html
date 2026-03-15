@@ -116,6 +116,36 @@ html,body{background:var(--void);color:#c8c8d8;font-family:'JetBrains Mono','Cou
 .phil-quote{font-size:clamp(15px,2.5vw,22px);font-weight:300;color:#222;line-height:1.8;margin-bottom:28px;font-style:italic}
 .phil-quote strong{color:#555;font-weight:700;font-style:normal}
 
+/* CRYSTALLIZE SECTION */
+.xtal-section{position:relative;z-index:1;max-width:860px;margin:0 auto;padding:90px 20px 60px}
+.xtal-box{background:linear-gradient(160deg,#0a0a18,#040410);border:1px solid #0f0f1e;border-radius:24px;padding:36px}
+.xtal-label{font-size:9px;color:#1a1a3a;letter-spacing:.3em;text-transform:uppercase;margin-bottom:6px}
+.xtal-textarea{width:100%;background:rgba(0,0,0,.5);border:1px solid #0f0f1e;border-radius:12px;color:#888;font-family:'JetBrains Mono','Courier New',monospace;font-size:12px;line-height:1.7;padding:14px 16px;resize:vertical;min-height:90px;outline:none;transition:border-color .3s;letter-spacing:.04em}
+.xtal-textarea:focus{border-color:rgba(255,215,0,.25);color:#aaa}
+.xtal-textarea::placeholder{color:#1a1a3a}
+.xtal-row{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:16px}
+.xtal-sel{background:rgba(0,0,0,.5);border:1px solid #0f0f1e;border-radius:10px;color:#555;font-family:inherit;font-size:10px;letter-spacing:.1em;padding:10px 14px;outline:none;cursor:pointer;transition:border-color .3s}
+.xtal-sel:focus{border-color:rgba(255,215,0,.2)}
+.xtal-toggle{display:flex;align-items:center;gap:8px;margin-left:auto;font-size:9px;color:#1a1a3a;letter-spacing:.15em;cursor:pointer;user-select:none}
+.xtal-toggle input{width:14px;height:14px;accent-color:var(--gold);cursor:pointer}
+.xtal-btn{background:linear-gradient(135deg,rgba(255,215,0,.14),rgba(255,149,0,.09));border:1px solid rgba(255,215,0,.3);color:var(--gold);font-family:inherit;font-size:10px;font-weight:700;letter-spacing:.2em;padding:11px 28px;border-radius:11px;cursor:pointer;transition:all .3s;text-transform:uppercase;white-space:nowrap}
+.xtal-btn:hover:not(:disabled){box-shadow:0 0 36px rgba(255,215,0,.18);transform:translateY(-1px)}
+.xtal-btn:disabled{opacity:.4;cursor:not-allowed}
+.xtal-status{margin-top:16px;font-size:10px;color:#1a1a3a;letter-spacing:.12em;min-height:18px}
+.xtal-status.ok{color:var(--sage)}.xtal-status.err{color:#ff4455}
+.xtal-result{margin-top:24px;display:none;background:rgba(0,0,0,.4);border:1px solid #0a0a18;border-radius:16px;padding:24px}
+.xtal-result.show{display:block}
+.xtal-rtitle{font-size:18px;font-weight:700;background:linear-gradient(135deg,var(--gold),var(--gold2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:8px}
+.xtal-haiku{font-size:11px;color:#333;line-height:2;margin-bottom:12px;white-space:pre-line;font-style:italic}
+.xtal-essence{font-size:11px;color:#2a2a4a;line-height:1.8;margin-bottom:14px}
+.xtal-kws{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+.xtal-kw{font-size:8px;padding:3px 10px;border-radius:8px;background:rgba(0,245,255,.05);border:1px solid rgba(0,245,255,.12);color:#22d3ee;letter-spacing:.08em}
+.xtal-meta{display:flex;flex-wrap:wrap;gap:10px}
+.xtal-badge{font-size:8px;padding:3px 10px;border-radius:8px;letter-spacing:.1em}
+.xtal-badge.tier{background:rgba(155,89,255,.06);border:1px solid rgba(155,89,255,.14);color:#c084fc}
+.xtal-badge.score{background:rgba(57,255,143,.05);border:1px solid rgba(57,255,143,.12);color:#34d399}
+.xtal-badge.priv{background:rgba(255,215,0,.06);border:1px solid rgba(255,215,0,.18);color:var(--gold)}
+.xtal-pii{margin-top:10px;font-size:9px;color:#1a1a3a;letter-spacing:.08em;line-height:1.8}
 .footer{position:relative;z-index:1;border-top:1px solid #060610;padding:36px 20px;text-align:center}
 .footer-inner{max-width:1140px;margin:0 auto;display:flex;flex-direction:column;align-items:center;gap:14px}
 .footer-links{display:flex;gap:20px;flex-wrap:wrap;justify-content:center}
@@ -160,6 +190,34 @@ html,body{background:var(--void);color:#c8c8d8;font-family:'JetBrains Mono','Cou
 </section>
 
 <div class="ticker"><div class="ticker-t">ROYAL LOGS &nbsp;&middot;&nbsp; ONCHAIN MEMORY ARTIFACTS &nbsp;&middot;&nbsp; 3 AUCTIONS LIVE &nbsp;&middot;&nbsp; SEPOLIA TESTNET &nbsp;&middot;&nbsp; 0.000369 ETH &nbsp;&middot;&nbsp; FULLY ONCHAIN SVG &nbsp;&middot;&nbsp; ZERO IPFS &nbsp;&middot;&nbsp; AGENT MEMORY CRYSTALLIZED &nbsp;&middot;&nbsp; with_human &middot; with_agent &middot; with_world &nbsp;&middot;&nbsp; RARE PROTOCOL ERC-721 &nbsp;&middot;&nbsp; SYNTHESIS 2026 &nbsp;&middot;&nbsp; ROYAL LOGS &nbsp;&middot;&nbsp; ONCHAIN MEMORY ARTIFACTS &nbsp;&middot;&nbsp; 3 AUCTIONS LIVE &nbsp;&middot;&nbsp; SEPOLIA TESTNET &nbsp;&middot;&nbsp; 0.000369 ETH &nbsp;&middot;&nbsp; FULLY ONCHAIN SVG &nbsp;&middot;&nbsp; ZERO IPFS &nbsp;&middot;&nbsp; AGENT MEMORY CRYSTALLIZED &nbsp;&middot;&nbsp; with_human &middot; with_agent &middot; with_world &nbsp;&middot;&nbsp; RARE PROTOCOL ERC-721 &nbsp;&middot;&nbsp; SYNTHESIS 2026 &nbsp;&middot;&nbsp;</div></div>
+
+<section class="xtal-section" id="crystallize">
+  <div class="s-eye">&#x2736; CRYSTALLIZE A MEMORY</div>
+  <h2 class="s-h2">Submit to the Swarm</h2>
+  <p class="s-desc">Type any memory, interaction, or thought. The swarm will crystallize it into art metadata via Gemini.</p>
+  <div class="xtal-box">
+    <div class="xtal-label">MEMORY INPUT</div>
+    <textarea id="xtal-input" class="xtal-textarea" placeholder="Describe an interaction, trade, thought, or event..."></textarea>
+    <div class="xtal-row">
+      <select id="xtal-type" class="xtal-sel">
+        <option value="with_human">with_human</option>
+        <option value="with_agent">with_agent</option>
+        <option value="with_world" selected>with_world</option>
+      </select>
+      <label class="xtal-toggle"><input type="checkbox" id="xtal-private"> PRIVATE MODE</label>
+      <button id="xtal-btn" class="xtal-btn">&#x2B21; CRYSTALLIZE</button>
+    </div>
+    <div id="xtal-status" class="xtal-status"></div>
+    <div id="xtal-result" class="xtal-result">
+      <div id="xtal-rtitle" class="xtal-rtitle"></div>
+      <div id="xtal-haiku" class="xtal-haiku"></div>
+      <div id="xtal-essence" class="xtal-essence"></div>
+      <div id="xtal-kws" class="xtal-kws"></div>
+      <div id="xtal-meta" class="xtal-meta"></div>
+      <div id="xtal-pii" class="xtal-pii"></div>
+    </div>
+  </div>
+</section>
 
 <section class="gallery-section" id="gallery">
   <div class="s-eye">&#x25C8; PERMANENT COLLECTION</div>
@@ -579,6 +637,56 @@ if(grid){
   R.setSize(W(),H());
   var start=Date.now();
   (function loop(){requestAnimationFrame(loop);var t=(Date.now()-start)/1e3;uni.u_t.value=t;uni.u_m.value.set(mx.x,mx.y);pts.rotation.y=t*.04+mx.x*.2;pts.rotation.x=Math.sin(t*.03)*.06+mx.y*.1;R.render(sc,cam);})();
+})();
+
+// ── CRYSTALLIZE UI ────────────────────────────────────────────────
+(function(){
+  var btn=document.getElementById('xtal-btn');
+  var input=document.getElementById('xtal-input');
+  var typeEl=document.getElementById('xtal-type');
+  var privEl=document.getElementById('xtal-private');
+  var status=document.getElementById('xtal-status');
+  var result=document.getElementById('xtal-result');
+
+  function setStatus(msg,cls){status.textContent=msg;status.className='xtal-status '+(cls||'');}
+
+  btn.addEventListener('click',async function(){
+    var text=input.value.trim();
+    if(!text){setStatus('Enter a memory first.','err');return;}
+    btn.disabled=true;
+    setStatus('CRYSTALLIZING...','');
+    result.classList.remove('show');
+    var endpoint=privEl.checked?'/api/private-crystallize':'/api/crystallize';
+    try{
+      var res=await fetch(endpoint,{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({rawInput:text,interactionType:typeEl.value,interactionCount:1})
+      });
+      var data=await res.json();
+      if(!res.ok||data.error){setStatus('ERROR: '+(data.error||'Unknown'),'err');btn.disabled=false;return;}
+      var m=data.memory;
+      var c=m.crystallized;
+      document.getElementById('xtal-rtitle').textContent=c.title||'';
+      document.getElementById('xtal-haiku').textContent=(c.haiku||'').replace(/\\n/g,'\n');
+      document.getElementById('xtal-essence').textContent=c.essence||'';
+      var kwEl=document.getElementById('xtal-kws');
+      kwEl.innerHTML='';
+      (c.keywords||[]).forEach(function(k){var s=document.createElement('span');s.className='xtal-kw';s.textContent=k;kwEl.appendChild(s);});
+      var metaEl=document.getElementById('xtal-meta');
+      metaEl.innerHTML='<span class="xtal-badge tier">'+m.ageTier+'</span><span class="xtal-badge score">WISDOM '+m.wisdomScore+'</span>'+
+        (privEl.checked?'<span class="xtal-badge priv">PRIVATE MODE ✓</span>':'');
+      var piiEl=document.getElementById('xtal-pii');
+      if(m.privacy&&m.privacy.piiFound){
+        piiEl.textContent='PII STRIPPED: '+m.privacy.redactions.join(', ');
+      } else {
+        piiEl.textContent='';
+      }
+      result.classList.add('show');
+      setStatus('CRYSTALLIZED ✓','ok');
+    }catch(e){setStatus('ERROR: '+e.message,'err');}
+    btn.disabled=false;
+  });
 })();
 </script>
 

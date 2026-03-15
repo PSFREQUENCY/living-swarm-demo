@@ -58,6 +58,7 @@ html,body{background:var(--void);color:#c8c8d8;font-family:'JetBrains Mono','Cou
 .wrow{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px;flex-wrap:wrap}
 .waddr{font-size:9px;color:#2a2a5a;background:rgba(0,0,0,.3);padding:5px 10px;border-radius:6px;border:1px solid #0a0a1a}
 .wcbtn{background:rgba(155,89,255,.1);border:1px solid rgba(155,89,255,.22);color:var(--violet);font-family:inherit;font-size:9px;letter-spacing:.1em;padding:5px 12px;border-radius:7px;cursor:pointer;transition:all .2s}.wcbtn:hover{background:rgba(155,89,255,.18)}
+.nettog{display:flex;gap:4px}.netbtn{background:rgba(0,0,0,.3);border:1px solid #1a1a3a;color:#333;font-family:inherit;font-size:8px;letter-spacing:.12em;padding:4px 10px;border-radius:6px;cursor:pointer;transition:all .2s}.netbtn.active{border-color:rgba(0,245,255,.4);color:var(--cyan);background:rgba(0,245,255,.06)}.netbtn:hover:not(.active){color:#666;border-color:#333}
 .term{background:#020208;border:1px solid #0a0a18;border-radius:10px;padding:12px;min-height:110px;max-height:240px;overflow-y:auto;font-size:10px;line-height:1.8}
 .ll{margin-bottom:1px}
 .lts{color:#1a1a3a}.la{color:var(--violet)}.ld{color:#444}.lok{color:var(--sage)}.lw{color:var(--gold)}.le{color:var(--red)}.ltx{color:var(--cyan)}.lp{color:var(--plasma)}.larb{color:var(--orange)}
@@ -83,7 +84,13 @@ html,body{background:var(--void);color:#c8c8d8;font-family:'JetBrains Mono','Cou
     <div class="ctitle">&#x25CE; WALLET</div>
     <div class="wrow">
       <div><div style="font-size:8px;color:#333;letter-spacing:.15em;margin-bottom:4px">ADDRESS</div><div class="waddr" id="waddr">NOT CONNECTED</div></div>
-      <button class="wcbtn" id="wcbtn" onclick="connectWallet()">CONNECT</button>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
+        <div class="nettog">
+          <button class="netbtn active" id="net-mainnet" onclick="setNetwork('mainnet')">MAINNET</button>
+          <button class="netbtn" id="net-sepolia" onclick="setNetwork('sepolia')">SEPOLIA</button>
+        </div>
+        <button class="wcbtn" id="wcbtn" onclick="connectWallet()">CONNECT</button>
+      </div>
     </div>
   </div>
   <div class="card">
@@ -174,14 +181,40 @@ html,body{background:var(--void);color:#c8c8d8;font-family:'JetBrains Mono','Cou
 </div>
 <script>
 function log(cls,key,msg){var t=new Date().toTimeString().slice(0,8);var el=document.createElement('div');el.className='ll';el.innerHTML='<span class="lts">['+t+']</span> <span class="'+cls+'">'+key+'</span> <span class="ld">'+msg+'</span>';var term=document.getElementById('term');term.appendChild(el);term.scrollTop=term.scrollHeight;}
-var S={wallet:null,quoteData:null};
-var SYMS={'0x0000000000000000000000000000000000000000':{s:'ETH',d:18},'0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48':{s:'USDC',d:6},'0xdac17f958d2ee523a2206206994597c13d831ec7':{s:'USDT',d:6},'0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2':{s:'WETH',d:18},'0x6b175474e89094c44da98b954eedeac495271d0f':{s:'DAI',d:18}};
+var CHAINS={
+  mainnet:{id:1,hex:'0x1',name:'MAINNET',tokens:[
+    {a:'0x0000000000000000000000000000000000000000',s:'ETH',d:18},
+    {a:'0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',s:'USDC',d:6},
+    {a:'0xdAC17F958D2ee523a2206206994597C13D831ec7',s:'USDT',d:6},
+    {a:'0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',s:'WETH',d:18},
+    {a:'0x6B175474E89094C44Da98b954EedeAC495271d0F',s:'DAI',d:18}
+  ]},
+  sepolia:{id:11155111,hex:'0xaa36a7',name:'SEPOLIA',tokens:[
+    {a:'0x0000000000000000000000000000000000000000',s:'ETH',d:18},
+    {a:'0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14',s:'WETH',d:18},
+    {a:'0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238',s:'USDC',d:6}
+  ]}
+};
+var S={wallet:null,quoteData:null,chain:CHAINS.mainnet};
+function setNetwork(n){
+  S.chain=CHAINS[n];S.quoteData=null;
+  document.getElementById('net-mainnet').className='netbtn'+(n==='mainnet'?' active':'');
+  document.getElementById('net-sepolia').className='netbtn'+(n==='sepolia'?' active':'');
+  var tks=S.chain.tokens;
+  function fillSel(id,skip){var sel=document.getElementById(id);sel.innerHTML='';tks.forEach(function(t,i){if(i===skip)return;var o=document.createElement('option');o.value=t.a;o.textContent=t.s;sel.appendChild(o);});}
+  fillSel('tin',1);fillSel('tout',0);
+  document.getElementById('outval').textContent='—';document.getElementById('outrate').textContent='';
+  document.getElementById('qdetails').style.display='none';document.getElementById('arbcard').style.display='none';
+  log('la','NETWORK',S.chain.name+' (chainId '+S.chain.id+')');
+}
+var SYMS={};
+CHAINS.mainnet.tokens.concat(CHAINS.sepolia.tokens).forEach(function(t){SYMS[t.a.toLowerCase()]={s:t.s,d:t.d};});
 var RN={0:'CLASSIC',1:'DUTCH_LIMIT',2:'DUTCH_V2',3:'LIMIT_ORDER',4:'WRAP',5:'UNWRAP',6:'BRIDGE',7:'PRIORITY',8:'DUTCH_V3',9:'QUICKROUTE',10:'CHAINED'};
 function arbScore(b){var s=0;var a=0;try{a=parseFloat(b.amount||'0');}catch(e){}if(a>10)s+=40;else if(a>1)s+=20;else s+=5;if((b.tokenInChainId||1)!==(b.tokenOutChainId||1))s+=25;var K=['0x0000000000000000000000000000000000000000','0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48','0xdac17f958d2ee523a2206206994597c13d831ec7','0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2','0x6b175474e89094c44da98b954eedeac495271d0f'];if(K.indexOf((b.tokenIn||'').toLowerCase())<0)s+=15;if(K.indexOf((b.tokenOut||'').toLowerCase())<0)s+=15;return Math.min(s,100);}
 function arbBand(s){if(s<=25)return{band:'PASS',action:'execute'};if(s<=50)return{band:'LOG',action:'log'};if(s<=75)return{band:'HOLD',action:'hold'};return{band:'BLOCK',action:'block'};}
 function setStep(n){for(var i=1;i<=6;i++){var e=document.getElementById('s'+i);e.className='step'+(i<n?' done':i===n?' active':'');}}
-async function ensureMainnet(){var chain=await window.ethereum.request({method:'eth_chainId'});if(chain==='0x1')return true;log('lw','NETWORK','Switching to Ethereum Mainnet...');try{await window.ethereum.request({method:'wallet_switchEthereumChain',params:[{chainId:'0x1'}]});log('lok','NETWORK','Switched to Mainnet');return true;}catch(e){log('le','NETWORK_ERR','Switch failed: '+e.message);return false;}}
-async function connectWallet(){if(!window.ethereum){log('le','WALLET','No wallet detected. Install MetaMask.');return;}try{var a=await window.ethereum.request({method:'eth_requestAccounts'});S.wallet=a[0];document.getElementById('waddr').textContent=a[0].slice(0,6)+'...'+a[0].slice(-4);document.getElementById('wcbtn').textContent='CONNECTED';document.getElementById('wcbtn').style.color='var(--sage)';log('lok','WALLET',a[0]);var chain=await window.ethereum.request({method:'eth_chainId'});if(chain!=='0x1')log('lw','NETWORK','Not on Mainnet (chainId '+chain+') — will switch before swap');}catch(e){log('le','WALLET_ERR',e.message);}}
+async function ensureChain(){var cur=await window.ethereum.request({method:'eth_chainId'});if(cur===S.chain.hex)return true;log('lw','NETWORK','Switching to '+S.chain.name+'...');try{await window.ethereum.request({method:'wallet_switchEthereumChain',params:[{chainId:S.chain.hex}]});log('lok','NETWORK','Switched to '+S.chain.name);return true;}catch(e){log('le','NETWORK_ERR','Switch failed: '+e.message);return false;}}
+async function connectWallet(){if(!window.ethereum){log('le','WALLET','No wallet detected. Install MetaMask.');return;}try{var a=await window.ethereum.request({method:'eth_requestAccounts'});S.wallet=a[0];document.getElementById('waddr').textContent=a[0].slice(0,6)+'...'+a[0].slice(-4);document.getElementById('wcbtn').textContent='CONNECTED';document.getElementById('wcbtn').style.color='var(--sage)';log('lok','WALLET',a[0]);var chain=await window.ethereum.request({method:'eth_chainId'});if(chain!==S.chain.hex)log('lw','NETWORK','Not on '+S.chain.name+' ('+chain+') — will switch before swap');}catch(e){log('le','WALLET_ERR',e.message);}}
 function flip(){var i=document.getElementById('tin'),o=document.getElementById('tout'),t=i.value;for(var x=0;x<i.options.length;x++)if(i.options[x].value===o.value){i.selectedIndex=x;break;}for(var x=0;x<o.options.length;x++)if(o.options[x].value===t){o.selectedIndex=x;break;}}
 function toWei(amt,dec){var p=String(amt).split('.'),f=BigInt(10)**BigInt(dec);return(BigInt(p[0]||'0')*f+(p[1]?BigInt(p[1].slice(0,dec).padEnd(dec,'0')):BigInt(0))).toString();}
 async function getQuote(){
@@ -192,7 +225,8 @@ async function getQuote(){
   log('la','QUOTE_REQ',amt+' '+im.s+' -> '+om.s);
   var btn=document.getElementById('qbtn');btn.disabled=true;btn.textContent='FETCHING...';
   try{
-    var qpayload={type:'EXACT_INPUT',amount:toWei(amt,im.d),tokenIn:ti,tokenOut:to,tokenInChainId:1,tokenOutChainId:1,swapper:sw,routingPreference:'BEST_PRICE',autoSlippage:'DEFAULT',urgency:'urgent',permitAmount:'FULL'};
+    var cid=S.chain.id;
+    var qpayload={type:'EXACT_INPUT',amount:toWei(amt,im.d),tokenIn:ti,tokenOut:to,tokenInChainId:cid,tokenOutChainId:cid,swapper:sw,routingPreference:'BEST_PRICE',autoSlippage:'DEFAULT',urgency:'urgent',permitAmount:'FULL'};
     var r=await fetch('/api/uniswap/quote',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(qpayload)});
     var d=await r.json();
     // client-side arbiter
@@ -247,7 +281,7 @@ async function checkApproval(){
   log('lp','PERMIT2','Checking approval...');
   try{
     var amt=document.getElementById('amtin').value||'0.1',im=SYMS[ti.toLowerCase()]||{d:18};
-    var r=await fetch('/api/uniswap/approval',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token:ti,amount:toWei(amt,im.d),walletAddress:S.wallet,chainId:1})});
+    var r=await fetch('/api/uniswap/approval',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token:ti,amount:toWei(amt,im.d),walletAddress:S.wallet,chainId:S.chain.id})});
     var d=await r.json();
     if(d.needsApproval){log('lw','APPROVAL_NEEDED','Token needs Permit2 approval');document.getElementById('p2box').style.display='';}
     else log('lok','PERMIT2_OK','Already approved');
@@ -257,7 +291,7 @@ async function checkApproval(){
 async function executeSwap(){
   if(!S.quoteData)return;
   setStep(5);var btn=document.getElementById('execbtn');btn.disabled=true;
-  if(window.ethereum&&S.wallet){var ok=await ensureMainnet();if(!ok){btn.disabled=false;return;}}
+  if(window.ethereum&&S.wallet){var ok=await ensureChain();if(!ok){btn.disabled=false;return;}}
   var d=S.quoteData,quote=d.quote;
   if(!quote){log('le','NO_QUOTE','routing: '+d.routing);btn.disabled=false;return;}
   log('la','SWAP_BUILD','Building tx...');

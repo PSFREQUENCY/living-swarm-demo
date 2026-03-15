@@ -180,7 +180,8 @@ var RN={0:'CLASSIC',1:'DUTCH_LIMIT',2:'DUTCH_V2',3:'LIMIT_ORDER',4:'WRAP',5:'UNW
 function arbScore(b){var s=0;var a=0;try{a=parseFloat(b.amount||'0');}catch(e){}if(a>10)s+=40;else if(a>1)s+=20;else s+=5;if((b.tokenInChainId||1)!==(b.tokenOutChainId||1))s+=25;var K=['0x0000000000000000000000000000000000000000','0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48','0xdac17f958d2ee523a2206206994597c13d831ec7','0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2','0x6b175474e89094c44da98b954eedeac495271d0f'];if(K.indexOf((b.tokenIn||'').toLowerCase())<0)s+=15;if(K.indexOf((b.tokenOut||'').toLowerCase())<0)s+=15;return Math.min(s,100);}
 function arbBand(s){if(s<=25)return{band:'PASS',action:'execute'};if(s<=50)return{band:'LOG',action:'log'};if(s<=75)return{band:'HOLD',action:'hold'};return{band:'BLOCK',action:'block'};}
 function setStep(n){for(var i=1;i<=6;i++){var e=document.getElementById('s'+i);e.className='step'+(i<n?' done':i===n?' active':'');}}
-async function connectWallet(){if(!window.ethereum){log('le','WALLET','No wallet detected. Install MetaMask.');return;}try{var a=await window.ethereum.request({method:'eth_requestAccounts'});S.wallet=a[0];document.getElementById('waddr').textContent=a[0].slice(0,6)+'...'+a[0].slice(-4);document.getElementById('wcbtn').textContent='CONNECTED';document.getElementById('wcbtn').style.color='var(--sage)';log('lok','WALLET',a[0]);}catch(e){log('le','WALLET_ERR',e.message);}}
+async function ensureMainnet(){var chain=await window.ethereum.request({method:'eth_chainId'});if(chain==='0x1')return true;log('lw','NETWORK','Switching to Ethereum Mainnet...');try{await window.ethereum.request({method:'wallet_switchEthereumChain',params:[{chainId:'0x1'}]});log('lok','NETWORK','Switched to Mainnet');return true;}catch(e){log('le','NETWORK_ERR','Switch failed: '+e.message);return false;}}
+async function connectWallet(){if(!window.ethereum){log('le','WALLET','No wallet detected. Install MetaMask.');return;}try{var a=await window.ethereum.request({method:'eth_requestAccounts'});S.wallet=a[0];document.getElementById('waddr').textContent=a[0].slice(0,6)+'...'+a[0].slice(-4);document.getElementById('wcbtn').textContent='CONNECTED';document.getElementById('wcbtn').style.color='var(--sage)';log('lok','WALLET',a[0]);var chain=await window.ethereum.request({method:'eth_chainId'});if(chain!=='0x1')log('lw','NETWORK','Not on Mainnet (chainId '+chain+') — will switch before swap');}catch(e){log('le','WALLET_ERR',e.message);}}
 function flip(){var i=document.getElementById('tin'),o=document.getElementById('tout'),t=i.value;for(var x=0;x<i.options.length;x++)if(i.options[x].value===o.value){i.selectedIndex=x;break;}for(var x=0;x<o.options.length;x++)if(o.options[x].value===t){o.selectedIndex=x;break;}}
 function toWei(amt,dec){var p=String(amt).split('.'),f=BigInt(10)**BigInt(dec);return(BigInt(p[0]||'0')*f+(p[1]?BigInt(p[1].slice(0,dec).padEnd(dec,'0')):BigInt(0))).toString();}
 async function getQuote(){
@@ -256,6 +257,7 @@ async function checkApproval(){
 async function executeSwap(){
   if(!S.quoteData)return;
   setStep(5);var btn=document.getElementById('execbtn');btn.disabled=true;
+  if(window.ethereum&&S.wallet){var ok=await ensureMainnet();if(!ok){btn.disabled=false;return;}}
   var d=S.quoteData,quote=d.quote;
   if(!quote){log('le','NO_QUOTE','routing: '+d.routing);btn.disabled=false;return;}
   log('la','SWAP_BUILD','Building tx...');

@@ -32,6 +32,6 @@ export async function POST(req: NextRequest) {
       body: JSON.stringify(body),
     });
     const d = await r.json();
-    return NextResponse.json({ ...d, routingName: RN[d.routing] || 'UNKNOWN', arbiter: {score, verdict} }, { status: r.status });
+    return NextResponse.json({ ...d, routingName: RN[d.routing] || d.routing || 'UNKNOWN', arbiter: {score, verdict} }, { status: r.status });
   } catch(e: any) { return NextResponse.json({ error: e.message }, { status: 500 }); }
 }

@@ -28,8 +28,8 @@ export type ChainKey = keyof typeof CHAINS;
 
 // ── Fill in after deploying GhostTownVault.sol ──────────────────────────────
 export const CONTRACT_ADDRESSES: Record<ChainKey, string> = {
-  mainnet: "0x0000000000000000000000000000000000000000", // TODO: deploy
-  sepolia: "0x0000000000000000000000000000000000000000", // TODO: deploy
+  mainnet: "0x0000000000000000000000000000000000000000", // TODO: deploy mainnet
+  sepolia: "0xc41d5e631E4fce9710ced106809EB3ef5D2307c0",
 };
 
 // ── ABI (minimal surface for the frontend) ──────────────────────────────────

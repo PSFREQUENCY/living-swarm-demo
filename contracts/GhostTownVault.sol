@@ -331,13 +331,8 @@ contract GhostTownVault {
             "skin","relic","companion"
         ];
         uint8[12] memory pows = [95,92,88,85,82,80,75,72,70,68,65,60];
-        // prices: rarer = higher  (in wei, ~0.001 ETH base)
-        uint256[12] memory prices = [
-            0.03 ether,0.025 ether,0.02 ether,
-            0.018 ether,0.016 ether,0.015 ether,
-            0.012 ether,0.01 ether,0.009 ether,
-            0.008 ether,0.007 ether,0.005 ether
-        ];
+        uint256 _p = 0.001 ether;
+        uint256[12] memory prices = [_p,_p,_p,_p,_p,_p,_p,_p,_p,_p,_p,_p];
 
         for (uint i; i < 12; i++) {
             uint256 id = ++itemCount;
@@ -358,19 +353,13 @@ contract GhostTownVault {
 
         // 12 Alpha items — 3× supply, ~60% power, vault-locked
         string[12] memory aNames = [
-            "Void Katana α","Ghost Armor α","Neural Crown α",
-            "Samaur-AI Scroll α","Phantom Blade α","Hex Shield α",
-            "Fleet Sigil α","Zone Key α","Cyber Steed α",
-            "Signal Cloak α","Oracle Lens α","Swarm Drone α"
+            "Void Katana  Alpha","Ghost Armor  Alpha","Neural Crown  Alpha",
+            "Samaur-AI Scroll  Alpha","Phantom Blade  Alpha","Hex Shield  Alpha",
+            "Fleet Sigil  Alpha","Zone Key  Alpha","Cyber Steed  Alpha",
+            "Signal Cloak  Alpha","Oracle Lens  Alpha","Swarm Drone  Alpha"
         ];
         uint8[12] memory aPows = [57,55,53,51,49,48,45,43,42,41,39,36];
-        // Alpha prices: slightly lower than genesis
-        uint256[12] memory aPrices = [
-            0.012 ether,0.01 ether,0.009 ether,
-            0.008 ether,0.007 ether,0.006 ether,
-            0.005 ether,0.004 ether,0.004 ether,
-            0.003 ether,0.003 ether,0.002 ether
-        ];
+        uint256[12] memory aPrices = [_p,_p,_p,_p,_p,_p,_p,_p,_p,_p,_p,_p];
 
         nextVaultUnlock = itemCount + 1; // first alpha unlocks first
 

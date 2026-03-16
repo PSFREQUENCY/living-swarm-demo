@@ -736,6 +736,6 @@ setInterval(()=>{const ns=document.querySelectorAll('.node'),r=ns[Math.floor(Mat
 </script>
 </body>
 </html>
-0:{"buildId":"kKWFmoroQ87r-diFmpcaO","rsc":["$","$1","c",{"children":[["$","div",null,{"dangerouslySetInnerHTML":{"__html":"$2"}}],null,"$L3"]}],"loading":null,"isPartial":false}
+0:{"buildId":"gmgbZt747AtrSzEfee4dP","rsc":["$","$1","c",{"children":[["$","div",null,{"dangerouslySetInnerHTML":{"__html":"$2"}}],null,"$L3"]}],"loading":null,"isPartial":false}
 3:["$","$L4",null,{"children":["$","$5",null,{"name":"Next.MetadataOutlet","children":"$@6"}]}]
 6:null

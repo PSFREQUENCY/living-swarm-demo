@@ -105,8 +105,8 @@ export const GENESIS_EDITIONS = [3,6,9,11,12,13,21,30,33,36,42,69];
 
 // ── Vault progress helper ────────────────────────────────────────────────────
 export function vaultProgress(balance: bigint, threshold: bigint): number {
-  if (threshold === 0n) return 0;
-  return Math.min(1, Number((balance * 100n) / threshold) / 100);
+  if (threshold === BigInt(0)) return 0;
+  return Math.min(1, Number((balance * BigInt(100)) / threshold) / 100);
 }
 
 // ── Switch chain via MetaMask/EIP-1193 ──────────────────────────────────────

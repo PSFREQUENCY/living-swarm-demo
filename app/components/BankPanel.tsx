@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   CHAINS, ChainKey, CONTRACT_ADDRESSES, VAULT_ABI,
   CATEGORY_ICONS, TIER_LABELS, TIER_COLORS, RARITY_BY_SUPPLY,
@@ -99,7 +99,7 @@ export default function BankPanel({ onClose }: { onClose: () => void }) {
   const [wallet, setWallet]         = useState<string>("");
   const [items, setItems]           = useState<VaultItem[]>([]);
   const [listings, setListings]     = useState<MarketListing[]>([]);
-  const [vaultBal, setVaultBal]     = useState<bigint>(0n);
+  const [vaultBal, setVaultBal]     = useState<bigint>(BigInt(0));
   const [vaultThresh, setVaultThresh] = useState<bigint>(BigInt("50000000000000000")); // 0.05 ETH
   const [season, setSeason]         = useState<number>(1);
   const [nextUnlock, setNextUnlock] = useState<number>(0);
@@ -133,31 +133,31 @@ export default function BankPanel({ onClose }: { onClose: () => void }) {
       if (!res.ok) throw new Error("metadata not ready");
       // Build item list from our known genesis + alpha set
       const mock: VaultItem[] = [
-        { id:1n,  name:"Void Katana",         season:1, power:95, tier:1, category:"weapon",   maxSupply:3n,   minted:0n, price:BigInt("1000000000000000"),  vaultLocked:false, active:true },
-        { id:2n,  name:"Ghost Armor Mk.I",    season:1, power:92, tier:1, category:"armor",    maxSupply:6n,   minted:0n, price:BigInt("1000000000000000"),  vaultLocked:false, active:true },
-        { id:3n,  name:"Neural Crown",        season:1, power:88, tier:1, category:"relic",    maxSupply:9n,   minted:0n, price:BigInt("1000000000000000"),  vaultLocked:false, active:true },
-        { id:4n,  name:"Samaur-AI Scroll",    season:1, power:85, tier:1, category:"relic",    maxSupply:11n,  minted:0n, price:BigInt("1000000000000000"),  vaultLocked:false, active:true },
-        { id:5n,  name:"Phantom Blade",       season:1, power:82, tier:1, category:"weapon",   maxSupply:12n,  minted:0n, price:BigInt("1000000000000000"),  vaultLocked:false, active:true },
-        { id:6n,  name:"Hex Shield",          season:1, power:80, tier:1, category:"armor",    maxSupply:13n,  minted:0n, price:BigInt("1000000000000000"),  vaultLocked:false, active:true },
-        { id:7n,  name:"Fleet Sigil",         season:1, power:75, tier:1, category:"relic",    maxSupply:21n,  minted:0n, price:BigInt("1000000000000000"),  vaultLocked:false, active:true },
-        { id:8n,  name:"Zone Key: Void Core", season:1, power:72, tier:1, category:"key",      maxSupply:30n,  minted:0n, price:BigInt("1000000000000000"),  vaultLocked:false, active:true },
-        { id:9n,  name:"Cyber Steed",         season:1, power:70, tier:1, category:"vehicle",  maxSupply:33n,  minted:0n, price:BigInt("1000000000000000"),   vaultLocked:false, active:true },
-        { id:10n, name:"Signal Cloak",        season:1, power:68, tier:1, category:"skin",     maxSupply:36n,  minted:0n, price:BigInt("1000000000000000"),   vaultLocked:false, active:true },
-        { id:11n, name:"Oracle Lens",         season:1, power:65, tier:1, category:"relic",    maxSupply:42n,  minted:0n, price:BigInt("1000000000000000"),   vaultLocked:false, active:true },
-        { id:12n, name:"Swarm Drone",         season:1, power:60, tier:1, category:"companion",maxSupply:69n,  minted:0n, price:BigInt("1000000000000000"),   vaultLocked:false, active:true },
+        { id:BigInt(1),  name:"Void Katana",         season:1, power:95, tier:1, category:"weapon",   maxSupply:BigInt(3),   minted:BigInt(0), price:BigInt("1000000000000000"),  vaultLocked:false, active:true },
+        { id:BigInt(2),  name:"Ghost Armor Mk.I",    season:1, power:92, tier:1, category:"armor",    maxSupply:BigInt(6),   minted:BigInt(0), price:BigInt("1000000000000000"),  vaultLocked:false, active:true },
+        { id:BigInt(3),  name:"Neural Crown",        season:1, power:88, tier:1, category:"relic",    maxSupply:BigInt(9),   minted:BigInt(0), price:BigInt("1000000000000000"),  vaultLocked:false, active:true },
+        { id:BigInt(4),  name:"Samaur-AI Scroll",    season:1, power:85, tier:1, category:"relic",    maxSupply:BigInt(11),  minted:BigInt(0), price:BigInt("1000000000000000"),  vaultLocked:false, active:true },
+        { id:BigInt(5),  name:"Phantom Blade",       season:1, power:82, tier:1, category:"weapon",   maxSupply:BigInt(12),  minted:BigInt(0), price:BigInt("1000000000000000"),  vaultLocked:false, active:true },
+        { id:BigInt(6),  name:"Hex Shield",          season:1, power:80, tier:1, category:"armor",    maxSupply:BigInt(13),  minted:BigInt(0), price:BigInt("1000000000000000"),  vaultLocked:false, active:true },
+        { id:BigInt(7),  name:"Fleet Sigil",         season:1, power:75, tier:1, category:"relic",    maxSupply:BigInt(21),  minted:BigInt(0), price:BigInt("1000000000000000"),  vaultLocked:false, active:true },
+        { id:BigInt(8),  name:"Zone Key: Void Core", season:1, power:72, tier:1, category:"key",      maxSupply:BigInt(30),  minted:BigInt(0), price:BigInt("1000000000000000"),  vaultLocked:false, active:true },
+        { id:BigInt(9),  name:"Cyber Steed",         season:1, power:70, tier:1, category:"vehicle",  maxSupply:BigInt(33),  minted:BigInt(0), price:BigInt("1000000000000000"),   vaultLocked:false, active:true },
+        { id:BigInt(10), name:"Signal Cloak",        season:1, power:68, tier:1, category:"skin",     maxSupply:BigInt(36),  minted:BigInt(0), price:BigInt("1000000000000000"),   vaultLocked:false, active:true },
+        { id:BigInt(11), name:"Oracle Lens",         season:1, power:65, tier:1, category:"relic",    maxSupply:BigInt(42),  minted:BigInt(0), price:BigInt("1000000000000000"),   vaultLocked:false, active:true },
+        { id:BigInt(12), name:"Swarm Drone",         season:1, power:60, tier:1, category:"companion",maxSupply:BigInt(69),  minted:BigInt(0), price:BigInt("1000000000000000"),   vaultLocked:false, active:true },
         // Alpha
-        { id:13n, name:"Void Katana α",       season:1, power:57, tier:2, category:"weapon",   maxSupply:9n,   minted:0n, price:BigInt("1000000000000000"),  vaultLocked:true,  active:true },
-        { id:14n, name:"Ghost Armor α",       season:1, power:55, tier:2, category:"armor",    maxSupply:18n,  minted:0n, price:BigInt("1000000000000000"),  vaultLocked:true,  active:true },
-        { id:15n, name:"Neural Crown α",      season:1, power:53, tier:2, category:"relic",    maxSupply:27n,  minted:0n, price:BigInt("1000000000000000"),   vaultLocked:true,  active:true },
-        { id:16n, name:"Samaur-AI Scroll α",  season:1, power:51, tier:2, category:"relic",    maxSupply:33n,  minted:0n, price:BigInt("1000000000000000"),   vaultLocked:true,  active:true },
-        { id:17n, name:"Phantom Blade α",     season:1, power:49, tier:2, category:"weapon",   maxSupply:36n,  minted:0n, price:BigInt("1000000000000000"),   vaultLocked:true,  active:true },
-        { id:18n, name:"Hex Shield α",        season:1, power:48, tier:2, category:"armor",    maxSupply:39n,  minted:0n, price:BigInt("1000000000000000"),   vaultLocked:true,  active:true },
-        { id:19n, name:"Fleet Sigil α",       season:1, power:45, tier:2, category:"relic",    maxSupply:63n,  minted:0n, price:BigInt("1000000000000000"),   vaultLocked:true,  active:true },
-        { id:20n, name:"Zone Key α",          season:1, power:43, tier:2, category:"key",      maxSupply:90n,  minted:0n, price:BigInt("1000000000000000"),   vaultLocked:true,  active:true },
-        { id:21n, name:"Cyber Steed α",       season:1, power:42, tier:2, category:"vehicle",  maxSupply:99n,  minted:0n, price:BigInt("1000000000000000"),   vaultLocked:true,  active:true },
-        { id:22n, name:"Signal Cloak α",      season:1, power:41, tier:2, category:"skin",     maxSupply:108n, minted:0n, price:BigInt("1000000000000000"),   vaultLocked:true,  active:true },
-        { id:23n, name:"Oracle Lens α",       season:1, power:39, tier:2, category:"relic",    maxSupply:126n, minted:0n, price:BigInt("1000000000000000"),   vaultLocked:true,  active:true },
-        { id:24n, name:"Swarm Drone α",       season:1, power:36, tier:2, category:"companion",maxSupply:207n, minted:0n, price:BigInt("1000000000000000"),   vaultLocked:true,  active:true },
+        { id:BigInt(13), name:"Void Katana α",       season:1, power:57, tier:2, category:"weapon",   maxSupply:BigInt(9),   minted:BigInt(0), price:BigInt("1000000000000000"),  vaultLocked:true,  active:true },
+        { id:BigInt(14), name:"Ghost Armor α",       season:1, power:55, tier:2, category:"armor",    maxSupply:BigInt(18),  minted:BigInt(0), price:BigInt("1000000000000000"),  vaultLocked:true,  active:true },
+        { id:BigInt(15), name:"Neural Crown α",      season:1, power:53, tier:2, category:"relic",    maxSupply:BigInt(27),  minted:BigInt(0), price:BigInt("1000000000000000"),   vaultLocked:true,  active:true },
+        { id:BigInt(16), name:"Samaur-AI Scroll α",  season:1, power:51, tier:2, category:"relic",    maxSupply:BigInt(33),  minted:BigInt(0), price:BigInt("1000000000000000"),   vaultLocked:true,  active:true },
+        { id:BigInt(17), name:"Phantom Blade α",     season:1, power:49, tier:2, category:"weapon",   maxSupply:BigInt(36),  minted:BigInt(0), price:BigInt("1000000000000000"),   vaultLocked:true,  active:true },
+        { id:BigInt(18), name:"Hex Shield α",        season:1, power:48, tier:2, category:"armor",    maxSupply:BigInt(39),  minted:BigInt(0), price:BigInt("1000000000000000"),   vaultLocked:true,  active:true },
+        { id:BigInt(19), name:"Fleet Sigil α",       season:1, power:45, tier:2, category:"relic",    maxSupply:BigInt(63),  minted:BigInt(0), price:BigInt("1000000000000000"),   vaultLocked:true,  active:true },
+        { id:BigInt(20), name:"Zone Key α",          season:1, power:43, tier:2, category:"key",      maxSupply:BigInt(90),  minted:BigInt(0), price:BigInt("1000000000000000"),   vaultLocked:true,  active:true },
+        { id:BigInt(21), name:"Cyber Steed α",       season:1, power:42, tier:2, category:"vehicle",  maxSupply:BigInt(99),  minted:BigInt(0), price:BigInt("1000000000000000"),   vaultLocked:true,  active:true },
+        { id:BigInt(22), name:"Signal Cloak α",      season:1, power:41, tier:2, category:"skin",     maxSupply:BigInt(108), minted:BigInt(0), price:BigInt("1000000000000000"),   vaultLocked:true,  active:true },
+        { id:BigInt(23), name:"Oracle Lens α",       season:1, power:39, tier:2, category:"relic",    maxSupply:BigInt(126), minted:BigInt(0), price:BigInt("1000000000000000"),   vaultLocked:true,  active:true },
+        { id:BigInt(24), name:"Swarm Drone α",       season:1, power:36, tier:2, category:"companion",maxSupply:BigInt(207), minted:BigInt(0), price:BigInt("1000000000000000"),   vaultLocked:true,  active:true },
       ];
       setItems(mock);
     } catch {
@@ -319,7 +319,7 @@ export default function BankPanel({ onClose }: { onClose: () => void }) {
                   const rarity  = RARITY_BY_SUPPLY(Number(item.maxSupply));
                   const rc      = RARITY_COLORS[rarity];
                   const tc      = TIER_COLORS[item.tier];
-                  const pct     = item.maxSupply > 0n ? Number((item.minted*100n)/item.maxSupply)/100 : 0;
+                  const pct     = item.maxSupply > BigInt(0) ? Number((item.minted*BigInt(100))/item.maxSupply)/100 : 0;
                   const qty     = mintQty[Number(item.id)] || 1;
                   const cost    = item.price * BigInt(qty);
                   return (
@@ -379,8 +379,8 @@ export default function BankPanel({ onClose }: { onClose: () => void }) {
                   </div>
                   <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(240px,1fr))",gap:10}}>
                     {items.map(item=>{
-                      const bal = item.ownedBalance || 0n;
-                      if (bal === 0n) return null;
+                      const bal = item.ownedBalance || BigInt(0);
+                      if (bal === BigInt(0)) return null;
                       return (
                         <div key={Number(item.id)} style={S.card}>
                           <div style={{fontSize:16,marginBottom:4}}>{CATEGORY_ICONS[item.category]||"📦"}</div>
@@ -398,7 +398,7 @@ export default function BankPanel({ onClose }: { onClose: () => void }) {
                         </div>
                       );
                     })}
-                    {items.every(i=>(i.ownedBalance||0n)===0n) && (
+                    {items.every(i=>(i.ownedBalance||BigInt(0))===BigInt(0)) && (
                       <div style={{color:"rgba(0,255,231,0.25)",fontSize:9,padding:20}}>No items yet — mint some from the Vault tab.</div>
                     )}
                   </div>

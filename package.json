@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start",
     "setup:rare": "npm install -g @rareprotocol/rare-cli && echo '✅ Rare CLI installed. Run: rare configure --chain sepolia --private-key 0x... --rpc-url https://...'",
-    "deploy:collection": "rare deploy erc721 'Royal Logs' 'RLOG' --chain sepolia && echo '✅ Copy contract address to RARE_CONTRACT_ADDRESS in .env.local'"
+    "deploy:collection": "rare deploy erc721 'Royal Logs' 'RLOG' --chain sepolia && echo '✅ Copy contract address to RARE_CONTRACT_ADDRESS in .env.local'",
+    "build:pages": "mv app/api /tmp/_api_routes && GITHUB_PAGES=1 NEXT_PUBLIC_BASE_PATH=/living-swarm-demo next build && mv /tmp/_api_routes app/api",
+    "deploy:pages": "npm run build:pages && touch out/.nojekyll && npx gh-pages -d out -t true"
   },
   "dependencies": {
     "ethers": "^6.16.0",
@@ -23,7 +25,9 @@
     "@types/react-dom": "^18",
     "@types/three": "^0.165.0",
     "autoprefixer": "^10",
+    "gh-pages": "^6.3.0",
     "postcss": "^8",
+    "solc": "^0.8.34",
     "tailwindcss": "^3",
     "typescript": "^5"
   }

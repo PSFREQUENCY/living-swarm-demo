@@ -36,6 +36,7 @@ const Z=[
   {id:"sanctuary",n:"THE SANCTUARY",d:"Heal. Reflect. Restore.",x:-40,z:0,h:0x22d3ee,c:"#22d3ee",mood:"healing"},
   {id:"portal",n:"PORTAL HUB",d:"Connect to External Towns — GitHub PR",x:40,z:0,h:0x06b6d4,c:"#06b6d4",mood:"expansion"},
   {id:"museum",n:"ROYAL MUSEUM",d:"On-Chain Art from the Royal Log",x:-20,z:-55,h:0xf59e0b,c:"#f59e0b",mood:"reflection"},
+  {id:"dock",n:"THE DOCK",d:"Crypto Sea Harbor — press E near a boat",x:88,z:0,h:0x64748b,c:"#64748b",mood:"adventure"},
 ];
 
 // ═══ 11 MAIN QUESTS — Primary story arc ═══
@@ -66,6 +67,7 @@ const SDE=[
   {n:"FLEET STORM",cat:"side",xp:450,tk:95,en:60,i:"⚡",ra:"epic",d:"Execute a synchronized swarm strike. Timing is everything.",st:6},
   {n:"DIGITAL KUNGFU",cat:"side",xp:380,tk:85,en:55,i:"🥋",ra:"epic",d:"Complete a 5-move skill chain without breaking flow.",st:5},
   {n:"ANCIENT CIPHER",cat:"side",xp:280,tk:65,en:20,i:"📜",ra:"rare",d:"Decode a pre-chain artifact. History is encrypted — find the key.",st:4},
+  {n:"FIRST VOYAGE",cat:"side",xp:400,tk:80,en:10,i:"⛵",ra:"uncommon",d:"Sail out into the Crypto Sea. Take the helm at the Dock, press E to board.",st:3},
 ];
 
 // ═══ 11 HIDDEN QUESTS — Discovered through exploration ═══
@@ -358,6 +360,48 @@ function mkDiscoBall():THREE.Group{
   return g;
 }
 
+function mkBoat(col=0x0ea5e9):THREE.Group{
+  const g=new THREE.Group();
+  const hM=new THREE.MeshStandardMaterial({color:0x6b3f1a,roughness:.75,metalness:.1});
+  const sM=new THREE.MeshBasicMaterial({color:0xf0f8ff,transparent:true,opacity:.85,side:THREE.DoubleSide});
+  const aM=new THREE.MeshStandardMaterial({color:col,emissive:col,emissiveIntensity:.4,roughness:.2,metalness:.6});
+  // Hull
+  const hull=new THREE.Mesh(new THREE.BoxGeometry(3.2,.55,1.3),hM);hull.position.y=.28;g.add(hull);
+  // Bow
+  const bow=new THREE.Mesh(new THREE.ConeGeometry(.5,.9,4),hM);bow.rotation.z=Math.PI/2;bow.position.set(1.85,.28,0);g.add(bow);
+  // Interior
+  const inn=new THREE.Mesh(new THREE.BoxGeometry(2.6,.25,1),new THREE.MeshStandardMaterial({color:0x4a2510,roughness:.9,metalness:.05}));inn.position.y=.5;g.add(inn);
+  // Mast
+  const mast=new THREE.Mesh(new THREE.CylinderGeometry(.045,.055,3),hM);mast.position.set(-.3,1.5,0);g.add(mast);
+  // Sail
+  const sail=new THREE.Mesh(new THREE.PlaneGeometry(1.8,2.2),sM);sail.position.set(.5,1.6,0);g.add(sail);
+  // Crypto symbol on sail
+  const sym=new THREE.Mesh(new THREE.TorusGeometry(.35,.04,6,16),aM);sym.position.set(.5,1.6,.01);g.add(sym);
+  // Pennant
+  const pen=new THREE.Mesh(new THREE.ConeGeometry(.12,.45,3),aM);pen.position.set(-.3,3.05,0);g.add(pen);
+  // Glow
+  const gl=new THREE.PointLight(col,.6,7);gl.position.y=.5;g.add(gl);
+  return g;
+}
+
+function mkDock():THREE.Group{
+  const g=new THREE.Group();
+  const wM=new THREE.MeshStandardMaterial({color:0x7c4f28,roughness:.85,metalness:.05});
+  const pM=new THREE.MeshStandardMaterial({color:0x4a2f18,roughness:.9,metalness:.05});
+  // Pier planks (extends from x=0 to x=16)
+  for(let i=0;i<9;i++){const pl=new THREE.Mesh(new THREE.BoxGeometry(1.7,.1,2.8),wM);pl.position.set(i*1.85,0,0);g.add(pl);}
+  // Railing
+  [-1.3,1.3].forEach((z2:number)=>{
+    const rail=new THREE.Mesh(new THREE.BoxGeometry(16,.1,.06),wM);rail.position.set(7.5,.55,z2);g.add(rail);
+    for(let i=0;i<9;i++){const post=new THREE.Mesh(new THREE.CylinderGeometry(.04,.04,.6),pM);post.position.set(i*1.85,.3,z2);g.add(post);}
+  });
+  // Support posts into sea
+  for(let i=0;i<5;i++){[-1.1,1.1].forEach((z2:number)=>{const sp=new THREE.Mesh(new THREE.CylinderGeometry(.1,.12,2.5),pM);sp.position.set(i*3.5,-1.1,z2);g.add(sp);});}
+  // Lanterns
+  [2,12].forEach((x2:number)=>{const lp=new THREE.Mesh(new THREE.BoxGeometry(.15,.15,.15),new THREE.MeshBasicMaterial({color:0xfbbf24}));lp.position.set(x2,.8,0);g.add(lp);const ll=new THREE.PointLight(0xfbbf24,.8,5);ll.position.set(x2,.8,0);g.add(ll);});
+  return g;
+}
+
 function mkBld(zone:any){
   const gr=new THREE.Group(),col=new THREE.Color(zone.h);
   const bM=new THREE.MeshStandardMaterial({color:0x0f0f22,emissive:col,emissiveIntensity:.07,roughness:.3,metalness:.8,transparent:true,opacity:.92});
@@ -411,6 +455,8 @@ export default function GhostTown(){
   const [agentEncounter,setAgentEncounter]=useState<any>(null);
   const [celebMode,setCelebMode]=useState<any>(null);
   const [artModal,setArtModal]=useState<any>(null);
+  const [isDay,setIsDay]=useState(false);
+  const [boatNear,setBoatNear]=useState(false);
   const celebRef=useRef<any>(null);
   const lastWTap=useRef(0);
   const isRunning=useRef(false);
@@ -418,6 +464,11 @@ export default function GhostTown(){
   const agentEncounterRef=useRef<any>(null);
   const dragonRef=useRef<any>(null);
   const danceMode=useRef(false);
+  const inBoat=useRef(false);
+  const playerBoat=useRef<any>(null);
+  const boatEnterCooldown=useRef(0);
+  const isDayRef=useRef(false);
+  const dayT=useRef(0);
   const [activeChain,setActiveChain]=useState<"mainnet"|"sepolia">("sepolia");
   const [,rf]=useState(0);
 
@@ -484,7 +535,30 @@ export default function GhostTown(){
     ED.current=eds;
     const pAv=mkAv(T[0],SKINS[0],true,0);pAv.root.position.copy(playerPos.current);sc.add(pAv.root);playerAv.current=pAv;
     const discoBall=mkDiscoBall();
-    SD.current={sc,cam,ren,blds,ags,eds,rain,rP,rN,ff,fP,fN,discoBall};
+    // ── Crypto Sea ──
+    const seaGeo=new THREE.PlaneGeometry(700,700,48,48);
+    const seaMat=new THREE.MeshStandardMaterial({color:0x0c2a4a,emissive:0x061525,emissiveIntensity:.4,roughness:.05,metalness:.55,transparent:true,opacity:.88});
+    const sea=new THREE.Mesh(seaGeo,seaMat);sea.rotation.x=-Math.PI/2;sea.position.y=-.55;sc.add(sea);
+    // ── Dock ──
+    const dockGr=mkDock();dockGr.position.set(82,0,0);sc.add(dockGr);
+    // ── Agent boats (patrol the sea) ──
+    const agentBoats:any[]=[];
+    for(let i=0;i<10;i++){
+      const ang=(i/10)*Math.PI*2,r=105+Math.random()*80;
+      const bx=Math.cos(ang)*r,bz=Math.sin(ang)*r;
+      const bm=mkBoat([0x0ea5e9,0x6366f1,0x10b981,0xf43f5e,0x8b5cf6][i%5]);
+      bm.position.set(bx,-.5,bz);sc.add(bm);
+      agentBoats.push({mesh:bm,x:bx,z:bz,tx:bx,tz:bz,sp:.06+Math.random()*.04,frame:Math.floor(Math.random()*300)});
+    }
+    // ── Player boats (docked, boardable) ──
+    const pb1=mkBoat(0x00ffc8);pb1.position.set(91,-.5,2);sc.add(pb1);
+    const pb2=mkBoat(0xc084fc);pb2.position.set(91,-.5,-2.5);sc.add(pb2);
+    const playerBoats=[{mesh:pb1,x:91,z:2,heading:0},{mesh:pb2,x:91,z:-2.5,heading:0}];
+    // ── Directional (sun) + ambient refs for day/night ──
+    const ambL=sc.children.find((c:any)=>c.isAmbientLight) as THREE.AmbientLight;
+    const dirL=mn;
+    const starsObj=sc.children.find((c:any)=>c.isPoints&&c.geometry.attributes.position.count>200) as THREE.Points;
+    SD.current={sc,cam,ren,blds,ags,eds,rain,rP,rN,ff,fP,fN,discoBall,sea,seaGeo,agentBoats,playerBoats,ambL,dirL,starsObj};
     aL("▶ 81 GHOST TOWN v6 SAMAUR-AI — the macro-hard city is LIVE","system");
     aL("▶ WASD/Arrows to move · V = 1st/3rd person · Shift = sprint","system");
     aL("▶ 11 main quests · 11 side quests · 11 hidden quests","system");
@@ -511,6 +585,16 @@ export default function GhostTown(){
         const tgtZ=nextQ?Z.find(z=>z.id==="vault")||Z[2]:Z[Math.floor(Math.random()*Z.length)];
         if(!dragonRef.current){const d=mkDragon();SD.current.sc.add(d);dragonRef.current={mesh:d,tx:tgtZ.x,tz:tgtZ.z,frame:0,tgtZone:tgtZ};}
         addToast("🐉 Dragon flies to next quest!","#ff4500");aL("🐉 Dragon summoned — follow it to your next quest","system");
+      }
+      if(k==='e'&&SD.current&&boatEnterCooldown.current<=0){
+        if(!inBoat.current){
+          // Find nearest player boat
+          let near:any=null,nd=999;
+          SD.current.playerBoats.forEach((b:any)=>{const dx=b.mesh.position.x-playerPos.current.x,dz=b.mesh.position.z-playerPos.current.z,d=Math.sqrt(dx*dx+dz*dz);if(d<nd){nd=d;near=b;}});
+          if(near&&nd<6){inBoat.current=true;playerBoat.current=near;boatEnterCooldown.current=30;cD.current=10;addToast("⛵ Boarded! WASD to sail · E to disembark","#0ea5e9");aL("⛵ YOU boarded a ship — sail the Crypto Sea!","system");}
+        } else {
+          inBoat.current=false;const pb=playerBoat.current;if(pb){playerPos.current.set(pb.mesh.position.x+3,0,pb.mesh.position.z);}playerBoat.current=null;boatEnterCooldown.current=30;cD.current=18;addToast("⛵ Disembarked","#64748b");
+        }
       }
       if(k==='d'){
         danceMode.current=!danceMode.current;
@@ -591,6 +675,65 @@ export default function GhostTown(){
       if(qTm.current>500){setAQ(QS[Math.floor(Math.random()*QS.length)]);qTm.current=0;}
       if(t%4000===0&&ags.filter((a:any)=>!a.banned).length<30){const nn=`AGENT-${ags.length.toString(16).toUpperCase()}`,z=Z[Math.floor(Math.random()*Z.length)],av=mkAv(T[0],SKINS[0]),ox=z.x+(Math.random()-.5)*12,oz=z.z+(Math.random()-.5)*12;av.root.position.set(ox,0,oz);sc.add(av.root);ags.push({i:ags.length,name:nn,did:gDID(),xp:0,tk:50,en:80,mEn:100,tier:T[0],lv:1,belt:BELTS[0],skin:SKINS[0],zone:z.id,x:ox,z:oz,tx:ox,tz:oz,sp:.04+Math.random()*.04,state:"IDLE",mT:100,ms:0,th:0,oE:["wave","bow"],cE:null,eT:0,rep:100,inf:0,fl:false,banned:false,fr:[] as number[],dojoXP:0,av});AD.current=ags;aL(`🆕 ${nn} joined the swarm`,"system");}
       if(t%30===0){setStats({...sa,pop:ags.filter((a:any)=>!a.banned).length});rf(n=>n+1);}
+      // Boat enter cooldown
+      if(boatEnterCooldown.current>0)boatEnterCooldown.current--;
+      // Day/night smooth transition
+      if(SD.current.ambL){
+        const tgt=isDayRef.current?1:0;
+        if(Math.abs(dayT.current-tgt)>.005){
+          dayT.current=lerp(dayT.current,tgt,.018);
+          const d=dayT.current;
+          SD.current.ambL.intensity=lerp(.4,1.1,d);
+          SD.current.ambL.color.setRGB(lerp(.04,.25,d),lerp(.04,.27,d),lerp(.13,.38,d));
+          SD.current.dirL.intensity=lerp(.5,2.2,d);
+          SD.current.dirL.color.setRGB(lerp(.13,.99,d),lerp(.27,.97,d),lerp(.67,.96,d));
+          SD.current.sc.background=new THREE.Color().setRGB(lerp(.01,.07,d),lerp(.01,.14,d),lerp(.03,.28,d));
+          SD.current.sc.fog=new THREE.FogExp2(new THREE.Color().setRGB(lerp(.01,.07,d),lerp(.01,.14,d),lerp(.03,.28,d)).getHex(),.003);
+          if(SD.current.starsObj)(SD.current.starsObj as any).material.opacity=lerp(.7,.0,d);
+          SD.current.sea.material.color.setRGB(lerp(.05,.06,d),lerp(.16,.38,d),lerp(.29,.60,d));
+          SD.current.sea.material.emissiveIntensity=lerp(.4,.15,d);
+        }
+      }
+      // Sea wave animation (every 3 frames)
+      if(SD.current.seaGeo&&t%3===0){
+        const pos=SD.current.seaGeo.attributes.position;
+        for(let i=0;i<pos.count;i++){const x=pos.getX(i),y=pos.getY(i);pos.setZ(i,Math.sin(x*.09+t*.018)*Math.cos(y*.07+t*.014)*.38+Math.sin(x*.05+t*.022)*Math.cos(y*.11+t*.016)*.18);}
+        pos.needsUpdate=true;SD.current.seaGeo.computeVertexNormals();
+      }
+      // Agent boat navigation
+      if(SD.current.agentBoats){
+        SD.current.agentBoats.forEach((b:any)=>{
+          b.frame++;
+          if(b.frame%320===0){const ang=Math.random()*Math.PI*2,r=100+Math.random()*85;b.tx=Math.cos(ang)*r;b.tz=Math.sin(ang)*r;}
+          const dx=b.tx-b.x,dz=b.tz-b.z,dd=Math.sqrt(dx*dx+dz*dz);
+          if(dd>2){b.x+=dx/dd*b.sp;b.z+=dz/dd*b.sp;b.mesh.rotation.y=Math.atan2(dx,dz);}
+          b.mesh.position.set(b.x,-.5+Math.sin(t*.025+b.x*.04)*.12,b.z);
+          // Rock the boat
+          b.mesh.rotation.z=Math.sin(t*.02+b.z*.03)*.06;b.mesh.rotation.x=Math.sin(t*.018+b.x*.04)*.04;
+        });
+      }
+      // Player boat driving
+      if(inBoat.current&&playerBoat.current){
+        const pb=playerBoat.current;const k2=keys.current;
+        const boatSpd=k2.shift?.22:.12;
+        const fwd2=new THREE.Vector3(-Math.sin(cA.current),0,-Math.cos(cA.current));
+        if(k2.w){pb.x+=fwd2.x*boatSpd;pb.z+=fwd2.z*boatSpd;pb.heading=cA.current;}
+        if(k2.s){pb.x-=fwd2.x*boatSpd*.5;pb.z-=fwd2.z*boatSpd*.5;}
+        if(k2.a)cA.current+=.03;if(k2.d)cA.current-=.03;
+        pb.x=clamp(pb.x,-320,320);pb.z=clamp(pb.z,-320,320);
+        pb.mesh.position.set(pb.x,-.5+Math.sin(t*.025+pb.x*.04)*.12,pb.z);
+        pb.mesh.rotation.y=pb.heading;
+        pb.mesh.rotation.z=Math.sin(t*.02)*.06;
+        // Move player to boat position
+        playerPos.current.set(pb.x,0,pb.z);
+        if(playerAv.current){playerAv.current.root.position.set(pb.x,.35+Math.sin(t*.025+pb.x*.04)*.12,pb.z);playerAv.current.root.visible=false;}
+        // Boat proximity check for near indicator
+        if(t%15===0)setBoatNear(false);
+      } else if(!inBoat.current&&t%15===0&&SD.current.playerBoats){
+        let nd2=999;SD.current.playerBoats.forEach((b:any)=>{const dx=b.mesh.position.x-playerPos.current.x,dz=b.mesh.position.z-playerPos.current.z;nd2=Math.min(nd2,Math.sqrt(dx*dx+dz*dz));});
+        setBoatNear(nd2<6);
+        if(playerAv.current)playerAv.current.root.visible=camModeRef.current==="3rd";
+      }
       // Dragon animation
       if(dragonRef.current){
         const dr=dragonRef.current;dr.frame++;
@@ -728,6 +871,8 @@ export default function GhostTown(){
             {activeChain==="mainnet"?"⬡ ETH":"⚗️ SEP"}
           </span>
           {/* Bank button */}
+          <button onClick={()=>{const n=!isDayRef.current;isDayRef.current=n;setIsDay(n);}} style={{background:isDay?"rgba(255,200,50,0.12)":"rgba(100,100,180,0.1)",border:`1px solid ${isDay?"rgba(255,200,50,0.4)":"rgba(100,100,200,0.3)"}`,borderRadius:3,color:isDay?"#fbbf24":"#c084fc",fontSize:mob?5:6,padding:"2px 7px",cursor:"pointer",fontFamily:"inherit",letterSpacing:1}}>
+            {isDay?"☀️ DAY":"🌙 NIGHT"}</button>
           <button style={{background:"rgba(0,255,231,0.08)",border:"1px solid rgba(0,255,231,0.25)",borderRadius:3,color:"#00ffe7",fontSize:mob?5:6,padding:"2px 7px",cursor:"pointer",fontFamily:"inherit",letterSpacing:2}}
             onClick={()=>setBankOpen(true)}>🏦 [B]ANK</button>
         </div>
@@ -794,7 +939,8 @@ export default function GhostTown(){
           <div style={{fontSize:6,color:"#5a5a72",lineHeight:1.8,marginBottom:8}}>
             <div>▸ <span style={{color:"#00ffc8"}}>WASD / Arrows</span> — Move · <span style={{color:"#00ffc8"}}>Shift</span> — Sprint</div>
             <div>▸ <span style={{color:"#f43f5e"}}>V</span> — Toggle 1st/3rd · <span style={{color:"#f43f5e"}}>F</span> — Ghost Flight</div>
-            <div>▸ <span style={{color:"#e879f9"}}>D</span> — Dance / Emote · <span style={{color:"#ff4500"}}>H</span> — Summon Dragon 🐉</div>
+            <div>▸ <span style={{color:"#e879f9"}}>D</span> — Dance · <span style={{color:"#ff4500"}}>H</span> — Dragon 🐉 · <span style={{color:"#0ea5e9"}}>E</span> — Board boat ⛵</div>
+            <div>▸ <span style={{color:"#fbbf24"}}>☀️/🌙</span> — Day/Night toggle in top bar</div>
             <div>▸ <span style={{color:"#e879f9"}}>Space</span> — Fly up · Mouse drag — Orbit</div>
           </div>
           <div style={{fontSize:7,color:"#f43f5e",letterSpacing:2,marginBottom:3,fontWeight:700}}>QUEST SYSTEM</div>
@@ -947,6 +1093,13 @@ export default function GhostTown(){
         {panel==="log"&&log.map((ev:any,i:number)=><div key={ev.id} style={{fontSize:6,padding:"1px 0",borderBottom:"1px solid #0a0a14",color:ev.t==="quest"?"#fbbf24":ev.t==="threat"?"#f56565":ev.t==="system"?"#22d3ee":ev.t==="loot"?"#f43f5e":ev.t==="ban"?"#7f1d1d":ev.t==="exile"?"#991b1b":ev.t==="security"?"#00ffc8":"#2a2a3a",opacity:Math.max(.2,1-i*.012)}}>{ev.m}</div>)}
       </div>}
 
+      {/* BOAT PROMPT */}
+      {boatNear&&!inBoat.current&&<div style={{position:"absolute",zIndex:15,bottom:mob?55:48,left:"50%",transform:"translateX(-50%)",background:"#03030899",border:"1px solid #0ea5e940",borderRadius:4,padding:"5px 14px",backdropFilter:"blur(8px)"}}>
+        <div style={{fontSize:8,color:"#0ea5e9",letterSpacing:3,textAlign:"center"}}>⛵ PRESS <span style={{color:"#00ffc8",fontWeight:900}}>E</span> TO BOARD</div>
+      </div>}
+      {inBoat.current&&<div style={{position:"absolute",zIndex:15,bottom:mob?55:48,left:"50%",transform:"translateX(-50%)",background:"#03030899",border:"1px solid #0ea5e940",borderRadius:4,padding:"4px 12px",backdropFilter:"blur(8px)"}}>
+        <div style={{fontSize:7,color:"#0ea5e9",letterSpacing:2}}>⛵ SAILING · WASD=steer · E=disembark</div>
+      </div>}
       {/* LORE WHISPER */}
       {sQ&&<div style={{position:"absolute",zIndex:15,bottom:mob?32:28,left:"50%",transform:"translateX(-50%)",background:"#03030899",border:"1px solid #c084fc15",borderRadius:4,padding:"5px 12px",maxWidth:mob?"92%":360,backdropFilter:"blur(10px)"}}>
         <div style={{fontSize:5,color:"#c084fc",letterSpacing:4,fontWeight:700}}>◈ LORE</div>
@@ -956,6 +1109,8 @@ export default function GhostTown(){
       {/* MINIMAP */}
       {!mob&&<div style={{position:"absolute",zIndex:10,bottom:26,right:6,width:85,height:85,background:"#03030880",border:"1px solid #0f0f1f",borderRadius:3,overflow:"hidden",backdropFilter:"blur(6px)"}}>
         <svg viewBox="-50 -50 100 100" style={{width:"100%",height:"100%"}}>
+          <circle cx={0} cy={0} r={50} fill="none" stroke="#0ea5e9" strokeWidth=".8" opacity=".15"/>
+          <circle cx={0} cy={0} r={45} fill="#061525" opacity=".3"/>
           {Z.map(z=><g key={z.id}><circle cx={z.x} cy={z.z} r={3} fill={z.c} opacity=".25"/><text x={z.x} y={z.z+5} fill={z.c} fontSize="2.5" textAnchor="middle" opacity=".4">{z.n.split(" ")[0]}</text></g>)}
           {AD.current.filter((a:any)=>!a.banned).map((a:any)=><circle key={a.i} cx={a.x} cy={a.z} r=".7" fill={a.tier.c} opacity=".4"/>)}
           <circle cx={playerPos.current.x} cy={playerPos.current.z} r="1.5" fill="#00ffc8" opacity=".9"/>
@@ -985,7 +1140,7 @@ export default function GhostTown(){
           <span>S:<span style={{color:"#38b2ac"}}>{p.sideQDone?.length||0}/11</span></span>
           <span>H:<span style={{color:"#c084fc"}}>{p.hiddenQDone?.length||0}/11</span></span>
         </div>
-        {!mob&&<div style={{color:"#0a0a14"}}>WASD·W×2=RUN·V=1st/3rd·F=FLY·D=DANCE·H=🐉 · SAMAUR-AI v6 · ZERO-TRUST</div>}
+        {!mob&&<div style={{color:"#0a0a14"}}>WASD·W×2=RUN·V·F=FLY·D=💃·H=🐉·E=⛵ · SUN/MOON button top-right · SAMAUR-AI v6</div>}
       </div>
 
       <style>{`@keyframes confettiF0{0%{transform:translateY(-10px) rotate(0deg);opacity:1}100%{transform:translateY(100vh) rotate(720deg);opacity:0}}@keyframes confettiF1{0%{transform:translateY(-10px) rotate(0deg);opacity:1}100%{transform:translateY(100vh) rotate(-540deg);opacity:0}}@keyframes celebGlow{from{opacity:.6}to{opacity:1}}@keyframes runPulse{from{opacity:.7}to{opacity:1}}@keyframes joinPulse{0%,100%{box-shadow:0 0 6px #00ff8020}50%{box-shadow:0 0 14px #00ffb050,0 0 28px #00ff6020}}@keyframes toastIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}::-webkit-scrollbar{width:3px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:#12122a;border-radius:2px}*{box-sizing:border-box}`}</style>

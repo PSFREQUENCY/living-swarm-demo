@@ -1,0 +1,3 @@
+:HL["/living-swarm-demo/_next/static/chunks/797fca2ce9b89c25.css","style"]
+:HL["/living-swarm-demo/_next/static/media/c9bd7381a27f2960-s.p.efaf60a6.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
+0:{"buildId":"ES_eodaX7PcMUoJ48HN8b","tree":{"name":"","paramType":null,"paramKey":"","hasRuntimePrefetch":false,"slots":{"children":{"name":"data-room","paramType":null,"paramKey":"data-room","hasRuntimePrefetch":false,"slots":{"children":{"name":"__PAGE__","paramType":null,"paramKey":"__PAGE__","hasRuntimePrefetch":false,"slots":null,"isRootLayout":false}},"isRootLayout":false}},"isRootLayout":true},"staleTime":300}

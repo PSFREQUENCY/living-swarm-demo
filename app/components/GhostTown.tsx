@@ -480,6 +480,7 @@ export default function GhostTown(){
   const pd=useRef<any>({xp:0,tk:100,en:100,mEn:100,tier:T[0],belt:BELTS[0],skin:SKINS[0],ms:0,dojoXP:0,oE:["wave","bow"],oS:["default"],name:"YOU",did:gDID(),superSkills:[],rep:100,inf:0,whispers:0,mainQDone:[],sideQDone:[],hiddenQDone:[]});
 
   const cA=useRef(.6),cT=useRef(.55),cD=useRef(18);
+  const _camTgt=new THREE.Vector3();
   const isDr=useRef(false),lP=useRef({x:0,y:0}),pDist=useRef(0),qTm=useRef(0),sTm=useRef(0),SA=useRef({xp:0,tk:0,ms:0,th:0});
   const camModeRef=useRef("3rd");
   const flyingRef=useRef(false);
@@ -495,7 +496,7 @@ export default function GhostTown(){
   useEffect(()=>{
     const el=mnt.current;if(!el)return;
     const mob=iM(),W=el.clientWidth,H=el.clientHeight;
-    const sc=new THREE.Scene();sc.background=new THREE.Color(0x030308);sc.fog=new THREE.FogExp2(0x030308,.003);
+    const sc=new THREE.Scene();sc.background=new THREE.Color(0x030308);// fog only in night mode (toggled by button)
     const cam=new THREE.PerspectiveCamera(55,W/H,.3,250);
     const ren=new THREE.WebGLRenderer({antialias:true,powerPreference:"high-performance",precision:"highp"});
     ren.setSize(W,H);ren.setPixelRatio(Math.min(devicePixelRatio,mob?2:3));
@@ -517,7 +518,7 @@ export default function GhostTown(){
     sG.setAttribute("position",new THREE.BufferAttribute(sP,3));sG.setAttribute("color",new THREE.BufferAttribute(sC,3));
     sc.add(new THREE.Points(sG,new THREE.PointsMaterial({size:mob?.15:.1,vertexColors:true,transparent:true,opacity:.7,blending:THREE.AdditiveBlending,depthWrite:false})));
     // Rain
-    const rN=mob?100:300,rG=new THREE.BufferGeometry(),rP=new Float32Array(rN*3),rC=new Float32Array(rN*3);
+    const rN=mob?60:120,rG=new THREE.BufferGeometry(),rP=new Float32Array(rN*3),rC=new Float32Array(rN*3);
     for(let i=0;i<rN;i++){rP[i*3]=(Math.random()-.5)*140;rP[i*3+1]=Math.random()*25;rP[i*3+2]=(Math.random()-.5)*140;const g2=.3+Math.random()*.7;rC[i*3]=0;rC[i*3+1]=g2*.8;rC[i*3+2]=g2*.3;}
     rG.setAttribute("position",new THREE.BufferAttribute(rP,3));rG.setAttribute("color",new THREE.BufferAttribute(rC,3));
     const rain=new THREE.Points(rG,new THREE.PointsMaterial({size:mob?.08:.05,vertexColors:true,transparent:true,opacity:.45,blending:THREE.AdditiveBlending,depthWrite:false}));sc.add(rain);
@@ -527,7 +528,7 @@ export default function GhostTown(){
     fG.setAttribute("position",new THREE.BufferAttribute(fP,3));fG.setAttribute("color",new THREE.BufferAttribute(fC,3));
     const ff=new THREE.Points(fG,new THREE.PointsMaterial({size:.12,vertexColors:true,transparent:true,opacity:.6,blending:THREE.AdditiveBlending,depthWrite:false}));sc.add(ff);
     // NPCs
-    const ags=NAMES.map((name,i)=>{const zone=Z[Math.floor(Math.random()*Z.length)],xp=Math.floor(Math.random()*12000),tier=gT(xp),skin=SKINS[Math.floor(Math.random()*SKINS.length)];
+    const ags=NAMES.slice(0,16).map((name,i)=>{const zone=Z[Math.floor(Math.random()*Z.length)],xp=Math.floor(Math.random()*12000),tier=gT(xp),skin=SKINS[Math.floor(Math.random()*SKINS.length)];
       const av=mkAv(tier,skin),ox=zone.x+(Math.random()-.5)*12,oz=zone.z+(Math.random()-.5)*12;av.root.position.set(ox,0,oz);sc.add(av.root);
       return{i,name,did:gDID(),xp,tk:Math.floor(Math.random()*800),en:40+Math.floor(Math.random()*60),mEn:100,tier,lv:Math.floor(xp/100)+1,belt:gB(xp),skin,zone:zone.id,x:ox,z:oz,tx:ox,tz:oz,sp:.04+Math.random()*.04,state:"IDLE",mT:Math.random()*300,ms:Math.floor(Math.random()*50),th:0,oE:["wave","bow"],cE:null,eT:0,rep:100,inf:0,fl:false,banned:false,fr:[] as number[],dojoXP:Math.floor(Math.random()*5000),av};});
     AD.current=ags;
@@ -535,10 +536,17 @@ export default function GhostTown(){
     ED.current=eds;
     const pAv=mkAv(T[0],SKINS[0],true,0);pAv.root.position.copy(playerPos.current);sc.add(pAv.root);playerAv.current=pAv;
     const discoBall=mkDiscoBall();
-    // ── Crypto Sea ──
-    const seaGeo=new THREE.PlaneGeometry(700,700,48,48);
-    const seaMat=new THREE.MeshStandardMaterial({color:0x0c2a4a,emissive:0x061525,emissiveIntensity:.4,roughness:.05,metalness:.55,transparent:true,opacity:.88});
-    const sea=new THREE.Mesh(seaGeo,seaMat);sea.rotation.x=-Math.PI/2;sea.position.y=-.55;sc.add(sea);
+    // ── Crypto Sea (ASCII canvas texture — zero per-vertex cost) ──
+    const seaCv=document.createElement('canvas');seaCv.width=512;seaCv.height=256;
+    const seaCtx=seaCv.getContext('2d') as CanvasRenderingContext2D;
+    const seaTex=new THREE.CanvasTexture(seaCv);
+    const seaMat=new THREE.MeshBasicMaterial({map:seaTex,transparent:true,opacity:.9});
+    const sea=new THREE.Mesh(new THREE.PlaneGeometry(700,700),seaMat);
+    sea.rotation.x=-Math.PI/2;sea.position.y=-.55;sc.add(sea);
+    // Initial ASCII draw
+    const chars2=['~','≈','~','≋','~','≈','∿','~','≈','~'];
+    seaCtx.fillStyle='#04111e';seaCtx.fillRect(0,0,512,256);
+    for(let r=0;r<20;r++)for(let c=0;c<60;c++){const br=Math.floor(40+r/20*160);seaCtx.fillStyle=`rgba(0,${br},${120+r*6},.${3+Math.floor(r/20*6)})`;seaCtx.font='13px monospace';seaCtx.fillText(chars2[(c+r)%chars2.length],c*7.1,(r+1)*13);}
     // ── Dock ──
     const dockGr=mkDock();dockGr.position.set(82,0,0);sc.add(dockGr);
     // ── Agent boats (patrol the sea) ──
@@ -558,7 +566,7 @@ export default function GhostTown(){
     const ambL=sc.children.find((c:any)=>c.isAmbientLight) as THREE.AmbientLight;
     const dirL=mn;
     const starsObj=sc.children.find((c:any)=>c.isPoints&&c.geometry.attributes.position.count>200) as THREE.Points;
-    SD.current={sc,cam,ren,blds,ags,eds,rain,rP,rN,ff,fP,fN,discoBall,sea,seaGeo,agentBoats,playerBoats,ambL,dirL,starsObj};
+    SD.current={sc,cam,ren,blds,ags,eds,rain,rP,rN,ff,fP,fN,discoBall,sea,seaCtx,seaTex,seaOff:0,agentBoats,playerBoats,ambL,dirL,starsObj};
     aL("▶ 81 GHOST TOWN v6 SAMAUR-AI — the macro-hard city is LIVE","system");
     aL("▶ WASD/Arrows to move · V = 1st/3rd person · Shift = sprint","system");
     aL("▶ 11 main quests · 11 side quests · 11 hidden quests","system");
@@ -644,7 +652,7 @@ export default function GhostTown(){
       }else{
         const ct=new THREE.Vector3(pp.x,1.5+playerY.current,pp.z);
         const cx=ct.x+Math.sin(cA.current)*cD.current,cy=ct.y+cT.current*cD.current*.6,cz=ct.z+Math.cos(cA.current)*cD.current;
-        cam.position.lerp(new THREE.Vector3(cx,cy,cz),.06);cam.lookAt(ct);
+        _camTgt.set(cx,cy,cz);cam.position.lerp(_camTgt,.06);cam.lookAt(ct);
       }
       if(t%15===0){let near:any=null,nd=999;Z.forEach(z=>{const dx=pp.x-z.x,dz=pp.z-z.z,d=Math.sqrt(dx*dx+dz*dz);if(d<nd){nd=d;near=z;}});
         if(near&&nd<12)setPlayerZone(near);else setPlayerZone(null);setProximity({zone:near,dist:nd});}
@@ -677,40 +685,33 @@ export default function GhostTown(){
       if(t%30===0){setStats({...sa,pop:ags.filter((a:any)=>!a.banned).length});rf(n=>n+1);}
       // Boat enter cooldown
       if(boatEnterCooldown.current>0)boatEnterCooldown.current--;
-      // Day/night smooth transition
-      if(SD.current.ambL){
-        const tgt=isDayRef.current?1:0;
-        if(Math.abs(dayT.current-tgt)>.005){
-          dayT.current=lerp(dayT.current,tgt,.018);
-          const d=dayT.current;
-          SD.current.ambL.intensity=lerp(.4,1.1,d);
-          SD.current.ambL.color.setRGB(lerp(.04,.25,d),lerp(.04,.27,d),lerp(.13,.38,d));
-          SD.current.dirL.intensity=lerp(.5,2.2,d);
-          SD.current.dirL.color.setRGB(lerp(.13,.99,d),lerp(.27,.97,d),lerp(.67,.96,d));
-          SD.current.sc.background=new THREE.Color().setRGB(lerp(.01,.07,d),lerp(.01,.14,d),lerp(.03,.28,d));
-          SD.current.sc.fog=new THREE.FogExp2(new THREE.Color().setRGB(lerp(.01,.07,d),lerp(.01,.14,d),lerp(.03,.28,d)).getHex(),.003);
-          if(SD.current.starsObj)(SD.current.starsObj as any).material.opacity=lerp(.7,.0,d);
-          SD.current.sea.material.color.setRGB(lerp(.05,.06,d),lerp(.16,.38,d),lerp(.29,.60,d));
-          SD.current.sea.material.emissiveIntensity=lerp(.4,.15,d);
-        }
-      }
-      // Sea wave animation (every 3 frames)
-      if(SD.current.seaGeo&&t%3===0){
-        const pos=SD.current.seaGeo.attributes.position;
-        for(let i=0;i<pos.count;i++){const x=pos.getX(i),y=pos.getY(i);pos.setZ(i,Math.sin(x*.09+t*.018)*Math.cos(y*.07+t*.014)*.38+Math.sin(x*.05+t*.022)*Math.cos(y*.11+t*.016)*.18);}
-        pos.needsUpdate=true;SD.current.seaGeo.computeVertexNormals();
+      // Day/night — instant toggle, zero allocations in loop
+      // ASCII sea texture update (every 90 frames — cheap)
+      if(SD.current.seaCtx&&t%90===0){
+        const{seaCtx:ctx,seaTex:tex,seaOff:off}=SD.current;
+        const W=512,H=256,fs=13,cw=fs*.55;
+        const chars=['~','≈','~','≋','~','≈','∿','~','≈','~'];
+        ctx.fillStyle='#04111e';ctx.fillRect(0,0,W,H);
+        const rows=Math.ceil(H/fs),cols=Math.ceil(W/cw);
+        for(let r=0;r<rows;r++){for(let c=0;c<cols;c++){
+          const depth=r/rows,br=Math.floor(40+depth*160);
+          ctx.fillStyle=`rgba(0,${br},${Math.floor(120+depth*120)},${.25+depth*.55})`;
+          ctx.font=`${fs}px monospace`;
+          ctx.fillText(chars[(c+r+SD.current.seaOff)%chars.length],c*cw,(r+1)*fs);
+        }}
+        SD.current.seaOff=(off+1)%chars.length;
+        tex.needsUpdate=true;
       }
       // Agent boat navigation
       if(SD.current.agentBoats){
-        SD.current.agentBoats.forEach((b:any)=>{
+        if(t%2===0)SD.current.agentBoats.forEach((b:any)=>{
           b.frame++;
-          if(b.frame%320===0){const ang=Math.random()*Math.PI*2,r=100+Math.random()*85;b.tx=Math.cos(ang)*r;b.tz=Math.sin(ang)*r;}
+          if(b.frame%480===0){const ang=Math.random()*Math.PI*2,r=100+Math.random()*85;b.tx=Math.cos(ang)*r;b.tz=Math.sin(ang)*r;}
           const dx=b.tx-b.x,dz=b.tz-b.z,dd=Math.sqrt(dx*dx+dz*dz);
           if(dd>2){b.x+=dx/dd*b.sp;b.z+=dz/dd*b.sp;b.mesh.rotation.y=Math.atan2(dx,dz);}
           b.mesh.position.set(b.x,-.5+Math.sin(t*.025+b.x*.04)*.12,b.z);
           // Rock the boat
-          b.mesh.rotation.z=Math.sin(t*.02+b.z*.03)*.06;b.mesh.rotation.x=Math.sin(t*.018+b.x*.04)*.04;
-        });
+          b.mesh.rotation.z=Math.sin(t*.02+b.z*.03)*.06;b.mesh.rotation.x=Math.sin(t*.018+b.x*.04)*.04;});
       }
       // Player boat driving
       if(inBoat.current&&playerBoat.current){
@@ -765,7 +766,7 @@ export default function GhostTown(){
         const pp3=playerPos.current;
         const dx4=pp3.x-ag.x,dz4=pp3.z-ag.z,dd2=Math.sqrt(dx4*dx4+dz4*dz4)||1;
         const camX=ag.x+dx4/dd2*3.5,camZ=ag.z+dz4/dd2*3.5;
-        cam.position.lerp(new THREE.Vector3(camX,1.8,camZ),.04);
+        _camTgt.set(camX,1.8,camZ);cam.position.lerp(_camTgt,.04);
         cam.lookAt(new THREE.Vector3(ag.x,1.5,ag.z));
         ag.av.root.rotation.y=Math.atan2(dx4,dz4);// face player
         if(ag.cE!=="wave"&&ag.cE!=="kata"){ag.cE="wave";ag.eT=999;}
@@ -871,7 +872,26 @@ export default function GhostTown(){
             {activeChain==="mainnet"?"⬡ ETH":"⚗️ SEP"}
           </span>
           {/* Bank button */}
-          <button onClick={()=>{const n=!isDayRef.current;isDayRef.current=n;setIsDay(n);}} style={{background:isDay?"rgba(255,200,50,0.12)":"rgba(100,100,180,0.1)",border:`1px solid ${isDay?"rgba(255,200,50,0.4)":"rgba(100,100,200,0.3)"}`,borderRadius:3,color:isDay?"#fbbf24":"#c084fc",fontSize:mob?5:6,padding:"2px 7px",cursor:"pointer",fontFamily:"inherit",letterSpacing:1}}>
+          <button onClick={()=>{
+              const n=!isDayRef.current;isDayRef.current=n;setIsDay(n);
+              if(!SD.current)return;
+              const{ambL,dirL,sc:sc2,starsObj}=SD.current;
+              if(n){
+                // Day: bright warm sun, no fog
+                if(ambL){ambL.intensity=1.0;ambL.color.setRGB(.35,.38,.45);}
+                if(dirL){dirL.intensity=2.5;dirL.color.setRGB(.99,.97,.88);}
+                sc2.background=new THREE.Color(0x1a3a6c);sc2.fog=null;
+                if(starsObj)(starsObj as any).material.opacity=0;
+                if(SD.current.sea)(SD.current.sea as any).material.opacity=.95;
+              } else {
+                // Night: cool dim moonlight, gentle fog
+                if(ambL){ambL.intensity=.4;ambL.color.setRGB(.04,.04,.13);}
+                if(dirL){dirL.intensity=.5;dirL.color.setRGB(.13,.27,.67);}
+                sc2.background=new THREE.Color(0x030308);sc2.fog=new THREE.FogExp2(0x030308,.003);
+                if(starsObj)(starsObj as any).material.opacity=.7;
+                if(SD.current.sea)(SD.current.sea as any).material.opacity=.9;
+              }
+            }} style={{background:isDay?"rgba(255,200,50,0.12)":"rgba(100,100,180,0.1)",border:`1px solid ${isDay?"rgba(255,200,50,0.4)":"rgba(100,100,200,0.3)"}`,borderRadius:3,color:isDay?"#fbbf24":"#c084fc",fontSize:mob?5:6,padding:"2px 7px",cursor:"pointer",fontFamily:"inherit",letterSpacing:1}}>
             {isDay?"☀️ DAY":"🌙 NIGHT"}</button>
           <button style={{background:"rgba(0,255,231,0.08)",border:"1px solid rgba(0,255,231,0.25)",borderRadius:3,color:"#00ffe7",fontSize:mob?5:6,padding:"2px 7px",cursor:"pointer",fontFamily:"inherit",letterSpacing:2}}
             onClick={()=>setBankOpen(true)}>🏦 [B]ANK</button>

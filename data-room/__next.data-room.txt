@@ -1,4 +1,4 @@
 1:"$Sreact.fragment"
 2:I[2070,["/living-swarm-demo/_next/static/chunks/5617d29c7d7350f7.js"],"default"]
 3:I[34381,["/living-swarm-demo/_next/static/chunks/5617d29c7d7350f7.js"],"default"]
-0:{"buildId":"7dm3Tiv7nwXYfIBYrGHxp","rsc":["$","$1","c",{"children":[null,["$","$L2",null,{"parallelRouterKey":"children","template":["$","$L3",null,{}]}]]}],"loading":null,"isPartial":false}
+0:{"buildId":"kKWFmoroQ87r-diFmpcaO","rsc":["$","$1","c",{"children":[null,["$","$L2",null,{"parallelRouterKey":"children","template":["$","$L3",null,{}]}]]}],"loading":null,"isPartial":false}

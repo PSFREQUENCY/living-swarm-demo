@@ -1,6 +1,0 @@
-[
-  {
-    "regexp": "^\\/living-swarm-demo(?:\\/(_next\\/data\\/[^/]{1,}))?\\/api\\/swarm(?:\\/((?:[^\\/#\\?]+?)(?:\\/(?:[^\\/#\\?]+?))*))?(\\\\.json)?[\\/#\\?]?$",
-    "originalSource": "/api/swarm/:path*"
-  }
-]

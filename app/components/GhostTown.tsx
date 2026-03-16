@@ -480,7 +480,14 @@ export default function GhostTown(){
   const pd=useRef<any>({xp:0,tk:100,en:100,mEn:100,tier:T[0],belt:BELTS[0],skin:SKINS[0],ms:0,dojoXP:0,oE:["wave","bow"],oS:["default"],name:"YOU",did:gDID(),superSkills:[],rep:100,inf:0,whispers:0,mainQDone:[],sideQDone:[],hiddenQDone:[]});
 
   const cA=useRef(.6),cT=useRef(.55),cD=useRef(18);
-  const _camTgt=new THREE.Vector3();
+  const _camTgt=useRef(new THREE.Vector3()).current;
+  const _fwd=useRef(new THREE.Vector3()).current;
+  const _right=useRef(new THREE.Vector3()).current;
+  const _mv=useRef(new THREE.Vector3()).current;
+  const _tgt=useRef(new THREE.Vector3()).current;
+  const _lookAt=useRef(new THREE.Vector3()).current;
+  const _ct=useRef(new THREE.Vector3()).current;
+  const _agLook=useRef(new THREE.Vector3()).current;
   const isDr=useRef(false),lP=useRef({x:0,y:0}),pDist=useRef(0),qTm=useRef(0),sTm=useRef(0),SA=useRef({xp:0,tk:0,ms:0,th:0});
   const camModeRef=useRef("3rd");
   const flyingRef=useRef(false);
@@ -627,20 +634,20 @@ export default function GhostTown(){
     const loop=()=>{
       if(!run)return;AID.current=requestAnimationFrame(loop);const t=++FC.current;qTm.current++;sTm.current++;
       const k=keys.current;let moving=false;const spd=isRunning.current?.32:k.shift?.18:.1;
-      const fwd=new THREE.Vector3(-Math.sin(cA.current),0,-Math.cos(cA.current)).normalize();
-      const right=new THREE.Vector3(fwd.z,0,-fwd.x);
-      const mv=new THREE.Vector3();
+      _fwd.set(-Math.sin(cA.current),0,-Math.cos(cA.current)).normalize();
+      _right.set(_fwd.z,0,-_fwd.x);
+      _mv.set(0,0,0);
       const jx=joyDir.current.x,jy=joyDir.current.y;
-      if(k.w||jy<-.3){mv.add(fwd);moving=true;}
-      if(k.s||jy>.3){mv.sub(fwd);moving=true;}
-      if(k.a||jx<-.3){mv.sub(right);moving=true;}
-      if(k.d||jx>.3){mv.add(right);moving=true;}
-      if(mv.lengthSq()>0){mv.normalize().multiplyScalar(spd);playerPos.current.add(mv);playerPos.current.x=clamp(playerPos.current.x,-95,95);playerPos.current.z=clamp(playerPos.current.z,-95,95);playerAngle.current=Math.atan2(mv.x,mv.z);}
+      if(k.w||jy<-.3){_mv.add(_fwd);moving=true;}
+      if(k.s||jy>.3){_mv.sub(_fwd);moving=true;}
+      if(k.a||jx<-.3){_mv.sub(_right);moving=true;}
+      if(k.d||jx>.3){_mv.add(_right);moving=true;}
+      if(_mv.lengthSq()>0){_mv.normalize().multiplyScalar(spd);playerPos.current.add(_mv);playerPos.current.x=clamp(playerPos.current.x,-95,95);playerPos.current.z=clamp(playerPos.current.z,-95,95);playerAngle.current=Math.atan2(_mv.x,_mv.z);}
       if(flyingRef.current){if(k.space)playerY.current=Math.min(25,playerY.current+.12);else playerY.current=Math.max(0,playerY.current-.04);}
       else playerY.current=lerp(playerY.current,0,.1);
       if(playerAv.current){
-        const tgt=playerPos.current.clone();tgt.y=playerY.current;
-        playerAv.current.root.position.lerp(tgt,.2);
+        _tgt.set(playerPos.current.x,playerY.current,playerPos.current.z);
+        playerAv.current.root.position.lerp(_tgt,.2);
         playerAv.current.root.rotation.y=lerp(playerAv.current.root.rotation.y,playerAngle.current,.1);
         playerAv.current.root.visible=camModeRef.current==="3rd";
         anAv(playerAv.current,{i:999,state:moving?"MOVING":"IDLE",skin:pd.current.skin,eT:0,cE:null},t);
@@ -648,11 +655,11 @@ export default function GhostTown(){
       const pp=playerPos.current;
       if(camModeRef.current==="1st"){
         const eyeH=1.5+playerY.current;cam.position.set(pp.x,eyeH,pp.z);
-        const lookAt=new THREE.Vector3(pp.x-Math.sin(cA.current)*5,eyeH-cT.current*.5,pp.z-Math.cos(cA.current)*5);cam.lookAt(lookAt);
+        _lookAt.set(pp.x-Math.sin(cA.current)*5,eyeH-cT.current*.5,pp.z-Math.cos(cA.current)*5);cam.lookAt(_lookAt);
       }else{
-        const ct=new THREE.Vector3(pp.x,1.5+playerY.current,pp.z);
-        const cx=ct.x+Math.sin(cA.current)*cD.current,cy=ct.y+cT.current*cD.current*.6,cz=ct.z+Math.cos(cA.current)*cD.current;
-        _camTgt.set(cx,cy,cz);cam.position.lerp(_camTgt,.06);cam.lookAt(ct);
+        _ct.set(pp.x,1.5+playerY.current,pp.z);
+        const cx=_ct.x+Math.sin(cA.current)*cD.current,cy=_ct.y+cT.current*cD.current*.6,cz=_ct.z+Math.cos(cA.current)*cD.current;
+        _camTgt.set(cx,cy,cz);cam.position.lerp(_camTgt,.06);cam.lookAt(_ct);
       }
       if(t%15===0){let near:any=null,nd=999;Z.forEach(z=>{const dx=pp.x-z.x,dz=pp.z-z.z,d=Math.sqrt(dx*dx+dz*dz);if(d<nd){nd=d;near=z;}});
         if(near&&nd<12)setPlayerZone(near);else setPlayerZone(null);setProximity({zone:near,dist:nd});}
@@ -767,7 +774,7 @@ export default function GhostTown(){
         const dx4=pp3.x-ag.x,dz4=pp3.z-ag.z,dd2=Math.sqrt(dx4*dx4+dz4*dz4)||1;
         const camX=ag.x+dx4/dd2*3.5,camZ=ag.z+dz4/dd2*3.5;
         _camTgt.set(camX,1.8,camZ);cam.position.lerp(_camTgt,.04);
-        cam.lookAt(new THREE.Vector3(ag.x,1.5,ag.z));
+        _agLook.set(ag.x,1.5,ag.z);cam.lookAt(_agLook);
         ag.av.root.rotation.y=Math.atan2(dx4,dz4);// face player
         if(ag.cE!=="wave"&&ag.cE!=="kata"){ag.cE="wave";ag.eT=999;}
       }

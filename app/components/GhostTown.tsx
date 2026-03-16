@@ -1,8 +1,7 @@
 'use client';
 import { useState, useEffect, useRef, useCallback } from "react";
 import * as THREE from "three";
-import dynamic from "next/dynamic";
-const BankPanel = dynamic(()=>import("./BankPanel"),{ssr:false});
+import BankPanel from "./BankPanel";
 
 // ═══════════════════════════════════════════════════════════════════════════════
 //  81 GHOST TOWN v6 — SAMAUR-AI EDITION

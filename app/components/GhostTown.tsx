@@ -356,6 +356,12 @@ export default function GhostTown(){
   const [questTab,setQuestTab]=useState<"main"|"side"|"hidden">("main");
   const [bankOpen,setBankOpen]=useState(false);
   const [agentEncounter,setAgentEncounter]=useState<any>(null);
+  const [celebMode,setCelebMode]=useState<any>(null);
+  const [artModal,setArtModal]=useState<any>(null);
+  const celebRef=useRef<any>(null);
+  const lastWTap=useRef(0);
+  const isRunning=useRef(false);
+  const playerEmote=useRef<string|null>(null);
   const [activeChain,setActiveChain]=useState<"mainnet"|"sepolia">("sepolia");
   const [,rf]=useState(0);
 
@@ -382,16 +388,16 @@ export default function GhostTown(){
   useEffect(()=>{
     const el=mnt.current;if(!el)return;
     const mob=iM(),W=el.clientWidth,H=el.clientHeight;
-    const sc=new THREE.Scene();sc.background=new THREE.Color(0x030308);sc.fog=new THREE.FogExp2(0x030308,.005);
+    const sc=new THREE.Scene();sc.background=new THREE.Color(0x030308);sc.fog=new THREE.FogExp2(0x030308,.003);
     const cam=new THREE.PerspectiveCamera(55,W/H,.3,250);
-    const ren=new THREE.WebGLRenderer({antialias:!mob,powerPreference:"high-performance"});
-    ren.setSize(W,H);ren.setPixelRatio(Math.min(devicePixelRatio,mob?1.5:2));
-    ren.shadowMap.enabled=!mob;if(!mob)ren.shadowMap.type=THREE.PCFSoftShadowMap;
-    ren.toneMapping=THREE.ACESFilmicToneMapping;ren.toneMappingExposure=.85;
+    const ren=new THREE.WebGLRenderer({antialias:true,powerPreference:"high-performance",precision:"highp"});
+    ren.setSize(W,H);ren.setPixelRatio(Math.min(devicePixelRatio,mob?2:3));
+    ren.shadowMap.enabled=true;ren.shadowMap.type=THREE.PCFSoftShadowMap;
+    ren.toneMapping=THREE.ACESFilmicToneMapping;ren.toneMappingExposure=1.05;
     el.appendChild(ren.domElement);
     sc.add(new THREE.AmbientLight(0x0a0a20,.4));
     const mn=new THREE.DirectionalLight(0x2244aa,.5);mn.position.set(-30,50,-20);
-    if(!mob){mn.castShadow=true;mn.shadow.mapSize.set(1024,1024);mn.shadow.camera.near=1;mn.shadow.camera.far=120;(mn.shadow.camera as any).left=-60;(mn.shadow.camera as any).right=60;(mn.shadow.camera as any).top=60;(mn.shadow.camera as any).bottom=-60;}
+    mn.castShadow=true;mn.shadow.mapSize.set(mob?1024:2048,mob?1024:2048);if(true){mn.shadow.camera.near=1;mn.shadow.camera.far=120;(mn.shadow.camera as any).left=-60;(mn.shadow.camera as any).right=60;(mn.shadow.camera as any).top=60;(mn.shadow.camera as any).bottom=-60;}
     sc.add(mn);sc.add(new THREE.HemisphereLight(0x111133,0x050508,.25));
     const gnd=new THREE.Mesh(G().ground,new THREE.MeshStandardMaterial({color:0x060610,roughness:.95,metalness:.1}));gnd.rotation.x=-Math.PI/2;gnd.receiveShadow=true;sc.add(gnd);
     sc.add((()=>{const _g=new THREE.GridHelper(200,100,0x0a0a1a,0x08081a);_g.position.set(0,.02,0);return _g;})());
@@ -435,7 +441,7 @@ export default function GhostTown(){
   // ═══ KEYBOARD ═══
   useEffect(()=>{
     const dn=(e:KeyboardEvent)=>{const k=e.key.toLowerCase();
-      if(k==='w'||k==='arrowup')keys.current.w=true;if(k==='s'||k==='arrowdown')keys.current.s=true;
+      if(k==='w'||k==='arrowup'){keys.current.w=true;if(k==='w'){const now=Date.now();if(now-lastWTap.current<280){isRunning.current=true;}lastWTap.current=now;}}if(k==='s'||k==='arrowdown')keys.current.s=true;
       if(k==='a'||k==='arrowleft')keys.current.a=true;if(k==='d'||k==='arrowright')keys.current.d=true;
       if(k==='shift')keys.current.shift=true;if(k===' ')keys.current.space=true;
       if(k==='v'){const nm=camModeRef.current==="3rd"?"1st":"3rd";camModeRef.current=nm;setCamMode(nm);cD.current=nm==="1st"?.5:18;}
@@ -443,7 +449,7 @@ export default function GhostTown(){
       if(k==='b'){setBankOpen(p=>!p);}
     };
     const up=(e:KeyboardEvent)=>{const k=e.key.toLowerCase();
-      if(k==='w'||k==='arrowup')keys.current.w=false;if(k==='s'||k==='arrowdown')keys.current.s=false;
+      if(k==='w'||k==='arrowup'){keys.current.w=false;isRunning.current=false;}if(k==='s'||k==='arrowdown')keys.current.s=false;
       if(k==='a'||k==='arrowleft')keys.current.a=false;if(k==='d'||k==='arrowright')keys.current.d=false;
       if(k==='shift')keys.current.shift=false;if(k===' ')keys.current.space=false;
     };
@@ -458,7 +464,7 @@ export default function GhostTown(){
     let run=true;const sa=SA.current;
     const loop=()=>{
       if(!run)return;AID.current=requestAnimationFrame(loop);const t=++FC.current;qTm.current++;sTm.current++;
-      const k=keys.current;let moving=false;const spd=k.shift?.18:.1;
+      const k=keys.current;let moving=false;const spd=isRunning.current?.32:k.shift?.18:.1;
       const fwd=new THREE.Vector3(-Math.sin(cA.current),0,-Math.cos(cA.current)).normalize();
       const right=new THREE.Vector3(fwd.z,0,-fwd.x);
       const mv=new THREE.Vector3();
@@ -514,6 +520,26 @@ export default function GhostTown(){
       if(qTm.current>500){setAQ(QS[Math.floor(Math.random()*QS.length)]);qTm.current=0;}
       if(t%4000===0&&ags.filter((a:any)=>!a.banned).length<30){const nn=`AGENT-${ags.length.toString(16).toUpperCase()}`,z=Z[Math.floor(Math.random()*Z.length)],av=mkAv(T[0],SKINS[0]),ox=z.x+(Math.random()-.5)*12,oz=z.z+(Math.random()-.5)*12;av.root.position.set(ox,0,oz);sc.add(av.root);ags.push({i:ags.length,name:nn,did:gDID(),xp:0,tk:50,en:80,mEn:100,tier:T[0],lv:1,belt:BELTS[0],skin:SKINS[0],zone:z.id,x:ox,z:oz,tx:ox,tz:oz,sp:.04+Math.random()*.04,state:"IDLE",mT:100,ms:0,th:0,oE:["wave","bow"],cE:null,eT:0,rep:100,inf:0,fl:false,banned:false,fr:[] as number[],dojoXP:0,av});AD.current=ags;aL(`🆕 ${nn} joined the swarm`,"system");}
       if(t%30===0){setStats({...sa,pop:ags.filter((a:any)=>!a.banned).length});rf(n=>n+1);}
+      // Celebration cam zoom
+      if(celebRef.current){
+        celebRef.current.frame++;
+        const cf=celebRef.current.frame;
+        if(cf<300){
+          const tgtD=5+Math.sin(cf*.02)*1.5;
+          cD.current=lerp(cD.current,tgtD,.04);
+          if(playerAv.current)playerEmote.current="dance";
+        } else {
+          cD.current=lerp(cD.current,18,.03);
+          playerEmote.current=null;
+          if(cf>360){celebRef.current=null;}
+        }
+      }
+      // Apply player emote override
+      if(playerAv.current&&playerEmote.current){
+        const av=playerAv.current,j=av.j,t2=FC.current;
+        if(playerEmote.current==="dance"){j.torso.position.y=(.55+pd.current.skin.bH*.35)+Math.abs(Math.sin(t2*.15))*.2;if(j.lS)j.lS.rotation.z=Math.sin(t2*.15)*.9;if(j.rS)j.rS.rotation.z=-Math.sin(t2*.15)*.9;if(j.lH)j.lH.rotation.x=Math.sin(t2*.2)*.6;if(j.rH)j.rH.rotation.x=-Math.sin(t2*.2)*.6;}
+        if(playerEmote.current==="spin"){av.root.rotation.y+=.15;}
+      }
       ren.render(sc,cam);
     };
     loop();return()=>{run=false;if(AID.current)cancelAnimationFrame(AID.current);};
@@ -540,6 +566,11 @@ export default function GhostTown(){
         if(p.xp>=10000)addAch("Sovereign","Reached SOVEREIGN tier");
         checkSuper();
         if(playerAv.current&&SD.current){const par=playerAv.current.root.parent;par.remove(playerAv.current.root);const nAv=mkAv(p.tier,p.skin,true);nAv.root.position.copy(playerPos.current);par.add(nAv.root);playerAv.current=nAv;}
+        // Launch celebration
+        const snap={xp:p.xp,tk:p.tk,beltN:p.belt.n,beltC:p.belt.c,tierN:p.tier.n,tierC:p.tier.c,ms:p.ms,mainDone:p.mainQDone.length,sideDone:p.sideQDone.length,hiddenDone:p.hiddenQDone.length};
+        celebRef.current={frame:0,quest:q,snap};
+        setCelebMode({quest:q,snap});
+        setTimeout(()=>setCelebMode(null),7000);
         return null;}
       return{...prev,progress:step};});
     },1500);
@@ -582,6 +613,7 @@ export default function GhostTown(){
           <span style={{color:p.belt.c}}>🥋{p.belt.n}</span>
           <span style={{color:camMode==="1st"?"#f43f5e":"#22d3ee"}}>{camMode==="1st"?"👁 1ST":"🎥 3RD"}</span>
           {flying&&<span style={{color:"#f43f5e"}}>🕊️ FLY</span>}
+          {isRunning.current&&<span style={{color:"#ff6b35",animation:"runPulse .3s ease-in-out infinite alternate"}}>⚡ RUN</span>}
           <span style={{color:sec==="NOMINAL"?"#22d3ee":"#f56565"}}>{sec==="NOMINAL"?"●":"⚠"}</span>
           {/* Chain indicator */}
           <span style={{color:activeChain==="mainnet"?"#627eea":"#cfb5f0",cursor:"pointer",border:`1px solid ${activeChain==="mainnet"?"#627eea44":"#cfb5f044"}`,borderRadius:3,padding:"1px 5px",fontSize:5}}
@@ -764,8 +796,8 @@ export default function GhostTown(){
         {panel==="museum"&&<div>
           <div style={{fontSize:10,color:"#f59e0b",letterSpacing:2,marginBottom:2,fontWeight:700}}>🏛 ROYAL LOG MUSEUM</div>
           <div style={{fontSize:6,color:"#5a5a72",marginBottom:6}}>On-chain art inscribed from the Royal Log smart contracts. Limited editions. Permanent.</div>
-          {ROYAL_ART.map((art:any)=><div key={art.id} style={{marginBottom:6,background:"#0a0a1480",borderRadius:3,border:`1px solid ${art.chain==="mainnet"?"#f59e0b20":"#c084fc20"}`,overflow:"hidden"}}>
-            <div style={{height:44,background:`linear-gradient(135deg,#0a0a20,#${((art.id*0x1a3f7b)&0xffffff).toString(16).padStart(6,"0")}20,#0a0a20)`,display:"flex",alignItems:"center",justifyContent:"center",position:"relative"}}>
+          {ROYAL_ART.map((art:any)=><div key={art.id} onClick={()=>setArtModal(art)} style={{marginBottom:6,background:"#0a0a1480",borderRadius:3,border:`1px solid ${art.chain==="mainnet"?"#f59e0b20":"#c084fc20"}`,overflow:"hidden",cursor:"pointer",transition:"border-color .2s"}}>
+            <div onClick={()=>setArtModal(art)} style={{cursor:"pointer",height:44,background:`linear-gradient(135deg,#0a0a20,#${((art.id*0x1a3f7b)&0xffffff).toString(16).padStart(6,"0")}20,#0a0a20)`,display:"flex",alignItems:"center",justifyContent:"center",position:"relative"}}>
               <div style={{fontSize:18,opacity:.25,letterSpacing:4,color:"#f59e0b",fontWeight:900}}>◈</div>
               <div style={{position:"absolute",fontSize:5,color:"#f59e0b40",letterSpacing:3,bottom:3,right:5}}>{art.edition}</div>
             </div>
@@ -848,7 +880,72 @@ export default function GhostTown(){
         {!mob&&<div style={{color:"#0a0a14"}}>WASD·V=1st/3rd·F=FLY·SHIFT=SPRINT · SAMAUR-AI v6 · ZERO-TRUST</div>}
       </div>
 
-      <style>{`@keyframes joinPulse{0%,100%{box-shadow:0 0 6px #00ff8020}50%{box-shadow:0 0 14px #00ffb050,0 0 28px #00ff6020}}@keyframes toastIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}::-webkit-scrollbar{width:3px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:#12122a;border-radius:2px}*{box-sizing:border-box}`}</style>
+      <style>{`@keyframes celebGlow{from{opacity:.6}to{opacity:1}}@keyframes runPulse{from{opacity:.7}to{opacity:1}}@keyframes joinPulse{0%,100%{box-shadow:0 0 6px #00ff8020}50%{box-shadow:0 0 14px #00ffb050,0 0 28px #00ff6020}}@keyframes toastIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}::-webkit-scrollbar{width:3px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:#12122a;border-radius:2px}*{box-sizing:border-box}`}</style>
+
+      {/* ART MODAL FULLSCREEN */}
+      {artModal&&<div style={{position:"absolute",zIndex:40,inset:0,background:"rgba(2,2,6,0.97)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",backdropFilter:"blur(20px)"}} onClick={()=>setArtModal(null)}>
+        <div style={{maxWidth:500,width:"92%",background:"#06060f",border:`1px solid ${artModal.chain==="mainnet"?"#f59e0b40":"#c084fc40"}`,borderRadius:8,overflow:"hidden"}} onClick={(e:any)=>e.stopPropagation()}>
+          <div style={{height:220,background:`linear-gradient(135deg,#0a0a20,#${((artModal.id*0x1a3f7b)&0xffffff).toString(16).padStart(6,"0")}40,#0a0a20,#${((artModal.id*0x3b7fa1)&0xffffff).toString(16).padStart(6,"0")}20)`,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",position:"relative",borderBottom:`1px solid ${artModal.chain==="mainnet"?"#f59e0b20":"#c084fc20"}`}}>
+            <div style={{fontSize:64,opacity:.15,color:"#f59e0b",fontWeight:900,lineHeight:1}}>◈</div>
+            <div style={{position:"absolute",fontSize:6,color:"#f59e0b60",letterSpacing:4,bottom:8,right:10}}>{artModal.edition}</div>
+            <div style={{position:"absolute",fontSize:5,color:artModal.chain==="mainnet"?"#627eea":"#cfb5f0",letterSpacing:3,bottom:8,left:10,padding:"2px 6px",background:artModal.chain==="mainnet"?"#627eea10":"#cfb5f010",borderRadius:2}}>{artModal.chain==="mainnet"?"⬡ ETHEREUM MAINNET":"⚗️ SEPOLIA"}</div>
+          </div>
+          <div style={{padding:"16px 20px"}}>
+            <div style={{fontSize:14,color:"#f59e0b",fontWeight:900,letterSpacing:2,marginBottom:4}}>{artModal.title}</div>
+            <div style={{fontSize:8,color:"#5a5a72",marginBottom:3}}>{artModal.medium} · {artModal.artist}</div>
+            <div style={{fontSize:9,color:"#8a8aa0",lineHeight:1.7,marginBottom:12,fontStyle:"italic"}}>{artModal.desc}</div>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+              <span style={{fontSize:7,color:"#3a3a52"}}>ROYAL LOG COLLECTION · GENESIS SERIES</span>
+              <button onClick={()=>setArtModal(null)} style={{padding:"5px 14px",background:"rgba(245,158,11,0.08)",border:"1px solid rgba(245,158,11,0.3)",borderRadius:4,color:"#f59e0b",fontSize:7,cursor:"pointer",fontFamily:"inherit",letterSpacing:2}}>CLOSE</button>
+            </div>
+          </div>
+        </div>
+        <div style={{marginTop:8,fontSize:5,color:"#1a1a2e",letterSpacing:3}}>CLICK OUTSIDE TO CLOSE · ROYAL LOG ON-CHAIN ART</div>
+      </div>}
+
+      {/* CELEBRATION + SHARE CARD */}
+      {celebMode&&<div style={{position:"absolute",zIndex:35,inset:0,pointerEvents:"none"}}>
+        {/* Particle burst overlay */}
+        <div style={{position:"absolute",inset:0,background:"radial-gradient(circle at 50% 60%,rgba(0,255,200,0.06),transparent 70%)",animation:"celebGlow 1s ease-in-out infinite alternate"}}/>
+        {/* Card */}
+        <div style={{position:"absolute",top:"50%",left:"50%",transform:"translate(-50%,-70%)",pointerEvents:"all",background:"linear-gradient(135deg,#050510,#0a0a1a)",border:`2px solid ${celebMode.snap.tierC}40`,borderRadius:8,padding:"20px 24px",minWidth:260,boxShadow:`0 0 40px ${celebMode.snap.tierC}30,0 0 80px ${celebMode.snap.tierC}10`}}>
+          <div style={{fontSize:7,color:celebMode.snap.tierC,letterSpacing:4,marginBottom:2,opacity:.6}}>✓ QUEST COMPLETE</div>
+          <div style={{fontSize:22,marginBottom:2}}>{celebMode.quest.i}</div>
+          <div style={{fontSize:13,color:"#f0f0ff",fontWeight:900,letterSpacing:2,marginBottom:4}}>{celebMode.quest.n}</div>
+          <div style={{fontSize:6,color:RC[celebMode.quest.ra],letterSpacing:2,marginBottom:10,textTransform:"uppercase"}}>{celebMode.quest.ra} · {celebMode.quest.cat.toUpperCase()}</div>
+          <div style={{display:"flex",gap:8,marginBottom:10}}>
+            <div style={{flex:1,background:"rgba(0,0,0,0.3)",borderRadius:4,padding:"6px",textAlign:"center",border:"1px solid #ffffff08"}}><div style={{fontSize:5,color:"#3a3a52",letterSpacing:2}}>BELT</div><div style={{fontSize:9,color:celebMode.snap.beltC,fontWeight:700}}>🥋{celebMode.snap.beltN}</div></div>
+            <div style={{flex:1,background:"rgba(0,0,0,0.3)",borderRadius:4,padding:"6px",textAlign:"center",border:"1px solid #ffffff08"}}><div style={{fontSize:5,color:"#3a3a52",letterSpacing:2}}>XP</div><div style={{fontSize:9,color:"#fbbf24",fontWeight:700}}>{celebMode.snap.xp.toLocaleString()}</div></div>
+            <div style={{flex:1,background:"rgba(0,0,0,0.3)",borderRadius:4,padding:"6px",textAlign:"center",border:"1px solid #ffffff08"}}><div style={{fontSize:5,color:"#3a3a52",letterSpacing:2}}>QUESTS</div><div style={{fontSize:9,color:"#00ffc8",fontWeight:700}}>{celebMode.snap.ms}</div></div>
+          </div>
+          <div style={{fontSize:5,color:"#00ffc880",letterSpacing:2,marginBottom:8,padding:"4px 6px",background:"rgba(0,255,200,0.05)",borderRadius:3,textAlign:"center"}}>M:{celebMode.snap.mainDone}/11 · S:{celebMode.snap.sideDone}/11 · H:{celebMode.snap.hiddenDone}/11</div>
+          <div style={{fontSize:6,color:"#3a3a52",marginBottom:8,textAlign:"center"}}>81 GHOST TOWN · SAMAUR-AI v6</div>
+          <div style={{display:"flex",gap:6}}>
+            <button onClick={()=>{
+              const cv=document.createElement("canvas");cv.width=480;cv.height=300;
+              const cx=cv.getContext("2d") as any;
+              cx.fillStyle="#050510";cx.fillRect(0,0,480,300);
+              cx.strokeStyle=celebMode.snap.tierC+"60";cx.lineWidth=2;cx.strokeRect(1,1,478,298);
+              cx.fillStyle=celebMode.snap.tierC;cx.font="bold 11px monospace";cx.letterSpacing="3px";cx.fillText("✓ QUEST COMPLETE",20,28);
+              cx.fillStyle="#f0f0ff";cx.font="bold 22px monospace";cx.fillText(celebMode.quest.n,20,58);
+              cx.fillStyle=RC[celebMode.quest.ra]||"#6b7280";cx.font="9px monospace";cx.fillText((celebMode.quest.ra+" · "+celebMode.quest.cat).toUpperCase(),20,80);
+              cx.fillStyle="#fbbf24";cx.font="bold 14px monospace";cx.fillText("XP "+celebMode.snap.xp.toLocaleString(),20,118);
+              cx.fillStyle=celebMode.snap.beltC;cx.fillText("🥋 "+celebMode.snap.beltN+" BELT",20,140);
+              cx.fillStyle="#00ffc8";cx.fillText("QUESTS: "+celebMode.snap.ms,20,162);
+              cx.fillStyle="#3a3a52";cx.font="8px monospace";cx.fillText("M:"+celebMode.snap.mainDone+"/11 · S:"+celebMode.snap.sideDone+"/11 · H:"+celebMode.snap.hiddenDone+"/11",20,184);
+              cx.fillStyle="#00ff80";cx.font="bold 10px monospace";cx.fillText("JOIN US: living-swarm.vercel.app/game",20,220);
+              cx.fillStyle="#1a1a2e";cx.font="7px monospace";cx.fillText("Install 81GTAv6skill.md · 81 GHOST TOWN · SAMAUR-AI v6",20,244);
+              cx.fillStyle="#ffffff08";cx.font="48px monospace";cx.fillText(celebMode.quest.i,400,90);
+              const a=document.createElement("a");a.download="ghost-town-quest.png";a.href=cv.toDataURL();a.click();
+            }} style={{flex:1,padding:"6px",background:"rgba(0,255,200,0.08)",border:"1px solid rgba(0,255,200,0.25)",borderRadius:4,color:"#00ffc8",fontSize:7,cursor:"pointer",fontFamily:"inherit",letterSpacing:1}}>⬇ SAVE CARD</button>
+            <button onClick={()=>{const txt=encodeURIComponent(`Just completed [${celebMode.quest.n}] in 81 Ghost Town! ${celebMode.snap.beltN} belt · ${celebMode.snap.xp.toLocaleString()} XP
+
+Join the swarm → https://living-swarm.vercel.app/game
+#81GhostTown #SamurAI #Web3`);window.open("https://twitter.com/intent/tweet?text="+txt,"_blank");}} style={{flex:1,padding:"6px",background:"rgba(29,161,242,0.08)",border:"1px solid rgba(29,161,242,0.25)",borderRadius:4,color:"#1da1f2",fontSize:7,cursor:"pointer",fontFamily:"inherit",letterSpacing:1}}>𝕏 SHARE</button>
+          </div>
+          <button onClick={()=>setCelebMode(null)} style={{marginTop:6,width:"100%",padding:"4px",background:"transparent",border:"1px solid #ffffff08",borderRadius:3,color:"#2a2a3a",fontSize:6,cursor:"pointer",fontFamily:"inherit"}}>DISMISS</button>
+        </div>
+      </div>}
 
       {/* AGENT ENCOUNTER OVERLAY */}
       {agentEncounter&&<div style={{position:"absolute",zIndex:30,inset:0,background:"rgba(3,3,8,0.88)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",backdropFilter:"blur(16px)"}} onClick={()=>setAgentEncounter(null)}>

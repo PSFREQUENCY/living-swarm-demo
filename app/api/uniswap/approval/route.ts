@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-const KEY = process.env.UNISWAP_API_KEY || 'UNISWAP_KEY_REDACTED';
+const KEY = process.env.UNISWAP_API_KEY || "" ;
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();

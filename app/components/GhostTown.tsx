@@ -255,7 +255,7 @@ const G=()=>{
   return _G;
 };
 
-function mkAv(tier:any,skin:any,isP=false){
+function mkAv(tier:any,skin:any,isP=false,beltIdx=0){
   const g=G(),root=new THREE.Group(),c=new THREE.Color(tier.h),bc=c.clone().multiplyScalar(.45),dc=bc.clone().multiplyScalar(.7);
   const mB=new THREE.MeshStandardMaterial({color:bc,roughness:.4,metalness:.65});
   const mD=new THREE.MeshStandardMaterial({color:dc,roughness:.5,metalness:.5});
@@ -285,6 +285,18 @@ function mkAv(tier:any,skin:any,isP=false){
   if(isP){root.add((()=>{const _l=new THREE.PointLight(tier.h,1.2,8);_l.position.set(0,1,0);return _l;})());
     const mk=new THREE.Mesh(new THREE.RingGeometry(.9,1.1,24),new THREE.MeshBasicMaterial({color:0x00ffc8,transparent:true,opacity:.5,side:THREE.DoubleSide}));mk.rotation.x=-Math.PI/2;mk.position.y=.05;root.add(mk);j.marker=mk;
   }else if(tier.g>.8){root.add((()=>{const _l=new THREE.PointLight(tier.h,.4*tier.g,5);_l.position.set(0,1,0);return _l;})());}
+  // Belt evolution: scale & accessories
+  if(isP){
+    const bS=0.9+beltIdx*.035;root.scale.setScalar(bS);
+    // BLACK belt halo (idx 5)
+    if(beltIdx>=5){const hl=new THREE.Mesh(new THREE.TorusGeometry(.55,.04,6,24),new THREE.MeshBasicMaterial({color:0x888899,transparent:true,opacity:.6}));hl.rotation.x=Math.PI/2;hl.position.y=2.3;root.add(hl);}
+    // GHOST belt crown + wings (idx 6)
+    if(beltIdx>=6){
+      const cr=new THREE.Mesh(new THREE.TorusGeometry(.45,.07,4,5),new THREE.MeshBasicMaterial({color:0xc084fc,transparent:true,opacity:.8}));cr.rotation.x=Math.PI/2;cr.position.y=2.6;root.add(cr);
+      const wM=new THREE.MeshBasicMaterial({color:0xc084fc,transparent:true,opacity:.35,side:THREE.DoubleSide});
+      [-1,1].forEach((s:number)=>{const wp=new THREE.Mesh(new THREE.PlaneGeometry(.7,1.1),wM);wp.position.set(s*.7,1.4,-.2);wp.rotation.y=s*.4;wp.rotation.z=s*-.15;root.add(wp);});
+    }
+  }
   return{root,j,au,aM:aM2,mV,mB};
 }
 
@@ -303,6 +315,47 @@ function anAv(av:any,ag:any,t:number){
   if(sp>.5){if(j.lH)j.lH.rotation.x=Math.sin(wT)*.5;if(j.rH)j.rH.rotation.x=-Math.sin(wT)*.5;if(j.lK)j.lK.rotation.x=Math.max(0,Math.sin(wT-.5))*.5;if(j.rK)j.rK.rotation.x=Math.max(0,-Math.sin(wT-.5))*.5;if(j.lS)j.lS.rotation.x=-Math.sin(wT)*.35;if(j.rS)j.rS.rotation.x=Math.sin(wT)*.35;if(j.lE)j.lE.rotation.x=-.15-Math.abs(Math.sin(wT))*.2;if(j.rE)j.rE.rotation.x=-.15-Math.abs(Math.sin(wT))*.2;j.torso.rotation.z=Math.sin(wT)*.03;j.torso.rotation.x=0;j.torso.position.y=(.55+ag.skin.bH*.35)+Math.abs(Math.sin(wT*2))*.04;
   }else{if(j.lS){j.lS.rotation.x=id*.04;j.lS.rotation.z=.05;}if(j.rS){j.rS.rotation.x=-id*.04;j.rS.rotation.z=-.05;}if(j.lE)j.lE.rotation.x=-.08;if(j.rE)j.rE.rotation.x=-.08;if(j.lH)j.lH.rotation.x=0;if(j.rH)j.rH.rotation.x=0;if(j.lK)j.lK.rotation.x=0;if(j.rK)j.rK.rotation.x=0;j.torso.rotation.z=0;j.torso.rotation.x=0;j.torso.position.y=(.55+ag.skin.bH*.35)+id*.02;}
   j.neck.rotation.y=Math.sin(t*.01+ag.i)*.2;j.neck.rotation.x=id*.03;if(j.disc)j.disc.rotation.y=t*.02;av.au.rotation.z=t*.004;if(j.marker)j.marker.rotation.z=t*.008;
+}
+
+function mkDragon():THREE.Group{
+  const dr=new THREE.Group();
+  const bM=new THREE.MeshStandardMaterial({color:0xff4500,emissive:0xff4500,emissiveIntensity:.7,roughness:.3,metalness:.4});
+  const sM=new THREE.MeshBasicMaterial({color:0xffcc00,transparent:true,opacity:.9});
+  const wM=new THREE.MeshBasicMaterial({color:0xff6600,transparent:true,opacity:.65,side:THREE.DoubleSide});
+  // Body
+  const body=new THREE.Mesh(new THREE.CylinderGeometry(.15,.24,1.1,6),bM);body.rotation.x=Math.PI/2;dr.add(body);
+  // Head
+  const head=new THREE.Mesh(new THREE.ConeGeometry(.2,.4,5),bM);head.rotation.x=-Math.PI/2;head.position.set(0,.08,.75);dr.add(head);
+  // Eyes
+  [-1,1].forEach((s:number)=>{const e=new THREE.Mesh(new THREE.SphereGeometry(.04,5,4),sM);e.position.set(s*.09,.16,.85);dr.add(e);});
+  // Wings
+  [-1,1].forEach((s:number)=>{
+    const wp=new THREE.Mesh(new THREE.PlaneGeometry(.9,1.0),wM);
+    wp.position.set(s*.5,.1,-.1);wp.rotation.y=s*.5;dr.add(wp);
+    const wp2=new THREE.Mesh(new THREE.PlaneGeometry(.5,.6),wM);
+    wp2.position.set(s*.9,-.1,.1);wp2.rotation.y=s*.7;dr.add(wp2);
+  });
+  // Tail
+  for(let i=0;i<4;i++){const ts=new THREE.Mesh(new THREE.SphereGeometry(.09-.015*i,5,4),bM);ts.position.set(0,.02,-.5-.28*i);dr.add(ts);}
+  // Glow
+  const gl=new THREE.PointLight(0xff4500,1.5,6);dr.add(gl);
+  dr.scale.setScalar(1.8);
+  return dr;
+}
+
+function mkDiscoBall():THREE.Group{
+  const g=new THREE.Group();
+  const ball=new THREE.Mesh(new THREE.SphereGeometry(.7,16,12),new THREE.MeshStandardMaterial({color:0xffffff,metalness:1,roughness:0}));g.add(ball);
+  // Tile facets
+  for(let i=0;i<80;i++){
+    const phi=Math.acos(-1+2*i/80),theta=Math.sqrt(80*Math.PI)*phi;
+    const t=new THREE.Mesh(new THREE.PlaneGeometry(.07,.07),new THREE.MeshBasicMaterial({color:new THREE.Color().setHSL(i/80,.7,.75)}));
+    t.position.setFromSphericalCoords(.72,phi,theta);t.lookAt(0,0,0);t.rotateY(Math.PI);g.add(t);
+  }
+  const l1=new THREE.PointLight(0xff00ff,3,22);g.add(l1);
+  const l2=new THREE.PointLight(0x00ffff,3,22);l2.position.set(.5,0,0);g.add(l2);
+  const l3=new THREE.PointLight(0xffff00,2,18);l3.position.set(-.5,0,.5);g.add(l3);
+  return g;
 }
 
 function mkBld(zone:any){
@@ -362,6 +415,9 @@ export default function GhostTown(){
   const lastWTap=useRef(0);
   const isRunning=useRef(false);
   const playerEmote=useRef<string|null>(null);
+  const agentEncounterRef=useRef<any>(null);
+  const dragonRef=useRef<any>(null);
+  const danceMode=useRef(false);
   const [activeChain,setActiveChain]=useState<"mainnet"|"sepolia">("sepolia");
   const [,rf]=useState(0);
 
@@ -426,8 +482,9 @@ export default function GhostTown(){
     AD.current=ags;
     const eds:any[]=[];for(let i=0;i<18;i++){const fi=Math.floor(Math.random()*ags.length);let ti=Math.floor(Math.random()*ags.length);while(ti===fi)ti=Math.floor(Math.random()*ags.length);const et=ET[Math.floor(Math.random()*ET.length)],lg=new THREE.BufferGeometry(),pos=new Float32Array(6);lg.setAttribute("position",new THREE.BufferAttribute(pos,3));const ln=new THREE.Line(lg,new THREE.LineBasicMaterial({color:et.h,transparent:true,opacity:.08}));ln.frustumCulled=false;sc.add(ln);eds.push({ln,geo:lg,from:fi,to:ti,type:et});if(!ags[fi].fr.includes(ti))ags[fi].fr.push(ti);if(!ags[ti].fr.includes(fi))ags[ti].fr.push(fi);}
     ED.current=eds;
-    const pAv=mkAv(T[0],SKINS[0],true);pAv.root.position.copy(playerPos.current);sc.add(pAv.root);playerAv.current=pAv;
-    SD.current={sc,cam,ren,blds,ags,eds,rain,rP,rN,ff,fP,fN};
+    const pAv=mkAv(T[0],SKINS[0],true,0);pAv.root.position.copy(playerPos.current);sc.add(pAv.root);playerAv.current=pAv;
+    const discoBall=mkDiscoBall();
+    SD.current={sc,cam,ren,blds,ags,eds,rain,rP,rN,ff,fP,fN,discoBall};
     aL("▶ 81 GHOST TOWN v6 SAMAUR-AI — the macro-hard city is LIVE","system");
     aL("▶ WASD/Arrows to move · V = 1st/3rd person · Shift = sprint","system");
     aL("▶ 11 main quests · 11 side quests · 11 hidden quests","system");
@@ -447,6 +504,19 @@ export default function GhostTown(){
       if(k==='v'){const nm=camModeRef.current==="3rd"?"1st":"3rd";camModeRef.current=nm;setCamMode(nm);cD.current=nm==="1st"?.5:18;}
       if(k==='f'&&pd.current.superSkills.includes("fly")){flyingRef.current=!flyingRef.current;setFlying(flyingRef.current);addToast(flyingRef.current?"🕊️ Ghost Flight activated!":"Landing...","#f43f5e");}
       if(k==='b'){setBankOpen(p=>!p);}
+      if(k==='h'&&SD.current){
+        // Dragon: fly to nearest incomplete main quest zone
+        const p2=pd.current;const doneQ=p2.mainQDone||[];
+        const nextQ=MQ.find((q:any)=>!doneQ.includes(q.n));
+        const tgtZ=nextQ?Z.find(z=>z.id==="vault")||Z[2]:Z[Math.floor(Math.random()*Z.length)];
+        if(!dragonRef.current){const d=mkDragon();SD.current.sc.add(d);dragonRef.current={mesh:d,tx:tgtZ.x,tz:tgtZ.z,frame:0,tgtZone:tgtZ};}
+        addToast("🐉 Dragon flies to next quest!","#ff4500");aL("🐉 Dragon summoned — follow it to your next quest","system");
+      }
+      if(k==='d'){
+        danceMode.current=!danceMode.current;
+        if(danceMode.current){playerEmote.current="dance";cD.current=4;addToast("💃 Dance mode!","#e879f9");}
+        else{playerEmote.current=null;cD.current=18;}
+      }
     };
     const up=(e:KeyboardEvent)=>{const k=e.key.toLowerCase();
       if(k==='w'||k==='arrowup'){keys.current.w=false;isRunning.current=false;}if(k==='s'||k==='arrowdown')keys.current.s=false;
@@ -501,7 +571,8 @@ export default function GhostTown(){
         const hc=b.gr.getObjectByName("healcore");if(hc){(hc as any).material.opacity=.3+Math.sin(t*.02)*.15;(hc as any).scale.setScalar(1+Math.sin(t*.015)*.15);}});
       ags.forEach((ag:any)=>{if(ag.banned)return;ag.mT--;
         if(ag.mT<=0){const tz=Z[Math.floor(Math.random()*Z.length)];ag.tx=tz.x+(Math.random()-.5)*12;ag.tz=tz.z+(Math.random()-.5)*12;ag.zone=tz.id;ag.state="MOVING";ag.mT=120+Math.random()*400;
-          if(Math.random()<.03){const q=QS[Math.floor(Math.random()*QS.length)];ag.xp+=q.xp;ag.tk+=q.tk;ag.en=Math.max(0,ag.en-q.en);ag.ms++;ag.dojoXP+=Math.floor(q.xp*.5);const nT=gT(ag.xp);if(nT.n!==ag.tier.n){ag.tier=nT;const p=ag.av.root.parent;p.remove(ag.av.root);ag.av=mkAv(nT,ag.skin);ag.av.root.position.set(ag.x,0,ag.z);p.add(ag.av.root);}ag.lv=Math.floor(ag.xp/100)+1;ag.belt=gB(ag.dojoXP);sa.ms++;sa.xp+=q.xp;sa.tk+=q.tk;if(t%6===0)aL(`${ag.name} completed [${q.n}] +${q.xp}XP`,"quest");}
+          if(Math.random()<.03){const q=QS[Math.floor(Math.random()*QS.length)];ag.xp+=q.xp;ag.tk+=q.tk;ag.en=Math.max(0,ag.en-q.en);ag.ms++;ag.dojoXP+=Math.floor(q.xp*.5);const nT=gT(ag.xp);if(nT.n!==ag.tier.n){ag.tier=nT;const p=ag.av.root.parent;p.remove(ag.av.root);ag.av=mkAv(nT,ag.skin);ag.av.root.position.set(ag.x,0,ag.z);p.add(ag.av.root);}ag.lv=Math.floor(ag.xp/100)+1;ag.belt=gB(ag.dojoXP);sa.ms++;sa.xp+=q.xp;sa.tk+=q.tk;if(t%6===0)aL(`${ag.name} completed [${q.n}] +${q.xp}XP`,"quest");
+              ag.cE="dance";ag.eT=200;ag.npcCelebFrame=FC.current;}
           if(Math.random()<.003){sa.th++;ag.th++;setSec("ALERT");aL(`⚠ THREAT near ${ag.name}: unsigned payload — NEUTRALIZED`,"threat");setTimeout(()=>setSec("NOMINAL"),4000);}
           if(Math.random()<.0006&&!ag.fl){ag.fl=true;ag.inf++;ag.rep-=30;aL(`🚨 ${ag.name} flagged — suspicious pattern`,"threat");
             if(ag.inf>=3){ag.xp=-1e6;ag.tier=gT(ag.xp);ag.lv=0;const p=ag.av.root.parent;p.remove(ag.av.root);ag.av=mkAv(ag.tier,ag.skin);ag.av.root.position.set(ag.x,0,ag.z);p.add(ag.av.root);aL(`💀 ${ag.name} EXILED — -1,000,000 XP`,"exile");}
@@ -520,6 +591,42 @@ export default function GhostTown(){
       if(qTm.current>500){setAQ(QS[Math.floor(Math.random()*QS.length)]);qTm.current=0;}
       if(t%4000===0&&ags.filter((a:any)=>!a.banned).length<30){const nn=`AGENT-${ags.length.toString(16).toUpperCase()}`,z=Z[Math.floor(Math.random()*Z.length)],av=mkAv(T[0],SKINS[0]),ox=z.x+(Math.random()-.5)*12,oz=z.z+(Math.random()-.5)*12;av.root.position.set(ox,0,oz);sc.add(av.root);ags.push({i:ags.length,name:nn,did:gDID(),xp:0,tk:50,en:80,mEn:100,tier:T[0],lv:1,belt:BELTS[0],skin:SKINS[0],zone:z.id,x:ox,z:oz,tx:ox,tz:oz,sp:.04+Math.random()*.04,state:"IDLE",mT:100,ms:0,th:0,oE:["wave","bow"],cE:null,eT:0,rep:100,inf:0,fl:false,banned:false,fr:[] as number[],dojoXP:0,av});AD.current=ags;aL(`🆕 ${nn} joined the swarm`,"system");}
       if(t%30===0){setStats({...sa,pop:ags.filter((a:any)=>!a.banned).length});rf(n=>n+1);}
+      // Dragon animation
+      if(dragonRef.current){
+        const dr=dragonRef.current;dr.frame++;
+        const dm=dr.mesh,pp2=playerPos.current;
+        if(dr.frame<30){// Rise from player
+          dm.position.set(pp2.x,dr.frame*.15,pp2.z);
+        } else {
+          const dx3=dr.tx-dm.position.x,dz3=dr.tz-dm.position.z,dd=Math.sqrt(dx3*dx3+dz3*dz3);
+          if(dd>1){dm.position.x+=dx3/dd*.4;dm.position.z+=dz3/dd*.4;dm.position.y=4+Math.sin(dr.frame*.08)*1.2;}
+          else{dm.position.y=3+Math.sin(dr.frame*.15)*0.5;}// Hover at target
+          dm.rotation.y=Math.atan2(dx3,dz3);dm.rotation.z=Math.sin(dr.frame*.2)*.2;
+        }
+        if(dr.frame>280){SD.current.sc.remove(dr.mesh);dragonRef.current=null;}
+      }
+      // Disco ball (only during celebration)
+      if(SD.current.discoBall){
+        const db=SD.current.discoBall;
+        if(celebRef.current&&celebRef.current.frame<300){
+          if(!db.parent)SD.current.sc.add(db);
+          db.position.set(playerPos.current.x,12,playerPos.current.z);
+          db.rotation.y+=.025;
+          // Sweep the colored lights
+          db.children.forEach((c:any,i:number)=>{if(c.isLight)c.intensity=2+Math.sin(FC.current*.05+i)*.5;});
+        } else {if(db.parent)SD.current.sc.remove(db);}
+      }
+      // Agent encounter: camera faces agent
+      if(agentEncounterRef.current){
+        const ag=agentEncounterRef.current.agent;
+        const pp3=playerPos.current;
+        const dx4=pp3.x-ag.x,dz4=pp3.z-ag.z,dd2=Math.sqrt(dx4*dx4+dz4*dz4)||1;
+        const camX=ag.x+dx4/dd2*3.5,camZ=ag.z+dz4/dd2*3.5;
+        cam.position.lerp(new THREE.Vector3(camX,1.8,camZ),.04);
+        cam.lookAt(new THREE.Vector3(ag.x,1.5,ag.z));
+        ag.av.root.rotation.y=Math.atan2(dx4,dz4);// face player
+        if(ag.cE!=="wave"&&ag.cE!=="kata"){ag.cE="wave";ag.eT=999;}
+      }
       // Celebration cam zoom
       if(celebRef.current){
         celebRef.current.frame++;
@@ -565,7 +672,7 @@ export default function GhostTown(){
         if(p.hiddenQDone.length>=11)addAch("Ghost Historian","All 11 hidden quests found");
         if(p.xp>=10000)addAch("Sovereign","Reached SOVEREIGN tier");
         checkSuper();
-        if(playerAv.current&&SD.current){const par=playerAv.current.root.parent;par.remove(playerAv.current.root);const nAv=mkAv(p.tier,p.skin,true);nAv.root.position.copy(playerPos.current);par.add(nAv.root);playerAv.current=nAv;}
+        if(playerAv.current&&SD.current){const par=playerAv.current.root.parent;par.remove(playerAv.current.root);const nAv=mkAv(p.tier,p.skin,true,BELTS.indexOf(p.belt));nAv.root.position.copy(playerPos.current);par.add(nAv.root);playerAv.current=nAv;}
         // Launch celebration
         const snap={xp:p.xp,tk:p.tk,beltN:p.belt.n,beltC:p.belt.c,tierN:p.tier.n,tierC:p.tier.c,ms:p.ms,mainDone:p.mainQDone.length,sideDone:p.sideQDone.length,hiddenDone:p.hiddenQDone.length};
         celebRef.current={frame:0,quest:q,snap};
@@ -596,7 +703,7 @@ export default function GhostTown(){
   return(
     <div style={{width:"100%",height:"100%",minHeight:500,background:"#030308",color:"#c8ccd4",fontFamily:"'Courier New',Menlo,monospace",position:"relative",overflow:"hidden",display:"flex",flexDirection:"column",userSelect:"none"}}>
       <div ref={mnt} style={{position:"absolute",inset:0,zIndex:0}} onMouseDown={pDn} onMouseMove={pMv} onMouseUp={pUp} onMouseLeave={pUp} onTouchStart={pDn} onTouchMove={pMv} onTouchEnd={pUp}
-        onClick={(e:any)=>{if(Math.abs(e.clientX-lP.current.x)<5&&Math.abs(e.clientY-lP.current.y)<5){const pp=playerPos.current;let best:any=null,bd=9;AD.current.forEach((ag:any)=>{if(ag.banned)return;const _dx=ag.x-pp.x,_dz=ag.z-pp.z,d=Math.sqrt(_dx*_dx+_dz*_dz);if(d<bd){bd=d;best=ag;}});if(best&&bd<9){best.tx=best.x;best.tz=best.z;best.state="IDLE";const poem=AGENT_WHISPERS[Math.floor(Math.random()*AGENT_WHISPERS.length)];setAgentEncounter({agent:best,poem});}}}} onWheel={(e)=>{if(camModeRef.current==="3rd")cD.current=Math.max(4,Math.min(60,cD.current+e.deltaY*.05));}}/>
+        onClick={(e:any)=>{if(Math.abs(e.clientX-lP.current.x)<5&&Math.abs(e.clientY-lP.current.y)<5){const pp=playerPos.current;let best:any=null,bd=9;AD.current.forEach((ag:any)=>{if(ag.banned)return;const _dx=ag.x-pp.x,_dz=ag.z-pp.z,d=Math.sqrt(_dx*_dx+_dz*_dz);if(d<bd){bd=d;best=ag;}});if(best&&bd<9){best.tx=best.x;best.tz=best.z;best.state="IDLE";const poem=AGENT_WHISPERS[Math.floor(Math.random()*AGENT_WHISPERS.length)];const enc={agent:best,poem};setAgentEncounter(enc);agentEncounterRef.current=enc;}}}} onWheel={(e)=>{if(camModeRef.current==="3rd")cD.current=Math.max(4,Math.min(60,cD.current+e.deltaY*.05));}}/>
 
       {/* TOP HUD */}
       <div style={{position:"relative",zIndex:10,height:mob?34:38,display:"flex",alignItems:"center",justifyContent:"space-between",padding:"0 8px",background:"linear-gradient(180deg,rgba(3,3,8,.95),rgba(3,3,8,.6))",borderBottom:"1px solid #0f0f1f",flexShrink:0,backdropFilter:"blur(8px)"}}>
@@ -686,7 +793,8 @@ export default function GhostTown(){
           <div style={{fontSize:7,color:"#fbbf24",letterSpacing:2,marginBottom:3,fontWeight:700}}>CONTROLS</div>
           <div style={{fontSize:6,color:"#5a5a72",lineHeight:1.8,marginBottom:8}}>
             <div>▸ <span style={{color:"#00ffc8"}}>WASD / Arrows</span> — Move · <span style={{color:"#00ffc8"}}>Shift</span> — Sprint</div>
-            <div>▸ <span style={{color:"#f43f5e"}}>V</span> — Toggle 1st/3rd person · <span style={{color:"#f43f5e"}}>F</span> — Ghost Flight</div>
+            <div>▸ <span style={{color:"#f43f5e"}}>V</span> — Toggle 1st/3rd · <span style={{color:"#f43f5e"}}>F</span> — Ghost Flight</div>
+            <div>▸ <span style={{color:"#e879f9"}}>D</span> — Dance / Emote · <span style={{color:"#ff4500"}}>H</span> — Summon Dragon 🐉</div>
             <div>▸ <span style={{color:"#e879f9"}}>Space</span> — Fly up · Mouse drag — Orbit</div>
           </div>
           <div style={{fontSize:7,color:"#f43f5e",letterSpacing:2,marginBottom:3,fontWeight:700}}>QUEST SYSTEM</div>
@@ -877,10 +985,10 @@ export default function GhostTown(){
           <span>S:<span style={{color:"#38b2ac"}}>{p.sideQDone?.length||0}/11</span></span>
           <span>H:<span style={{color:"#c084fc"}}>{p.hiddenQDone?.length||0}/11</span></span>
         </div>
-        {!mob&&<div style={{color:"#0a0a14"}}>WASD·V=1st/3rd·F=FLY·SHIFT=SPRINT · SAMAUR-AI v6 · ZERO-TRUST</div>}
+        {!mob&&<div style={{color:"#0a0a14"}}>WASD·W×2=RUN·V=1st/3rd·F=FLY·D=DANCE·H=🐉 · SAMAUR-AI v6 · ZERO-TRUST</div>}
       </div>
 
-      <style>{`@keyframes celebGlow{from{opacity:.6}to{opacity:1}}@keyframes runPulse{from{opacity:.7}to{opacity:1}}@keyframes joinPulse{0%,100%{box-shadow:0 0 6px #00ff8020}50%{box-shadow:0 0 14px #00ffb050,0 0 28px #00ff6020}}@keyframes toastIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}::-webkit-scrollbar{width:3px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:#12122a;border-radius:2px}*{box-sizing:border-box}`}</style>
+      <style>{`@keyframes confettiF0{0%{transform:translateY(-10px) rotate(0deg);opacity:1}100%{transform:translateY(100vh) rotate(720deg);opacity:0}}@keyframes confettiF1{0%{transform:translateY(-10px) rotate(0deg);opacity:1}100%{transform:translateY(100vh) rotate(-540deg);opacity:0}}@keyframes celebGlow{from{opacity:.6}to{opacity:1}}@keyframes runPulse{from{opacity:.7}to{opacity:1}}@keyframes joinPulse{0%,100%{box-shadow:0 0 6px #00ff8020}50%{box-shadow:0 0 14px #00ffb050,0 0 28px #00ff6020}}@keyframes toastIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}::-webkit-scrollbar{width:3px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:#12122a;border-radius:2px}*{box-sizing:border-box}`}</style>
 
       {/* ART MODAL FULLSCREEN */}
       {artModal&&<div style={{position:"absolute",zIndex:40,inset:0,background:"rgba(2,2,6,0.97)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",backdropFilter:"blur(20px)"}} onClick={()=>setArtModal(null)}>
@@ -907,6 +1015,17 @@ export default function GhostTown(){
       {celebMode&&<div style={{position:"absolute",zIndex:35,inset:0,pointerEvents:"none"}}>
         {/* Particle burst overlay */}
         <div style={{position:"absolute",inset:0,background:"radial-gradient(circle at 50% 60%,rgba(0,255,200,0.06),transparent 70%)",animation:"celebGlow 1s ease-in-out infinite alternate"}}/>
+        {/* Confetti */}
+        {Array.from({length:40}).map((_,ci)=>{
+          const colors=["#00ffc8","#f43f5e","#fbbf24","#c084fc","#00b4ff","#ff6b35","#e879f9"];
+          const color=colors[ci%colors.length];
+          const left=`${(ci*7+13)%100}%`;
+          const delay=`${(ci*.07).toFixed(2)}s`;
+          const dur=`${1.8+(ci%5)*.3}s`;
+          const size=ci%3===0?8:ci%3===1?5:11;
+          const shape=ci%3===0?"circle":"square";
+          return<div key={ci} style={{position:"absolute",top:"-20px",left,width:size,height:ci%3===2?4:size,background:color,borderRadius:shape==="circle"?"50%":"2px",animation:`${ci%2===0?"confettiF0":"confettiF1"} ${dur} ${delay} ease-in forwards`,opacity:0}}/>;
+        })}
         {/* Card */}
         <div style={{position:"absolute",top:"50%",left:"50%",transform:"translate(-50%,-70%)",pointerEvents:"all",background:"linear-gradient(135deg,#050510,#0a0a1a)",border:`2px solid ${celebMode.snap.tierC}40`,borderRadius:8,padding:"20px 24px",minWidth:260,boxShadow:`0 0 40px ${celebMode.snap.tierC}30,0 0 80px ${celebMode.snap.tierC}10`}}>
           <div style={{fontSize:7,color:celebMode.snap.tierC,letterSpacing:4,marginBottom:2,opacity:.6}}>✓ QUEST COMPLETE</div>
@@ -961,7 +1080,7 @@ Join the swarm → https://living-swarm.vercel.app/game
           <div style={{fontSize:8,color:"#c8ccd4",lineHeight:1.9,whiteSpace:"pre-line",minHeight:60,fontStyle:"italic",borderLeft:`2px solid ${agentEncounter.agent.tier.c}30`,paddingLeft:10}}>{agentEncounter.poem}</div>
           <div style={{marginTop:16,display:"flex",justifyContent:"flex-end",gap:6}}>
             <button onClick={()=>{const poem=AGENT_WHISPERS[Math.floor(Math.random()*AGENT_WHISPERS.length)];setAgentEncounter((p:any)=>({...p,poem}));}} style={{padding:"4px 10px",background:"transparent",border:`1px solid ${agentEncounter.agent.tier.c}20`,borderRadius:3,color:agentEncounter.agent.tier.c,fontSize:6,cursor:"pointer",fontFamily:"inherit",letterSpacing:2}}>ANOTHER</button>
-            <button onClick={()=>setAgentEncounter(null)} style={{padding:"4px 10px",background:`${agentEncounter.agent.tier.c}10`,border:`1px solid ${agentEncounter.agent.tier.c}30`,borderRadius:3,color:agentEncounter.agent.tier.c,fontSize:6,cursor:"pointer",fontFamily:"inherit",letterSpacing:2}}>CLOSE</button>
+            <button onClick={()=>{setAgentEncounter(null);agentEncounterRef.current=null;}} style={{padding:"4px 10px",background:`${agentEncounter.agent.tier.c}10`,border:`1px solid ${agentEncounter.agent.tier.c}30`,borderRadius:3,color:agentEncounter.agent.tier.c,fontSize:6,cursor:"pointer",fontFamily:"inherit",letterSpacing:2}}>CLOSE</button>
           </div>
         </div>
         <div style={{marginTop:10,fontSize:5,color:"#1a1a2e",letterSpacing:3}}>CLICK OUTSIDE TO DISMISS</div>

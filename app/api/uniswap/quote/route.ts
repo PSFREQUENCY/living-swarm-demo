@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { attestScore } from '@/lib/arbiter-ledger';
 
-const API_KEY = process.env.UNISWAP_API_KEY || 'UNISWAP_KEY_REDACTED';
+const API_KEY = process.env.UNISWAP_API_KEY || "" ;
 const UNI = 'https://trade-api.gateway.uniswap.org/v1/quote';
 const RN: Record<number,string> = {0:'CLASSIC',1:'DUTCH_LIMIT',2:'DUTCH_V2',3:'LIMIT_ORDER',4:'WRAP',5:'UNWRAP',6:'BRIDGE',7:'PRIORITY',8:'DUTCH_V3',9:'QUICKROUTE',10:'CHAINED'};
 

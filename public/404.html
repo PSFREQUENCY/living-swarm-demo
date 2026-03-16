@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>81 Ghost Town</title>
+<script>
+  // GitHub Pages SPA routing: redirect /living-swarm-demo/game → /?p=/game
+  var seg = window.location.pathname.replace('/living-swarm-demo','');
+  var q = window.location.search;
+  var h = window.location.hash;
+  if(seg && seg !== '/') {
+    window.location.replace(
+      '/living-swarm-demo/?p=' + encodeURIComponent(seg + q) + h
+    );
+  } else {
+    window.location.replace('/living-swarm-demo/');
+  }
+</script>
+</head>
+<body></body>
+</html>

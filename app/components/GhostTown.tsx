@@ -708,7 +708,7 @@ export default function GhostTown(){
       {/* TOP HUD */}
       <div style={{position:"relative",zIndex:10,height:mob?34:38,display:"flex",alignItems:"center",justifyContent:"space-between",padding:"0 8px",background:"linear-gradient(180deg,rgba(3,3,8,.95),rgba(3,3,8,.6))",borderBottom:"1px solid #0f0f1f",flexShrink:0,backdropFilter:"blur(8px)"}}>
         <div style={{display:"flex",alignItems:"center",gap:5}}>
-          <a href="/" style={{textDecoration:"none"}}>
+          <a href={`${process.env.NEXT_PUBLIC_BASE_PATH||""}/`} style={{textDecoration:"none"}}>
             <span style={{fontSize:mob?7:9,fontWeight:900,letterSpacing:3,color:"rgba(0,255,200,0.4)"}}>← HOME</span>
           </a>
           <span style={{fontSize:mob?9:13,fontWeight:900,letterSpacing:3,background:"linear-gradient(90deg,#f43f5e,#ff6b35,#fbbf24,#00ffc8,#00b4ff,#c084fc)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",marginLeft:8}}>81 GHOST TOWN</span>

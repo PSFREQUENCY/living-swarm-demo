@@ -1,6 +1,8 @@
 'use client';
 import { useState, useEffect, useRef, useCallback } from "react";
 import * as THREE from "three";
+import dynamic from "next/dynamic";
+const BankPanel = dynamic(()=>import("./BankPanel"),{ssr:false});
 
 // ═══════════════════════════════════════════════════════════════════════════════
 //  81 GHOST TOWN v6 — SAMAUR-AI EDITION
@@ -222,6 +224,8 @@ export default function GhostTown(){
   const [flying,setFlying]=useState(false);
   const [lootReady,setLootReady]=useState(true);
   const [questTab,setQuestTab]=useState<"main"|"side"|"hidden">("main");
+  const [bankOpen,setBankOpen]=useState(false);
+  const [activeChain,setActiveChain]=useState<"mainnet"|"sepolia">("sepolia");
   const [,rf]=useState(0);
 
   const keys=useRef({w:false,a:false,s:false,d:false,shift:false,space:false});
@@ -305,6 +309,7 @@ export default function GhostTown(){
       if(k==='shift')keys.current.shift=true;if(k===' ')keys.current.space=true;
       if(k==='v'){const nm=camModeRef.current==="3rd"?"1st":"3rd";camModeRef.current=nm;setCamMode(nm);cD.current=nm==="1st"?.5:18;}
       if(k==='f'&&pd.current.superSkills.includes("fly")){flyingRef.current=!flyingRef.current;setFlying(flyingRef.current);addToast(flyingRef.current?"🕊️ Ghost Flight activated!":"Landing...","#f43f5e");}
+      if(k==='b'){setBankOpen(p=>!p);}
     };
     const up=(e:KeyboardEvent)=>{const k=e.key.toLowerCase();
       if(k==='w'||k==='arrowup')keys.current.w=false;if(k==='s'||k==='arrowdown')keys.current.s=false;
@@ -446,6 +451,14 @@ export default function GhostTown(){
           <span style={{color:camMode==="1st"?"#f43f5e":"#22d3ee"}}>{camMode==="1st"?"👁 1ST":"🎥 3RD"}</span>
           {flying&&<span style={{color:"#f43f5e"}}>🕊️ FLY</span>}
           <span style={{color:sec==="NOMINAL"?"#22d3ee":"#f56565"}}>{sec==="NOMINAL"?"●":"⚠"}</span>
+          {/* Chain indicator */}
+          <span style={{color:activeChain==="mainnet"?"#627eea":"#cfb5f0",cursor:"pointer",border:`1px solid ${activeChain==="mainnet"?"#627eea44":"#cfb5f044"}`,borderRadius:3,padding:"1px 5px",fontSize:5}}
+            onClick={()=>setActiveChain(c=>c==="mainnet"?"sepolia":"mainnet")}>
+            {activeChain==="mainnet"?"⬡ ETH":"⚗️ SEP"}
+          </span>
+          {/* Bank button */}
+          <button style={{background:"rgba(0,255,231,0.08)",border:"1px solid rgba(0,255,231,0.25)",borderRadius:3,color:"#00ffe7",fontSize:mob?5:6,padding:"2px 7px",cursor:"pointer",fontFamily:"inherit",letterSpacing:2}}
+            onClick={()=>setBankOpen(true)}>🏦 [B]ANK</button>
         </div>
       </div>
 
@@ -659,6 +672,9 @@ export default function GhostTown(){
       </div>
 
       <style>{`@keyframes toastIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}::-webkit-scrollbar{width:3px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:#12122a;border-radius:2px}*{box-sizing:border-box}`}</style>
+
+      {/* BANK / VAULT PANEL */}
+      {bankOpen&&<BankPanel onClose={()=>setBankOpen(false)}/>}
     </div>
   );
 }

@@ -408,88 +408,49 @@ function mkDock():THREE.Group{
 }
 
 function mkSeaCoin(col=0xfbbf24):THREE.Group{
+  // Coin: emissive disc only — zero lights
   const gr=new THREE.Group();
-  const cM=new THREE.MeshStandardMaterial({color:col,emissive:col,emissiveIntensity:1.3,metalness:.9,roughness:.1});
-  const disc=new THREE.Mesh(new THREE.CylinderGeometry(.5,.5,.1,16),cM);disc.name='coinDisc';gr.add(disc);
-  const aura=new THREE.Mesh(new THREE.RingGeometry(.6,.8,16),new THREE.MeshBasicMaterial({color:col,transparent:true,opacity:.4,side:THREE.DoubleSide,depthWrite:false,blending:THREE.AdditiveBlending}));
-  aura.rotation.x=-Math.PI/2;aura.name='coinAura';gr.add(aura);
-  const l=new THREE.PointLight(col,.9,5);gr.add(l);
+  const cM=new THREE.MeshBasicMaterial({color:col});
+  const disc=new THREE.Mesh(new THREE.CylinderGeometry(.45,.45,.08,8),cM);disc.name='coinDisc';gr.add(disc);
   return gr;
 }
 function mkWaterfall():THREE.Group{
+  // 1 cliff + 2 water planes — zero lights
   const gr=new THREE.Group();
-  const rockM=new THREE.MeshStandardMaterial({color:0x1a2230,roughness:.9,metalness:.1});
-  const cliff=new THREE.Mesh(new THREE.BoxGeometry(18,22,7),rockM);cliff.position.set(0,5,0);cliff.castShadow=true;gr.add(cliff);
-  const base=new THREE.Mesh(new THREE.BoxGeometry(20,2,8),rockM);base.position.set(0,-4,0);gr.add(base);
-  for(let i=0;i<4;i++){
-    const wM=new THREE.MeshBasicMaterial({color:0x22aaff,transparent:true,opacity:.5-i*.07,blending:THREE.AdditiveBlending,side:THREE.DoubleSide,depthWrite:false});
-    const w=new THREE.Mesh(new THREE.PlaneGeometry(6-i*.5,22),wM);
-    w.position.set(i*.25,-1,3.5-i*.2);w.name=`wfall${i}`;gr.add(w);
-  }
-  const mistM=new THREE.MeshBasicMaterial({color:0x88ddff,transparent:true,opacity:.2,side:THREE.DoubleSide,depthWrite:false,blending:THREE.AdditiveBlending});
-  const mist=new THREE.Mesh(new THREE.CircleGeometry(12,16),mistM);mist.rotation.x=-Math.PI/2;mist.position.set(0,-11,2);mist.name='wfallMist';gr.add(mist);
-  gr.add((()=>{const l=new THREE.PointLight(0x2299ff,4,22);l.position.set(0,-10,5);return l;})());
+  const cliff=new THREE.Mesh(new THREE.BoxGeometry(18,22,7),new THREE.MeshBasicMaterial({color:0x1a2230}));cliff.position.set(0,5,0);gr.add(cliff);
+  const w0=new THREE.Mesh(new THREE.PlaneGeometry(7,22),new THREE.MeshBasicMaterial({color:0x3399ff,transparent:true,opacity:.55,side:THREE.DoubleSide,depthWrite:false}));w0.position.set(0,-1,3.6);w0.name='wfall0';gr.add(w0);
+  const w1=new THREE.Mesh(new THREE.PlaneGeometry(5,22),new THREE.MeshBasicMaterial({color:0x88ccff,transparent:true,opacity:.3,side:THREE.DoubleSide,depthWrite:false}));w1.position.set(.3,-1,3.4);w1.name='wfall1';gr.add(w1);
   return gr;
 }
 function mkCafe():THREE.Group{
+  // Cafe: 3 meshes, emissive — zero lights
   const gr=new THREE.Group();
-  const wallM=new THREE.MeshStandardMaterial({color:0x0d1117,roughness:.8});
-  const nM=new THREE.MeshStandardMaterial({color:0xff2d78,emissive:0xff2d78,emissiveIntensity:1.5,roughness:.1});
-  const cM2=new THREE.MeshStandardMaterial({color:0x00ffe7,emissive:0x00ffe7,emissiveIntensity:1.2,roughness:.1});
-  const body=new THREE.Mesh(new THREE.BoxGeometry(16,5,12),wallM);body.position.y=2.5;body.castShadow=true;gr.add(body);
-  const roof=new THREE.Mesh(new THREE.BoxGeometry(17,.4,13),nM);roof.position.y=5.2;gr.add(roof);
-  const sign=new THREE.Mesh(new THREE.BoxGeometry(10,1.2,.1),nM);sign.position.set(0,5.8,6.1);gr.add(sign);
-  [-5,0,5].forEach((x:number)=>{const w=new THREE.Mesh(new THREE.PlaneGeometry(2,1.8),cM2);w.position.set(x,2.5,6.05);gr.add(w);});
-  [['-5',8],['-5',10],['5',8],['5',10]].forEach(([xs,zs]:(string|number)[])=>{
-    const tx=Number(xs),tz=Number(zs);
-    const tbl=new THREE.Mesh(new THREE.CylinderGeometry(.7,.5,.15,8),new THREE.MeshStandardMaterial({color:0x1a1a2e,metalness:.7}));
-    tbl.position.set(tx,.15,tz);gr.add(tbl);
-    const leg=new THREE.Mesh(new THREE.CylinderGeometry(.06,.06,.8,6),wallM);leg.position.set(tx,-.25,tz);gr.add(leg);
-  });
-  gr.add((()=>{const l=new THREE.PointLight(0xff2d78,4,20);l.position.set(0,3,0);return l;})());
-  gr.add((()=>{const l=new THREE.PointLight(0x00ffe7,2,14);l.position.set(0,4,8);return l;})());
+  const body=new THREE.Mesh(new THREE.BoxGeometry(16,5,12),new THREE.MeshBasicMaterial({color:0x0d1117}));body.position.y=2.5;gr.add(body);
+  const roof=new THREE.Mesh(new THREE.BoxGeometry(17,.5,13),new THREE.MeshBasicMaterial({color:0xff2d78}));roof.position.y=5.2;gr.add(roof);
+  const sign=new THREE.Mesh(new THREE.BoxGeometry(10,1.4,.15),new THREE.MeshBasicMaterial({color:0x00ffe7}));sign.position.set(0,6,6.1);gr.add(sign);
   return gr;
 }
 function mkStairs():THREE.Group{
+  // Single glowing ramp — zero lights
   const gr=new THREE.Group();
-  const steps=10;
-  const sMat=new THREE.MeshStandardMaterial({color:0x00ffb0,emissive:0x00ff88,emissiveIntensity:.8,roughness:.2,metalness:.6});
-  for(let i=0;i<steps;i++){
-    const s=new THREE.Mesh(new THREE.BoxGeometry(4,.22,1.4),sMat);
-    s.position.set(0,-12+i*1.2+.1,i*1.4);gr.add(s);
-    const gl=new THREE.PointLight(0x00ffb0,.6,3);gl.position.set(0,-12+i*1.2+.8,i*1.4);gr.add(gl);
-  }
+  const ramp=new THREE.Mesh(new THREE.BoxGeometry(4,1,14),new THREE.MeshBasicMaterial({color:0x00ffb0}));
+  ramp.position.set(0,-6.5,7);ramp.rotation.x=Math.atan2(12,14);gr.add(ramp);
   return gr;
 }
 function mkMountain():THREE.Group{
+  // 2 cones + emissive peak — zero lights
   const gr=new THREE.Group();
-  const stoneM=new THREE.MeshStandardMaterial({color:0x1e2d3a,roughness:.95,metalness:.05});
-  const snowM=new THREE.MeshStandardMaterial({color:0xc8d8ff,emissive:0x4466aa,emissiveIntensity:.15,roughness:.6});
-  [[0,14,8],[8,6,12],[14,2,5]].forEach(([y,r,h]:number[],i:number)=>{
-    const cone=new THREE.Mesh(new THREE.ConeGeometry(r,h,12),i===2?snowM:stoneM);
-    cone.position.y=y+h/2;cone.castShadow=true;gr.add(cone);
-  });
-  const peak=new THREE.Mesh(new THREE.OctahedronGeometry(1.2),new THREE.MeshStandardMaterial({color:0x00b4ff,emissive:0x00b4ff,emissiveIntensity:2.5,roughness:.1}));
-  peak.position.y=21;gr.add(peak);
-  gr.add((()=>{const l=new THREE.PointLight(0x00b4ff,6,35);l.position.set(0,20,0);return l;})());
-  for(let i=0;i<8;i++){const ang=i/8*Math.PI*2,r2=2.5+Math.random();
-    const rock=new THREE.Mesh(new THREE.OctahedronGeometry(.3,0),snowM);
-    rock.position.set(Math.cos(ang)*r2,15+Math.random()*.5,Math.sin(ang)*r2);gr.add(rock);}
+  const c1=new THREE.Mesh(new THREE.ConeGeometry(14,20,8),new THREE.MeshBasicMaterial({color:0x1e2d3a}));c1.position.y=10;gr.add(c1);
+  const c2=new THREE.Mesh(new THREE.ConeGeometry(5,8,8),new THREE.MeshBasicMaterial({color:0xc8d8ff}));c2.position.y=22;gr.add(c2);
+  const peak=new THREE.Mesh(new THREE.OctahedronGeometry(1.1),new THREE.MeshBasicMaterial({color:0x00b4ff}));peak.position.y=26;peak.name='mtPeak';gr.add(peak);
   return gr;
 }
 function mkUnderground():THREE.Group{
+  // Cave floor + 3 emissive crystals — zero lights
   const gr=new THREE.Group();
-  // Cave floor
-  const floorM=new THREE.MeshStandardMaterial({color:0x0a0f17,roughness:.95,metalness:.05});
-  const floor=new THREE.Mesh(new THREE.PlaneGeometry(80,55),floorM);floor.rotation.x=-Math.PI/2;gr.add(floor);
-  // Cave walls/ceiling hints
-  const ceilM=new THREE.MeshStandardMaterial({color:0x060a10,roughness:.9});
-  const ceil=new THREE.Mesh(new THREE.PlaneGeometry(80,55),ceilM);ceil.rotation.x=Math.PI/2;ceil.position.y=9;gr.add(ceil);
-  // Glowing cave lights
-  [[0,1,0],[20,1,-15],[-20,1,15],[10,1,20]].forEach(([x,y,z]:number[])=>{
-    const l=new THREE.PointLight(0x331166,.8,18);l.position.set(x,y,z);gr.add(l);
-    const crystal=new THREE.Mesh(new THREE.OctahedronGeometry(.4,0),new THREE.MeshStandardMaterial({color:0x6644cc,emissive:0x441188,emissiveIntensity:1.5}));
-    crystal.position.set(x,y+.3,z);gr.add(crystal);
+  const floor=new THREE.Mesh(new THREE.PlaneGeometry(80,55),new THREE.MeshBasicMaterial({color:0x080c12}));floor.rotation.x=-Math.PI/2;gr.add(floor);
+  [[0,0],[18,-14],[-18,14]].forEach(([x,z]:number[])=>{
+    const c=new THREE.Mesh(new THREE.OctahedronGeometry(.5,0),new THREE.MeshBasicMaterial({color:0x6633cc}));c.position.set(x,.5,z);gr.add(c);
   });
   return gr;
 }
@@ -605,13 +566,13 @@ export default function GhostTown(){
     const sc=new THREE.Scene();sc.background=new THREE.Color(0x030308);// fog only in night mode (toggled by button)
     const cam=new THREE.PerspectiveCamera(55,W/H,.3,250);
     const ren=new THREE.WebGLRenderer({antialias:true,powerPreference:"high-performance",precision:"highp"});
-    ren.setSize(W,H);ren.setPixelRatio(Math.min(devicePixelRatio,mob?2:3));
-    ren.shadowMap.enabled=true;ren.shadowMap.type=THREE.PCFSoftShadowMap;
+    ren.setSize(W,H);ren.setPixelRatio(Math.min(devicePixelRatio,2));
+    ren.shadowMap.enabled=false;
     ren.toneMapping=THREE.ACESFilmicToneMapping;ren.toneMappingExposure=1.05;
     el.appendChild(ren.domElement);
     sc.add(new THREE.AmbientLight(0x0a0a20,.4));
     const mn=new THREE.DirectionalLight(0x2244aa,.5);mn.position.set(-30,50,-20);
-    mn.castShadow=true;mn.shadow.mapSize.set(mob?1024:2048,mob?1024:2048);if(true){mn.shadow.camera.near=1;mn.shadow.camera.far=120;(mn.shadow.camera as any).left=-60;(mn.shadow.camera as any).right=60;(mn.shadow.camera as any).top=60;(mn.shadow.camera as any).bottom=-60;}
+    mn.castShadow=true;mn.shadow.mapSize.set(512,512);if(true){mn.shadow.camera.near=1;mn.shadow.camera.far=120;(mn.shadow.camera as any).left=-60;(mn.shadow.camera as any).right=60;(mn.shadow.camera as any).top=60;(mn.shadow.camera as any).bottom=-60;}
     sc.add(mn);sc.add(new THREE.HemisphereLight(0x111133,0x050508,.25));
     const gnd=new THREE.Mesh(G().ground,new THREE.MeshStandardMaterial({color:0x060610,roughness:.95,metalness:.1}));gnd.rotation.x=-Math.PI/2;gnd.receiveShadow=true;sc.add(gnd);
     sc.add((()=>{const _g=new THREE.GridHelper(200,100,0x0a0a1a,0x08081a);_g.position.set(0,.02,0);return _g;})());
@@ -619,17 +580,17 @@ export default function GhostTown(){
     for(let i=0;i<Z.length;i++)for(let j=i+1;j<Z.length;j++){const a=Z[i],b=Z[j],dx=b.x-a.x,dz=b.z-a.z,d=Math.sqrt(dx*dx+dz*dz);const rd=new THREE.Mesh(new THREE.PlaneGeometry(.8,d),rM);rd.rotation.x=-Math.PI/2;rd.position.set((a.x+b.x)/2,.03,(a.z+b.z)/2);rd.rotation.z=-Math.atan2(dz,dx)+Math.PI/2;sc.add(rd);}
     const blds=Z.map(z=>{const b=mkBld(z);sc.add(b.gr);return{...b,zone:z};});
     // Stars
-    const sN=mob?300:800,sG=new THREE.BufferGeometry(),sP=new Float32Array(sN*3),sC=new Float32Array(sN*3);
+    const sN=mob?200:400,sG=new THREE.BufferGeometry(),sP=new Float32Array(sN*3),sC=new Float32Array(sN*3);
     for(let i=0;i<sN;i++){const th=Math.random()*Math.PI*2,phi=Math.random()*Math.PI*.45,r=80+Math.random()*60;sP[i*3]=Math.sin(th)*Math.cos(phi)*r;sP[i*3+1]=30+Math.random()*50;sP[i*3+2]=Math.cos(th)*Math.cos(phi)*r;const c=new THREE.Color().setHSL(.5+Math.random()*.3,.6,.6);sC[i*3]=c.r;sC[i*3+1]=c.g;sC[i*3+2]=c.b;}
     sG.setAttribute("position",new THREE.BufferAttribute(sP,3));sG.setAttribute("color",new THREE.BufferAttribute(sC,3));
     sc.add(new THREE.Points(sG,new THREE.PointsMaterial({size:mob?.15:.1,vertexColors:true,transparent:true,opacity:.7,blending:THREE.AdditiveBlending,depthWrite:false})));
     // Rain
-    const rN=mob?60:120,rG=new THREE.BufferGeometry(),rP=new Float32Array(rN*3),rC=new Float32Array(rN*3);
+    const rN=mob?30:60,rG=new THREE.BufferGeometry(),rP=new Float32Array(rN*3),rC=new Float32Array(rN*3);
     for(let i=0;i<rN;i++){rP[i*3]=(Math.random()-.5)*140;rP[i*3+1]=Math.random()*25;rP[i*3+2]=(Math.random()-.5)*140;const g2=.3+Math.random()*.7;rC[i*3]=0;rC[i*3+1]=g2*.8;rC[i*3+2]=g2*.3;}
     rG.setAttribute("position",new THREE.BufferAttribute(rP,3));rG.setAttribute("color",new THREE.BufferAttribute(rC,3));
     const rain=new THREE.Points(rG,new THREE.PointsMaterial({size:mob?.08:.05,vertexColors:true,transparent:true,opacity:.45,blending:THREE.AdditiveBlending,depthWrite:false}));sc.add(rain);
     // Fireflies
-    const fN=mob?40:120,fG=new THREE.BufferGeometry(),fP=new Float32Array(fN*3),fC=new Float32Array(fN*3);
+    const fN=mob?20:60,fG=new THREE.BufferGeometry(),fP=new Float32Array(fN*3),fC=new Float32Array(fN*3);
     for(let i=0;i<fN;i++){fP[i*3]=(Math.random()-.5)*100;fP[i*3+1]=1+Math.random()*8;fP[i*3+2]=(Math.random()-.5)*100;const hue=[.13,.47,.55,.75,.85][Math.floor(Math.random()*5)];const c=new THREE.Color().setHSL(hue,.8,.6);fC[i*3]=c.r;fC[i*3+1]=c.g;fC[i*3+2]=c.b;}
     fG.setAttribute("position",new THREE.BufferAttribute(fP,3));fG.setAttribute("color",new THREE.BufferAttribute(fC,3));
     const ff=new THREE.Points(fG,new THREE.PointsMaterial({size:.12,vertexColors:true,transparent:true,opacity:.6,blending:THREE.AdditiveBlending,depthWrite:false}));sc.add(ff);
@@ -852,9 +813,9 @@ export default function GhostTown(){
         });
       }
       // ── Waterfall animation ──
-      if(SD.current.wfall&&t%3===0){
-        for(let _wi=0;_wi<4;_wi++){const _wp=SD.current.wfall.getObjectByName(`wfall${_wi}`);if(_wp)(_wp as any).material.opacity=.35+Math.sin(t*.07+_wi*.8)*.18-_wi*.06;}
-        const _wm=SD.current.wfall.getObjectByName('wfallMist');if(_wm)(_wm as any).material.opacity=.15+Math.abs(Math.sin(t*.04))*.12;
+      if(SD.current.wfall&&t%6===0){
+        const _w0=SD.current.wfall.getObjectByName('wfall0');const _w1=SD.current.wfall.getObjectByName('wfall1');
+        const _op=.45+Math.sin(t*.07)*.1;if(_w0)(_w0 as any).material.opacity=_op;if(_w1)(_w1 as any).material.opacity=_op*.55;
       }
       // ── Waterfall entry — walk to x<-79 and fall in ──
       if(!inBoat.current&&!inUnderground.current){
@@ -924,7 +885,7 @@ export default function GhostTown(){
       if(inBoat.current&&playerBoat.current){
         const pb=playerBoat.current;const k2=keys.current;
         const boatSpd=k2.shift?.22:.12;
-        const fwd2=new THREE.Vector3(-Math.sin(cA.current),0,-Math.cos(cA.current));
+        _fwd.set(-Math.sin(cA.current),0,-Math.cos(cA.current));const fwd2=_fwd;
         if(k2.w){pb.x+=fwd2.x*boatSpd;pb.z+=fwd2.z*boatSpd;pb.heading=cA.current;}
         if(k2.s){pb.x-=fwd2.x*boatSpd*.5;pb.z-=fwd2.z*boatSpd*.5;}
         if(k2.a)cA.current+=.03;if(k2.d)cA.current-=.03;

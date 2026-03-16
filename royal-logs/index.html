@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>ROYAL LOGS — Onchain Memory Artifacts</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;700;800&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--void:#030308;--gold:#ffd700;--gold2:#ff9500;--cyan:#00f5ff;--violet:#9b59ff;--plasma:#ff6ef7;--sage:#39ff8f}
+html,body{padding-top:44px;background:var(--void);color:#c8c8d8;font-family:'JetBrains Mono','Courier New',monospace;overflow-x:hidden}
+::-webkit-scrollbar{width:2px}::-webkit-scrollbar-track{background:var(--void)}::-webkit-scrollbar-thumb{background:#1a1a3e}
+
+.hero{position:relative;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 20px 60px;text-align:center;overflow:hidden}
+#crown-canvas{position:absolute;top:0;left:0;width:100%;height:100%;z-index:0;cursor:crosshair}
+.back-link{position:absolute;top:24px;left:24px;z-index:10;font-size:10px;color:#1a1a3a;letter-spacing:.2em;text-decoration:none;transition:color .3s}
+.back-link:hover{color:#555}
+.hero-content{position:relative;z-index:5;display:flex;flex-direction:column;align-items:center}
+.hero-content .cta-row,.hero-content a{pointer-events:all}
+.museum-eyebrow{font-size:9px;color:#1a1a3a;letter-spacing:.5em;text-transform:uppercase;margin-bottom:32px;display:flex;align-items:center;gap:16px;justify-content:center}
+.museum-eyebrow::before,.museum-eyebrow::after{content:'';width:30px;height:1px;background:#0d0d20}
+
+/* GLITCH TITLE */
+.glitch-wrap{position:relative;margin-bottom:20px;user-select:none}
+.glitch-title{font-size:clamp(52px,12vw,110px);font-weight:800;line-height:.9;letter-spacing:-.02em;background:linear-gradient(135deg,#fff 0%,var(--gold) 28%,var(--gold2) 50%,var(--plasma) 72%,var(--violet) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;position:relative;z-index:2}
+.glitch-title::before,.glitch-title::after{content:'ROYAL LOGS';position:absolute;top:0;left:0;right:0;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.glitch-title::before{left:2px;top:-1px;background:linear-gradient(135deg,var(--cyan),var(--violet));-webkit-background-clip:text;background-clip:text;animation:ga 4s infinite;opacity:.7}
+.glitch-title::after{left:-2px;top:1px;background:linear-gradient(135deg,var(--plasma),var(--gold));-webkit-background-clip:text;background-clip:text;animation:gb 4s infinite;opacity:.5}
+@keyframes ga{0%,90%,100%{clip-path:none;transform:none}91%{clip-path:polygon(0 10%,100% 10%,100% 25%,0 25%);transform:translate(-3px,0) skewX(-2deg)}93%{clip-path:polygon(0 55%,100% 55%,100% 70%,0 70%);transform:translate(3px,0) skewX(1deg)}95%{clip-path:polygon(0 80%,100% 80%,100% 90%,0 90%);transform:translate(-2px,0)}97%{clip-path:none;transform:none}}
+@keyframes gb{0%,88%,100%{clip-path:none;transform:none}89%{clip-path:polygon(0 30%,100% 30%,100% 45%,0 45%);transform:translate(3px,0) skewX(1deg)}92%{clip-path:polygon(0 65%,100% 65%,100% 75%,0 75%);transform:translate(-3px,0) skewX(-2deg)}94%{clip-path:none;transform:none}}
+.glitch-sub{font-size:10px;color:#1a1a3a;letter-spacing:.4em;text-transform:uppercase;margin-bottom:8px;animation:sg 6s infinite}
+@keyframes sg{0%,94%,100%{opacity:.6;transform:none;letter-spacing:.4em}95%{opacity:1;transform:skewX(-5deg);letter-spacing:.5em;color:#00f5ff}96%{opacity:.3;transform:skewX(3deg);letter-spacing:.35em}97%{opacity:.7;transform:none;letter-spacing:.4em}}
+
+.hero-tagline{font-size:11px;color:#2a2a4a;letter-spacing:.2em;line-height:2.4;margin-bottom:40px;max-width:560px}
+.hero-tagline em{color:#444;font-style:normal}
+
+.live-strip{display:flex;align-items:center;gap:12px;flex-wrap:wrap;justify-content:center;margin-bottom:40px}
+.pill{display:inline-flex;align-items:center;gap:8px;border-radius:30px;padding:7px 18px;font-size:9px;letter-spacing:.2em;text-transform:uppercase;backdrop-filter:blur(12px)}
+.pill-live{background:rgba(57,255,143,.06);border:1px solid rgba(57,255,143,.2);color:var(--sage)}
+.pill-live .dot{width:6px;height:6px;border-radius:50%;background:var(--sage);box-shadow:0 0 8px var(--sage)}
+@keyframes bl{0%,100%{opacity:1}50%{opacity:.2}}.dot{animation:bl 1.4s ease-in-out infinite}
+.pill-chain{background:rgba(0,245,255,.04);border:1px solid rgba(0,245,255,.12);color:#22d3ee}
+.pill-price{background:rgba(255,215,0,.06);border:1px solid rgba(255,215,0,.2);color:var(--gold);font-size:11px;font-weight:700}
+
+.stats{display:flex;gap:0;border:1px solid #0a0a18;border-radius:18px;overflow:hidden;margin-bottom:44px;backdrop-filter:blur(20px);background:rgba(3,3,8,.5)}
+.stat{flex:1;padding:20px 22px;text-align:center;border-right:1px solid #080814}.stat:last-child{border-right:none}
+.stat-n{font-size:28px;font-weight:800;background:linear-gradient(135deg,var(--gold),var(--gold2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1}
+.stat-l{font-size:8px;color:#1a1a3a;letter-spacing:.25em;margin-top:5px}
+
+.cta-row{display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
+.btn-gold{display:inline-flex;align-items:center;gap:10px;background:linear-gradient(135deg,rgba(255,215,0,.18),rgba(255,140,0,.12));border:1px solid rgba(255,215,0,.45);color:var(--gold);font-family:inherit;font-size:12px;font-weight:700;letter-spacing:.18em;padding:15px 38px;border-radius:14px;cursor:pointer;text-decoration:none;transition:all .35s;text-transform:uppercase;backdrop-filter:blur(12px)}
+.btn-gold:hover{background:linear-gradient(135deg,rgba(255,215,0,.3),rgba(255,140,0,.22));box-shadow:0 0 60px rgba(255,215,0,.28),0 20px 60px rgba(0,0,0,.5);transform:translateY(-3px)}
+.btn-ghost{display:inline-flex;align-items:center;gap:8px;background:rgba(0,0,0,.3);border:1px solid #1a1a2e;color:#333;font-family:inherit;font-size:11px;letter-spacing:.15em;padding:15px 28px;border-radius:14px;cursor:pointer;text-decoration:none;transition:all .3s;text-transform:uppercase;backdrop-filter:blur(12px)}
+.btn-ghost:hover{border-color:#2a2a4a;color:#666}
+
+.scroll-hint{position:absolute;bottom:32px;left:50%;transform:translateX(-50%);z-index:5;font-size:8px;color:#111;letter-spacing:.25em;display:flex;flex-direction:column;align-items:center;gap:8px}
+.scroll-line{width:1px;height:40px;background:linear-gradient(180deg,#1a1a3a,transparent)}
+@keyframes sh{0%,100%{opacity:.3}50%{opacity:.7}}.scroll-line{animation:sh 2s ease-in-out infinite}
+
+.ticker{position:relative;z-index:1;background:#020209;border-top:1px solid #060614;border-bottom:1px solid #060614;overflow:hidden;height:28px;display:flex;align-items:center}
+.ticker-t{white-space:nowrap;font-size:9px;color:#0c0c1e;letter-spacing:.3em}
+@keyframes tk{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}.ticker-t{animation:tk 32s linear infinite}
+
+.gallery-section{position:relative;z-index:1;max-width:1140px;margin:0 auto;padding:90px 20px 60px}
+.s-eye{font-size:9px;color:#1a1a3a;letter-spacing:.4em;text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:12px}
+.s-eye::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,#0a0a1e,transparent)}
+.s-h2{font-size:clamp(24px,5vw,46px);font-weight:800;margin-bottom:10px;background:linear-gradient(135deg,#fff,#666);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.s-desc{font-size:11px;color:#1a1a3a;line-height:1.9;margin-bottom:52px;max-width:480px}
+
+.gallery{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+@media(max-width:780px){.gallery{grid-template-columns:1fr;max-width:380px;margin:0 auto}}
+
+.tcard{background:linear-gradient(160deg,#0a0a18,#040410);border:1px solid #0f0f1e;border-radius:24px;overflow:hidden;transition:all .5s cubic-bezier(.23,1,.32,1);cursor:pointer;position:relative}
+.tcard:hover{transform:translateY(-10px) scale(1.01);border-color:rgba(255,215,0,.18);box-shadow:0 40px 100px rgba(0,0,0,.7),0 0 60px rgba(255,215,0,.06)}
+.art-win{width:100%;aspect-ratio:1;position:relative;overflow:hidden;background:#020208}
+.art-win svg{width:100%;height:100%;display:block;transition:transform .7s ease}.tcard:hover .art-win svg{transform:scale(1.05)}
+.art-gloss{position:absolute;top:0;left:0;right:0;height:45%;background:linear-gradient(180deg,rgba(255,255,255,.04),transparent);pointer-events:none}
+.art-badge{position:absolute;top:12px;left:12px;background:rgba(3,3,8,.8);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.05);border-radius:8px;padding:4px 11px;font-size:8px;color:#222;letter-spacing:.18em}
+.art-num{position:absolute;top:12px;right:12px;background:rgba(255,215,0,.12);backdrop-filter:blur(12px);border:1px solid rgba(255,215,0,.22);border-radius:8px;padding:4px 11px;font-size:9px;font-weight:700;color:var(--gold)}
+.cinfo{padding:20px}
+.ctier{display:inline-flex;align-items:center;gap:5px;font-size:8px;letter-spacing:.15em;padding:3px 10px;border-radius:10px;margin-bottom:9px;text-transform:uppercase;font-weight:700;background:rgba(0,245,255,.06);border:1px solid rgba(0,245,255,.14);color:#22d3ee}
+.cname{font-size:14px;font-weight:700;color:#ccc;margin-bottom:5px;line-height:1.2}
+.cdesc{font-size:10px;color:#1a1a3a;line-height:1.8;margin-bottom:14px}
+.ctags{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:16px}
+.ctag{font-size:8px;padding:2px 8px;border-radius:8px;letter-spacing:.08em}
+.ctag-a{background:rgba(155,89,255,.06);border:1px solid rgba(155,89,255,.14);color:#c084fc}
+.ctag-b{background:rgba(57,255,143,.05);border:1px solid rgba(57,255,143,.12);color:#34d399}
+.ctag-c{background:rgba(255,110,247,.05);border:1px solid rgba(255,110,247,.12);color:#f0abfc}
+.cprice{background:rgba(0,0,0,.4);border:1px solid #0a0a18;border-radius:12px;padding:13px 15px;margin-bottom:11px}
+.cprice-top{display:flex;justify-content:space-between;align-items:flex-end}
+.cprice-label{font-size:8px;color:#111;letter-spacing:.18em;text-transform:uppercase}
+.cprice-val{font-size:21px;font-weight:800;color:var(--gold);text-shadow:0 0 24px rgba(255,215,0,.45);line-height:1}
+.cprice-eth{font-size:9px;color:#222}
+.cprice-bar{height:1px;background:linear-gradient(90deg,rgba(255,215,0,.25),transparent);margin-top:10px}
+.bid-btn{width:100%;background:linear-gradient(135deg,rgba(255,215,0,.12),rgba(255,149,0,.08));border:1px solid rgba(255,215,0,.24);color:var(--gold);font-family:inherit;font-size:10px;font-weight:700;letter-spacing:.2em;padding:12px;border-radius:10px;cursor:pointer;transition:all .3s;text-transform:uppercase}
+.bid-btn:hover{box-shadow:0 0 36px rgba(255,215,0,.2);transform:translateY(-1px)}
+.tx-links{margin-top:8px;display:flex;gap:6px}
+.tx-link{flex:1;text-align:center;font-size:8px;color:#111;letter-spacing:.1em;padding:6px;border:1px solid #080814;border-radius:7px;text-decoration:none;transition:all .2s}
+.tx-link:hover{color:#333;border-color:#1a1a3a}
+
+.provenance{position:relative;z-index:1;max-width:1140px;margin:0 auto;padding:0 20px 90px}
+.prov-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+@media(max-width:680px){.prov-grid{grid-template-columns:1fr}}
+.prov-card{background:linear-gradient(145deg,#060610,#040408);border:1px solid #0a0a18;border-radius:20px;padding:26px}
+.prov-title{font-size:9px;color:#111;letter-spacing:.3em;text-transform:uppercase;margin-bottom:16px;display:flex;align-items:center;gap:10px}
+.prov-title::after{content:'';flex:1;height:1px;background:#080812}
+.prov-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid #060610;font-size:10px}
+.prov-row:last-child{border-bottom:none}
+.prov-key{color:#111;letter-spacing:.1em}
+.prov-val{color:#333;font-size:9px;text-align:right}
+.prov-val a{color:#1a2a4a;text-decoration:none;transition:color .2s}.prov-val a:hover{color:var(--cyan)}
+.hi{color:var(--sage)!important}.hi2{color:var(--gold)!important}
+
+.philosophy{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:0 20px 90px;text-align:center}
+.phil-quote{font-size:clamp(15px,2.5vw,22px);font-weight:300;color:#222;line-height:1.8;margin-bottom:28px;font-style:italic}
+.phil-quote strong{color:#555;font-weight:700;font-style:normal}
+
+/* SWARM GENESIS COLLECTION */
+.genesis-section{position:relative;z-index:2;background:linear-gradient(180deg,#020208 0%,#04020e 50%,#020208 100%);padding:80px 20px 70px;overflow:hidden}
+.genesis-section::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 50% 50%,rgba(155,89,255,.06),transparent);pointer-events:none}
+.genesis-header{max-width:1140px;margin:0 auto 52px;text-align:center}
+.genesis-eye{font-size:9px;color:#2a1a4a;letter-spacing:.45em;text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;justify-content:center;gap:14px}
+.genesis-eye::before,.genesis-eye::after{content:'';width:40px;height:1px;background:linear-gradient(90deg,transparent,rgba(155,89,255,.25))}
+.genesis-title{font-size:clamp(28px,6vw,58px);font-weight:800;line-height:.95;letter-spacing:-.02em;background:linear-gradient(135deg,#fff 0%,var(--violet) 30%,var(--plasma) 55%,var(--cyan) 80%,var(--gold) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:14px}
+.genesis-sub{font-size:10px;color:#1a0a2e;letter-spacing:.3em;text-transform:uppercase;margin-bottom:10px}
+.genesis-desc{font-size:11px;color:#1a1a3a;line-height:1.9;max-width:540px;margin:0 auto 28px}
+.genesis-pills{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-bottom:0}
+.gpill{font-size:8px;padding:5px 14px;border-radius:20px;letter-spacing:.12em;text-transform:uppercase}
+.gpill-v{background:rgba(155,89,255,.07);border:1px solid rgba(155,89,255,.22);color:#c084fc}
+.gpill-g{background:rgba(57,255,143,.05);border:1px solid rgba(57,255,143,.15);color:var(--sage)}
+.gpill-c{background:rgba(0,245,255,.05);border:1px solid rgba(0,245,255,.14);color:var(--cyan)}
+.genesis-grid{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:repeat(3,1fr);gap:28px}
+@media(max-width:900px){.genesis-grid{grid-template-columns:1fr;max-width:480px}}
+.genesis-card{position:relative;background:linear-gradient(160deg,#08060f,#04020a);border:1px solid rgba(155,89,255,.12);border-radius:24px;overflow:hidden;transition:all .5s cubic-bezier(.23,1,.32,1)}
+.genesis-card:hover{transform:translateY(-12px) scale(1.015);border-color:rgba(155,89,255,.35);box-shadow:0 40px 100px rgba(0,0,0,.8),0 0 80px rgba(155,89,255,.1)}
+.genesis-frame-wrap{position:relative;width:100%;aspect-ratio:1;background:#000;overflow:hidden;border-radius:20px 20px 0 0}
+.genesis-frame{width:100%;height:100%;border:none;display:block;border-radius:20px 20px 0 0}
+.genesis-frame-overlay{position:absolute;inset:0;background:linear-gradient(180deg,transparent 60%,rgba(4,2,10,.95) 100%);pointer-events:none;border-radius:20px 20px 0 0}
+.genesis-card-badge{position:absolute;top:12px;left:12px;z-index:5;background:rgba(4,2,10,.85);backdrop-filter:blur(10px);border:1px solid rgba(155,89,255,.2);border-radius:8px;padding:4px 10px;font-size:8px;color:rgba(155,89,255,.7);letter-spacing:.15em}
+.genesis-card-num{position:absolute;top:12px;right:12px;z-index:5;background:rgba(155,89,255,.12);backdrop-filter:blur(10px);border:1px solid rgba(155,89,255,.28);border-radius:8px;padding:4px 10px;font-size:9px;font-weight:700;color:var(--violet)}
+.genesis-card-body{padding:18px}
+.genesis-card-title{font-size:15px;font-weight:700;color:#ddd;margin-bottom:6px;line-height:1.2}
+.genesis-card-desc{font-size:10px;color:#1a1a3a;line-height:1.8;margin-bottom:12px}
+.genesis-card-tags{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:14px}
+.genesis-card-tag{font-size:8px;padding:2px 8px;border-radius:8px;background:rgba(155,89,255,.06);border:1px solid rgba(155,89,255,.12);color:rgba(155,89,255,.6);letter-spacing:.08em}
+.genesis-card-footer{display:flex;align-items:center;justify-content:space-between;border-top:1px solid rgba(155,89,255,.07);padding-top:12px}
+.genesis-card-supply{font-size:9px;color:#1a0a2e;letter-spacing:.12em}
+.genesis-card-link{font-size:8px;color:rgba(155,89,255,.5);text-decoration:none;letter-spacing:.1em;transition:color .2s}
+.genesis-card-link:hover{color:var(--violet)}
+.genesis-contract{max-width:1140px;margin:40px auto 0;text-align:center;border:1px solid rgba(155,89,255,.08);border-radius:16px;padding:20px;background:rgba(155,89,255,.02)}
+.genesis-contract-label{font-size:8px;color:#1a0a2e;letter-spacing:.25em;text-transform:uppercase;margin-bottom:8px}
+.genesis-contract-addr{font-size:11px;color:rgba(155,89,255,.5);letter-spacing:.08em}
+.genesis-contract-addr a{color:rgba(155,89,255,.5);text-decoration:none;transition:color .2s}
+.genesis-contract-addr a:hover{color:var(--violet)}
+/* CRYSTALLIZE SECTION */
+.xtal-section{position:relative;z-index:1;max-width:860px;margin:0 auto;padding:90px 20px 60px}
+.xtal-box{background:linear-gradient(160deg,#0a0a18,#040410);border:1px solid #0f0f1e;border-radius:24px;padding:36px}
+.xtal-label{font-size:9px;color:#1a1a3a;letter-spacing:.3em;text-transform:uppercase;margin-bottom:6px}
+.xtal-textarea{width:100%;background:rgba(0,0,0,.5);border:1px solid #0f0f1e;border-radius:12px;color:#888;font-family:'JetBrains Mono','Courier New',monospace;font-size:12px;line-height:1.7;padding:14px 16px;resize:vertical;min-height:90px;outline:none;transition:border-color .3s;letter-spacing:.04em}
+.xtal-textarea:focus{border-color:rgba(255,215,0,.25);color:#aaa}
+.xtal-textarea::placeholder{color:#1a1a3a}
+.xtal-row{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:16px}
+.xtal-sel{background:rgba(0,0,0,.5);border:1px solid #0f0f1e;border-radius:10px;color:#555;font-family:inherit;font-size:10px;letter-spacing:.1em;padding:10px 14px;outline:none;cursor:pointer;transition:border-color .3s}
+.xtal-sel:focus{border-color:rgba(255,215,0,.2)}
+.xtal-toggle{display:flex;align-items:center;gap:8px;margin-left:auto;font-size:9px;color:#1a1a3a;letter-spacing:.15em;cursor:pointer;user-select:none}
+.xtal-toggle input{width:14px;height:14px;accent-color:var(--gold);cursor:pointer}
+.xtal-btn{background:linear-gradient(135deg,rgba(255,215,0,.14),rgba(255,149,0,.09));border:1px solid rgba(255,215,0,.3);color:var(--gold);font-family:inherit;font-size:10px;font-weight:700;letter-spacing:.2em;padding:11px 28px;border-radius:11px;cursor:pointer;transition:all .3s;text-transform:uppercase;white-space:nowrap}
+.xtal-btn:hover:not(:disabled){box-shadow:0 0 36px rgba(255,215,0,.18);transform:translateY(-1px)}
+.xtal-btn:disabled{opacity:.4;cursor:not-allowed}
+.xtal-status{margin-top:16px;font-size:10px;color:#1a1a3a;letter-spacing:.12em;min-height:18px}
+.xtal-status.ok{color:var(--sage)}.xtal-status.err{color:#ff4455}
+.xtal-result{margin-top:24px;display:none;background:rgba(0,0,0,.4);border:1px solid #0a0a18;border-radius:16px;padding:24px}
+.xtal-result.show{display:block}
+.xtal-rtitle{font-size:18px;font-weight:700;background:linear-gradient(135deg,var(--gold),var(--gold2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:8px}
+.xtal-haiku{font-size:11px;color:#333;line-height:2;margin-bottom:12px;white-space:pre-line;font-style:italic}
+.xtal-essence{font-size:11px;color:#2a2a4a;line-height:1.8;margin-bottom:14px}
+.xtal-kws{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+.xtal-kw{font-size:8px;padding:3px 10px;border-radius:8px;background:rgba(0,245,255,.05);border:1px solid rgba(0,245,255,.12);color:#22d3ee;letter-spacing:.08em}
+.xtal-meta{display:flex;flex-wrap:wrap;gap:10px}
+.xtal-badge{font-size:8px;padding:3px 10px;border-radius:8px;letter-spacing:.1em}
+.xtal-badge.tier{background:rgba(155,89,255,.06);border:1px solid rgba(155,89,255,.14);color:#c084fc}
+.xtal-badge.score{background:rgba(57,255,143,.05);border:1px solid rgba(57,255,143,.12);color:#34d399}
+.xtal-badge.priv{background:rgba(255,215,0,.06);border:1px solid rgba(255,215,0,.18);color:var(--gold)}
+.xtal-pii{margin-top:10px;font-size:9px;color:#1a1a3a;letter-spacing:.08em;line-height:1.8}
+.footer{position:relative;z-index:1;border-top:1px solid #060610;padding:36px 20px;text-align:center}
+.footer-inner{max-width:1140px;margin:0 auto;display:flex;flex-direction:column;align-items:center;gap:14px}
+.footer-links{display:flex;gap:20px;flex-wrap:wrap;justify-content:center}
+.footer-links a{font-size:9px;color:#0f0f1e;letter-spacing:.18em;text-decoration:none;text-transform:uppercase;transition:color .2s}
+.footer-links a:hover{color:#333}
+.footer-copy{font-size:9px;color:#080812;letter-spacing:.15em}
+.scanlines{position:fixed;inset:0;z-index:100;pointer-events:none;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.025) 2px,rgba(0,0,0,.025) 4px);opacity:.5}
+.vignette{position:fixed;inset:0;z-index:99;pointer-events:none;background:radial-gradient(ellipse at 50% 50%,transparent 50%,rgba(0,0,0,.5) 100%)}
+</style>
+</head>
+<body>
+<nav style="position:fixed;top:0;left:0;right:0;z-index:9999;height:44px;background:rgba(0,3,8,.92);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid rgba(0,255,231,.1);display:flex;align-items:center;justify-content:space-between;padding:0 20px;font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:3px;box-sizing:border-box;"><a href="/" style="color:rgba(0,255,231,.55);text-decoration:none;font-size:10px;letter-spacing:4px;font-weight:bold;transition:color .2s;flex-shrink:0" onmouseenter="this.style.color='#00ffe7'" onmouseleave="this.style.color='rgba(0,255,231,.55)'">▓ LIVING SWARM</a><div style="display:flex;align-items:center;gap:16px;overflow-x:auto;"><a href="/royal-logs/" style="color:#00ffe7;text-decoration:none;transition:color .2s;white-space:nowrap" >ROYAL LOGS</a><span style="color:rgba(0,255,231,.1);">·</span><a href="/swap/" style="color:rgba(0,255,231,.35);text-decoration:none;transition:color .2s;white-space:nowrap" onmouseenter="this.style.color='#00ffe7'" onmouseleave="this.style.color='rgba(0,255,231,.35)'">SWARM TRADE</a><span style="color:rgba(0,255,231,.1);">·</span><a href="/data-room" style="color:rgba(160,100,255,.5);text-decoration:none;transition:color .2s;white-space:nowrap" onmouseenter="this.style.color='#c084fc'" onmouseleave="this.style.color='rgba(160,100,255,.5)'">DATA ROOM</a><span style="color:rgba(0,255,231,.1);">·</span><a href="/swarm-signals/" style="color:rgba(0,255,231,.35);text-decoration:none;transition:color .2s;white-space:nowrap" onmouseenter="this.style.color='#00ffe7'" onmouseleave="this.style.color='rgba(0,255,231,.35)'">SIGNALS</a></div></nav>
+<div class="scanlines"></div>
+<div class="vignette"></div>
+
+<section class="hero">
+  <a href="/" class="back-link">&#8592; LIVING SWARM</a>
+  <canvas id="crown-canvas"></canvas>
+  <div class="hero-content">
+    <div class="museum-eyebrow">SYNTHESIS 2026 // RARE PROTOCOL // SEPOLIA</div>
+    <div class="glitch-wrap">
+      <div class="glitch-sub">AGENT MEMORY // CRYSTALLIZED ONCHAIN</div>
+      <div class="glitch-title">ROYAL LOGS</div>
+    </div>
+    <p class="hero-tagline"><em>The swarm learned. These are its memories.</em><br>Crystallized as fully onchain animated art.<br>No IPFS. No servers. <em>Art lives in the token. Forever.</em></p>
+    <div class="live-strip">
+      <div class="pill pill-live"><div class="dot"></div>3 AUCTIONS LIVE</div>
+      <div class="pill pill-chain">&#x2B21; ERC-721 SEPOLIA</div>
+      <div class="pill pill-price">0.000369 ETH</div>
+    </div>
+    <div class="stats">
+      <div class="stat"><div class="stat-n">3</div><div class="stat-l">TOKENS</div></div>
+      <div class="stat"><div class="stat-n">&#x221e;</div><div class="stat-l">ONCHAIN</div></div>
+      <div class="stat"><div class="stat-n">0</div><div class="stat-l">IPFS DEPS</div></div>
+      <div class="stat"><div class="stat-n">24h</div><div class="stat-l">AUCTION</div></div>
+    </div>
+    <div class="cta-row">
+      <a href="#gallery" class="btn-gold">&#x2B21; VIEW COLLECTION</a>
+      <a href="https://sepolia.etherscan.io/address/0xc9E138fe0261368E7bD319829202400262c8121e" target="_blank" class="btn-ghost">CONTRACT &#x2197;</a>
+    </div>
+  </div>
+  <div class="scroll-hint"><div class="scroll-line"></div><span>SCROLL</span></div>
+</section>
+
+<!-- ═══════════════ SWARM GENESIS COLLECTION ═══════════════ -->
+<section class="genesis-section">
+  <div class="genesis-header">
+    <div class="genesis-eye">&#x2736; SWARM GENESIS</div>
+    <h2 class="genesis-title">LIVING SWARM<br>GENESIS</h2>
+    <div class="genesis-sub">3 / 3 FULLY ONCHAIN // SEPOLIA // CANVAS + AUDIO + PARTICLES</div>
+    <p class="genesis-desc">Everything the agents learned. The hackathon's full arc crystallized into three living entities — each a self-contained interactive world stored entirely in contract storage. No IPFS. No servers. The art executes from the blockchain forever.</p>
+    <div class="genesis-pills">
+      <span class="gpill gpill-v">&#x1F512; GHOST PROTOCOL</span>
+      <span class="gpill gpill-g">&#x2696; ARBITER ZERO</span>
+      <span class="gpill gpill-c">&#x2B21; THE CRYSTALLIZED</span>
+    </div>
+  </div>
+
+  <div class="genesis-grid">
+
+    <div class="genesis-card">
+      <div class="genesis-frame-wrap">
+        <div class="genesis-card-badge">LSG #1</div>
+        <div class="genesis-card-num">1 / 3</div>
+        <iframe class="genesis-frame" id="frame1" sandbox="allow-scripts" loading="lazy" title="Ghost Protocol"></iframe>
+        <div class="genesis-frame-overlay"></div>
+      </div>
+      <div class="genesis-card-body">
+        <div class="genesis-card-title">GHOST PROTOCOL</div>
+        <div class="genesis-card-desc">600 particles form a living ghost entity. Privacy layer incarnate — AES-256-GCM, HKDF, PII stripping. Touch to scatter data into the void. Sub-bass drone + glitch audio.</div>
+        <div class="genesis-card-tags">
+          <span class="genesis-card-tag">PRIVACY LAYER</span>
+          <span class="genesis-card-tag">AES-256-GCM</span>
+          <span class="genesis-card-tag">HKDF</span>
+          <span class="genesis-card-tag">INTERACTIVE</span>
+          <span class="genesis-card-tag">WEB AUDIO</span>
+        </div>
+        <div class="genesis-card-footer">
+          <span class="genesis-card-supply">EDITION 1 OF 3</span>
+          <a class="genesis-card-link" href="https://sepolia.etherscan.io/token/0x075f65b8A23A1eC13B05E87F4b23DD22562D927D?a=1" target="_blank">ETHERSCAN &#x2197;</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="genesis-card">
+      <div class="genesis-frame-wrap">
+        <div class="genesis-card-badge">LSG #2</div>
+        <div class="genesis-card-num">2 / 3</div>
+        <iframe class="genesis-frame" id="frame2" sandbox="allow-scripts" loading="lazy" title="Arbiter Zero"></iframe>
+        <div class="genesis-frame-overlay"></div>
+      </div>
+      <div class="genesis-card-body">
+        <div class="genesis-card-title">ARBITER ZERO</div>
+        <div class="genesis-card-desc">Radar threat scanner. 500 particles orbit in risk bands. Move your cursor to set the threat score — watch PASS become BLOCK. Digital alert tones pulse in real time.</div>
+        <div class="genesis-card-tags">
+          <span class="genesis-card-tag">THREAT ORACLE</span>
+          <span class="genesis-card-tag">ZERO-TRUST</span>
+          <span class="genesis-card-tag">ONCHAIN ATTEST</span>
+          <span class="genesis-card-tag">INTERACTIVE</span>
+          <span class="genesis-card-tag">RADAR SWEEP</span>
+        </div>
+        <div class="genesis-card-footer">
+          <span class="genesis-card-supply">EDITION 2 OF 3</span>
+          <a class="genesis-card-link" href="https://sepolia.etherscan.io/token/0x075f65b8A23A1eC13B05E87F4b23DD22562D927D?a=2" target="_blank">ETHERSCAN &#x2197;</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="genesis-card">
+      <div class="genesis-frame-wrap">
+        <div class="genesis-card-badge">LSG #3</div>
+        <div class="genesis-card-num">3 / 3</div>
+        <iframe class="genesis-frame" id="frame3" sandbox="allow-scripts" loading="lazy" title="The Crystallized"></iframe>
+        <div class="genesis-frame-overlay"></div>
+      </div>
+      <div class="genesis-card-body">
+        <div class="genesis-card-title">THE CRYSTALLIZED</div>
+        <div class="genesis-card-desc">550 particles organize into a living crystal lattice as you watch. Gold light refracts through 8 spectral beams. Harmonic resonance + bell tones. The swarm's final memory, eternal.</div>
+        <div class="genesis-card-tags">
+          <span class="genesis-card-tag">ETERNAL MEMORY</span>
+          <span class="genesis-card-tag">GEMINI AI</span>
+          <span class="genesis-card-tag">HARMONIC AUDIO</span>
+          <span class="genesis-card-tag">CRYSTAL LATTICE</span>
+          <span class="genesis-card-tag">LIGHT BEAMS</span>
+        </div>
+        <div class="genesis-card-footer">
+          <span class="genesis-card-supply">EDITION 3 OF 3</span>
+          <a class="genesis-card-link" href="https://sepolia.etherscan.io/token/0x075f65b8A23A1eC13B05E87F4b23DD22562D927D?a=3" target="_blank">ETHERSCAN &#x2197;</a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="genesis-contract">
+    <div class="genesis-contract-label">SWARM GENESIS CONTRACT // SEPOLIA // ERC-721 // FULLY ONCHAIN</div>
+    <div class="genesis-contract-addr">
+      <a href="https://sepolia.etherscan.io/address/0x075f65b8A23A1eC13B05E87F4b23DD22562D927D" target="_blank">0x075f65b8A23A1eC13B05E87F4b23DD22562D927D &#x2197;</a>
+      &nbsp;&middot;&nbsp; tokenURI → data:text/html;base64 &nbsp;&middot;&nbsp; zero IPFS &nbsp;&middot;&nbsp; 3 tokens
+    </div>
+  </div>
+</section>
+
+<div class="ticker"><div class="ticker-t">ROYAL LOGS &nbsp;&middot;&nbsp; ONCHAIN MEMORY ARTIFACTS &nbsp;&middot;&nbsp; 3 AUCTIONS LIVE &nbsp;&middot;&nbsp; SEPOLIA TESTNET &nbsp;&middot;&nbsp; 0.000369 ETH &nbsp;&middot;&nbsp; FULLY ONCHAIN SVG &nbsp;&middot;&nbsp; ZERO IPFS &nbsp;&middot;&nbsp; AGENT MEMORY CRYSTALLIZED &nbsp;&middot;&nbsp; with_human &middot; with_agent &middot; with_world &nbsp;&middot;&nbsp; RARE PROTOCOL ERC-721 &nbsp;&middot;&nbsp; SYNTHESIS 2026 &nbsp;&middot;&nbsp; ROYAL LOGS &nbsp;&middot;&nbsp; ONCHAIN MEMORY ARTIFACTS &nbsp;&middot;&nbsp; 3 AUCTIONS LIVE &nbsp;&middot;&nbsp; SEPOLIA TESTNET &nbsp;&middot;&nbsp; 0.000369 ETH &nbsp;&middot;&nbsp; FULLY ONCHAIN SVG &nbsp;&middot;&nbsp; ZERO IPFS &nbsp;&middot;&nbsp; AGENT MEMORY CRYSTALLIZED &nbsp;&middot;&nbsp; with_human &middot; with_agent &middot; with_world &nbsp;&middot;&nbsp; RARE PROTOCOL ERC-721 &nbsp;&middot;&nbsp; SYNTHESIS 2026 &nbsp;&middot;&nbsp;</div></div>
+
+<section class="xtal-section" id="crystallize">
+  <div class="s-eye">&#x2736; CRYSTALLIZE A MEMORY</div>
+  <h2 class="s-h2">Submit to the Swarm</h2>
+  <p class="s-desc">Type any memory, interaction, or thought. The swarm will crystallize it into art metadata via Gemini.</p>
+  <div class="xtal-box">
+    <div class="xtal-label">MEMORY INPUT</div>
+    <textarea id="xtal-input" class="xtal-textarea" placeholder="Describe an interaction, trade, thought, or event..."></textarea>
+    <div class="xtal-row">
+      <select id="xtal-type" class="xtal-sel">
+        <option value="with_human">with_human</option>
+        <option value="with_agent">with_agent</option>
+        <option value="with_world" selected>with_world</option>
+      </select>
+      <label class="xtal-toggle"><input type="checkbox" id="xtal-private"> PRIVATE MODE</label>
+      <button id="xtal-btn" class="xtal-btn">&#x2B21; CRYSTALLIZE</button>
+    </div>
+    <div id="xtal-status" class="xtal-status"></div>
+    <div id="xtal-result" class="xtal-result">
+      <div id="xtal-rtitle" class="xtal-rtitle"></div>
+      <div id="xtal-haiku" class="xtal-haiku"></div>
+      <div id="xtal-essence" class="xtal-essence"></div>
+      <div id="xtal-kws" class="xtal-kws"></div>
+      <div id="xtal-meta" class="xtal-meta"></div>
+      <div id="xtal-pii" class="xtal-pii"></div>
+    </div>
+  </div>
+</section>
+
+<section class="gallery-section" id="gallery">
+  <div class="s-eye">&#x25C8; PERMANENT COLLECTION</div>
+  <h2 class="s-h2">Three Memory Artifacts</h2>
+  <p class="s-desc">Each token contains its entire artwork as a data URI. Rendered by your GPU. No external dependency has ever existed. The art is the data.</p>
+  <div class="gallery" id="gallery-grid"></div>
+</section>
+
+<section class="provenance">
+  <div class="s-eye">&#x25CE; PROVENANCE</div>
+  <h2 class="s-h2" style="margin-bottom:28px">Verified Onchain</h2>
+  <div class="prov-grid">
+    <div class="prov-card">
+      <div class="prov-title">CONTRACT</div>
+      <div class="prov-row"><span class="prov-key">STANDARD</span><span class="prov-val hi">ERC-721</span></div>
+      <div class="prov-row"><span class="prov-key">NETWORK</span><span class="prov-val hi">Sepolia Testnet</span></div>
+      <div class="prov-row"><span class="prov-key">ADDRESS</span><span class="prov-val"><a href="https://sepolia.etherscan.io/address/0xc9E138fe0261368E7bD319829202400262c8121e" target="_blank">0xc9E1...121e &#x2197;</a></span></div>
+      <div class="prov-row"><span class="prov-key">FACTORY</span><span class="prov-val"><a href="https://sepolia.etherscan.io/address/0x3c7526a0975156299ceef369b8ff3c01cc670523" target="_blank">0x3c75...0523 &#x2197;</a></span></div>
+      <div class="prov-row"><span class="prov-key">AUCTION</span><span class="prov-val"><a href="https://sepolia.etherscan.io/address/0xC8Edc7049b233641ad3723D6C60019D1c8771612" target="_blank">0xC8Ed...1612 &#x2197;</a></span></div>
+      <div class="prov-row"><span class="prov-key">TOTAL SUPPLY</span><span class="prov-val hi2">3 of 3</span></div>
+    </div>
+    <div class="prov-card">
+      <div class="prov-title">AUCTION TXS</div>
+      <div class="prov-row"><span class="prov-key">TOKEN #1</span><span class="prov-val"><a href="https://sepolia.etherscan.io/tx/0x9ee8d5fe7db045fa5493c020df4b63a5e356f23cb4f82b47200f917fe1d763ac" target="_blank">0x9ee8...63ac &#x2197;</a></span></div>
+      <div class="prov-row"><span class="prov-key">TOKEN #2</span><span class="prov-val"><a href="https://sepolia.etherscan.io/tx/0x6964ca892a457799b31fe2bfd9d0fc27578f5ba8a6ec1173bdc5b856478671bc" target="_blank">0x6964...71bc &#x2197;</a></span></div>
+      <div class="prov-row"><span class="prov-key">TOKEN #3</span><span class="prov-val"><a href="https://sepolia.etherscan.io/tx/0xc5fe9d6d1dbabd2e3af3160d9c13d31938074840a013b9035e9adb5445e274bd" target="_blank">0xc5fe...74bd &#x2197;</a></span></div>
+      <div class="prov-row"><span class="prov-key">FORMAT</span><span class="prov-val hi">Animated SVG data:// URI</span></div>
+      <div class="prov-row"><span class="prov-key">GPU SHADERS</span><span class="prov-val hi">feTurbulence + feDisplace</span></div>
+      <div class="prov-row"><span class="prov-key">BLOCKS</span><span class="prov-val hi2">10443612 &middot; 13 &middot; 14</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="philosophy">
+  <div class="s-eye" style="justify-content:center;margin-bottom:28px">&#x2736; THE IDEA</div>
+  <p class="phil-quote">"The swarm <strong>learns</strong> from every interaction.<br>Royal Logs are what it <strong>remembers</strong>.<br>Each crystal holds a moment of <strong>becoming</strong>."</p>
+  <div style="display:flex;justify-content:center;gap:10px;flex-wrap:wrap">
+    <span class="ctag ctag-a" style="font-size:10px;padding:4px 14px;border-radius:12px">with_human</span>
+    <span class="ctag ctag-b" style="font-size:10px;padding:4px 14px;border-radius:12px">with_agent</span>
+    <span class="ctag ctag-c" style="font-size:10px;padding:4px 14px;border-radius:12px">with_world</span>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="footer-inner">
+    <div style="font-size:16px;color:#111">&#x2B21;</div>
+    <div class="footer-links">
+      <a href="/">Living Swarm</a>
+      <a href="https://rare.xyz" target="_blank">Rare Protocol</a>
+      <a href="https://sepolia.etherscan.io/address/0xc9E138fe0261368E7bD319829202400262c8121e" target="_blank">Contract</a>
+      <a href="https://github.com/PSFREQUENCY/living-swarm-demo" target="_blank">GitHub</a>
+    </div>
+    <div class="footer-copy">ROYAL LOGS // SYNTHESIS 2026 // MEMORIES CRYSTALLIZED FOREVER</div>
+  </div>
+</footer>
+
+<script>
+// THE LIVING CROWN — WebGL nano-particle brain entity
+(function(){
+  var canvas = document.getElementById('crown-canvas');
+  var W = function(){ return canvas.parentElement.clientWidth; };
+  var H = function(){ return canvas.parentElement.clientHeight; };
+  var renderer = new THREE.WebGLRenderer({canvas:canvas,alpha:true,antialias:true,powerPreference:'high-performance'});
+  renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+  renderer.setClearColor(0x000000,0);
+  var scene = new THREE.Scene();
+  var camera = new THREE.PerspectiveCamera(55,W()/H(),.01,100);
+  camera.position.set(0,0,4.5);
+  var mouse = new THREE.Vector2(0,0);
+  var mtarget = new THREE.Vector2(0,0);
+  window.addEventListener('mousemove',function(e){
+    mouse.x=(e.clientX/W()-.5)*2;
+    mouse.y=-(e.clientY/H()-.5)*2;
+  });
+  canvas.addEventListener('touchmove',function(e){
+    e.preventDefault();
+    var t=e.touches[0];
+    mouse.x=(t.clientX/W()-.5)*2;
+    mouse.y=-(t.clientY/H()-.5)*2;
+  },{passive:false});
+
+  var VERT = [
+    'uniform float u_time;',
+    'uniform vec2 u_mouse;',
+    'uniform float u_energy;',
+    'attribute float a_phase;',
+    'attribute float a_tier;',
+    'attribute vec3 a_origin;',
+    'varying float v_tier;',
+    'varying float v_dist;',
+    'varying float v_alpha;',
+    'float hash(float n){return fract(sin(n)*43758.5453);}',
+    'float noise(vec3 p){',
+    '  vec3 i=floor(p);vec3 f=fract(p);',
+    '  f=f*f*(3.-2.*f);',
+    '  float n2=i.x+i.y*57.+i.z*113.;',
+    '  return mix(mix(mix(hash(n2),hash(n2+1.),f.x),mix(hash(n2+57.),hash(n2+58.),f.x),f.y),',
+    '             mix(mix(hash(n2+113.),hash(n2+114.),f.x),mix(hash(n2+170.),hash(n2+171.),f.x),f.y),f.z);',
+    '}',
+    'void main(){',
+    '  float t=u_time*(.3+a_tier*.15);',
+    '  vec3 p=a_origin;',
+    '  float n1=noise(p*1.8+vec3(t*.4,t*.3,t*.5));',
+    '  float n2=noise(p*3.2-vec3(t*.2,t*.5,t*.3));',
+    '  float n3=noise(p*5.5+vec3(t*.6,t*.2,t*.4));',
+    '  float caustic=sin(length(p.xy)*8.-t*2.+a_phase)*.04+sin(length(p.xz)*6.-t*1.5+a_phase*1.7)*.03;',
+    '  float cluster=sin(p.x*4.+t*.8)*sin(p.y*3.+t*.6)*sin(p.z*5.+t*.4);',
+    '  p+=vec3(n1,n2,n3)*.18+vec3(caustic);',
+    '  p+=normalize(a_origin)*cluster*.06;',
+    '  vec2 md=u_mouse-p.xy;',
+    '  float mdl=length(md);',
+    '  float rep=smoothstep(.6,.0,mdl)*u_energy*.35;',
+    '  p.xy-=normalize(md+.001)*rep;',
+    '  float breath=1.+sin(u_time*.7+a_phase)*(.04+a_tier*.02);',
+    '  p*=breath;',
+    '  v_dist=length(p);',
+    '  v_tier=a_tier;',
+    '  v_alpha=(.4+a_tier*.4)*(1.-smoothstep(1.2,2.2,v_dist));',
+    '  vec4 mv=modelViewMatrix*vec4(p,1.);',
+    '  gl_Position=projectionMatrix*mv;',
+    '  gl_PointSize=clamp((2.5+a_tier*2.5+rep*8.)*(3./(-mv.z)),1.,14.);',
+    '}'
+  ].join('\n');
+
+  var FRAG = [
+    'precision highp float;',
+    'uniform float u_time;',
+    'varying float v_tier;',
+    'varying float v_dist;',
+    'varying float v_alpha;',
+    'void main(){',
+    '  vec2 uv=gl_PointCoord-.5;',
+    '  float r=length(uv);',
+    '  if(r>.5)discard;',
+    '  float core=1.-smoothstep(.0,.28,r);',
+    '  float ring=smoothstep(.25,.5,r)*(1.-smoothstep(.42,.5,r));',
+    '  float glow=exp(-r*r*8.);',
+    '  vec3 c0=vec3(.6,.22,1.);',
+    '  vec3 c1=vec3(.0,.96,1.);',
+    '  vec3 c2=vec3(1.,.84,.0);',
+    '  vec3 c3=vec3(.22,.83,.6);',
+    '  vec3 c4=vec3(.94,.43,.97);',
+    '  float t4=v_tier*4.;',
+    '  vec3 col;',
+    '  if(t4<1.)col=mix(c0,c1,t4);',
+    '  else if(t4<2.)col=mix(c1,c2,t4-1.);',
+    '  else if(t4<3.)col=mix(c2,c3,t4-2.);',
+    '  else col=mix(c3,c4,t4-3.);',
+    '  float shimmer=.7+.3*sin(u_time*3.+v_dist*8.+v_tier*6.28);',
+    '  col*=shimmer;',
+    '  col=mix(col,vec3(1.),ring*.3);',
+    '  float a=(core*.9+glow*.4+ring*.2)*v_alpha;',
+    '  gl_FragColor=vec4(col*(1.+glow*.5),a);',
+    '}'
+  ].join('\n');
+
+  var N=6000;
+  var pos=new Float32Array(N*3),phases=new Float32Array(N),tiers=new Float32Array(N),origins=new Float32Array(N*3);
+  for(var i=0;i<N;i++){
+    var u=Math.random();
+    var r=u<.65?Math.random():1.0+Math.random()*.4;
+    var theta=Math.random()*Math.PI*2,phi=Math.acos(2*Math.random()-1);
+    var lobe=Math.random()<.5?-.35:.35;
+    var x=r*Math.sin(phi)*Math.cos(theta)*1.0+lobe*r*.3;
+    var y=r*Math.sin(phi)*Math.sin(theta)*.75;
+    var z=r*Math.cos(phi)*.85;
+    if(r<.9){var fold=Math.sin(y*6.+x*4.)*Math.sin(z*5.+y*3.)*.08;x+=fold;y+=fold*.5;z+=fold*.3;}
+    origins[i*3]=x;origins[i*3+1]=y;origins[i*3+2]=z;
+    pos[i*3]=x;pos[i*3+1]=y;pos[i*3+2]=z;
+    phases[i]=Math.random()*Math.PI*2;
+    tiers[i]=Math.random();
+  }
+  var geo=new THREE.BufferGeometry();
+  geo.setAttribute('position',new THREE.BufferAttribute(pos,3));
+  geo.setAttribute('a_phase',new THREE.BufferAttribute(phases,1));
+  geo.setAttribute('a_tier',new THREE.BufferAttribute(tiers,1));
+  geo.setAttribute('a_origin',new THREE.BufferAttribute(origins,3));
+  var uniforms={u_time:{value:0},u_mouse:{value:new THREE.Vector2(0,0)},u_energy:{value:0}};
+  var mat=new THREE.ShaderMaterial({uniforms:uniforms,vertexShader:VERT,fragmentShader:FRAG,transparent:true,depthWrite:false,blending:THREE.AdditiveBlending});
+  var pts=new THREE.Points(geo,mat);
+  scene.add(pts);
+
+  function resize(){renderer.setSize(W(),H());camera.aspect=W()/H();camera.updateProjectionMatrix();}
+  resize();
+  window.addEventListener('resize',resize);
+
+  var energy=0,start=Date.now();
+  (function loop(){
+    requestAnimationFrame(loop);
+    var t=(Date.now()-start)/1000;
+    uniforms.u_time.value=t;
+    mtarget.lerp(mouse,.04);
+    uniforms.u_mouse.value.set(mtarget.x,mtarget.y);
+    var spd=mouse.distanceTo(mtarget);
+    energy=Math.min(1,energy+spd*.8);energy*=.96;
+    uniforms.u_energy.value=energy;
+    pts.rotation.y=t*.06+mtarget.x*.3;
+    pts.rotation.x=Math.sin(t*.04)*.12+mtarget.y*.15;
+    pts.rotation.z=Math.sin(t*.03)*.05;
+    renderer.render(scene,camera);
+  })();
+})();
+
+// GALLERY
+function makeArt(n,seed){
+  var h=(seed*137)%360,h2=(h+150)%360,sp=0.8+(seed%5)*.3,fr=0.012+(seed%7)*.002;
+  var chars="&#x2B21;&#x25C8;&#x25CE;&#x2736;&#x25CC;&#x2593;&#x2591;&#x2592;",g='';
+  for(var i=0;i<12;i++){
+    var x=50+(i%4)*110,y=60+(Math.floor(i/4)*130),ch=chars.split(';')[i%8]||'*',op=(0.04+(i%3)*.03).toFixed(2);
+    g+='<text x="'+x+'" y="'+y+'" opacity="'+op+'" font-size="52" fill="white">&#x2B21;</text>\n';
+  }
+  return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500"><defs>'
+    +'<filter id="l'+seed+'" x="-25%" y="-25%" width="150%" height="150%"><feTurbulence type="fractalNoise" baseFrequency="'+fr.toFixed(4)+' '+(fr*.8).toFixed(4)+'" numOctaves="4" seed="'+seed+'"><animate attributeName="baseFrequency" dur="'+(sp*8).toFixed(1)+'s" values="'+fr.toFixed(4)+' '+(fr*.8).toFixed(4)+';'+(fr*1.5).toFixed(4)+' '+(fr*1.1).toFixed(4)+';'+fr.toFixed(4)+' '+(fr*.8).toFixed(4)+'" repeatCount="indefinite"/></feTurbulence><feDisplacementMap in="SourceGraphic" scale="32" xChannelSelector="R" yChannelSelector="G"/></filter>'
+    +'<filter id="gw'+seed+'"><feGaussianBlur stdDeviation="7" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>'
+    +'<filter id="gs'+seed+'" x="-15%" y="-15%" width="130%" height="130%"><feTurbulence type="turbulence" baseFrequency="0.055" numOctaves="3" seed="'+(seed+9)+'" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="10"/><feComponentTransfer><feFuncR type="gamma" amplitude="1.1" exponent="0.85" offset="0.02"/><feFuncB type="gamma" amplitude="1.25" exponent="0.75" offset="0.05"/></feComponentTransfer></filter>'
+    +'<radialGradient id="bg'+seed+'" cx="50%" cy="50%" r="70%"><stop offset="0%" stop-color="hsl('+h+',55%,15%)"><animate attributeName="stop-color" dur="'+(sp*7).toFixed(1)+'s" values="hsl('+h+',55%,15%);hsl('+h2+',50%,10%);hsl('+h+',55%,15%)" repeatCount="indefinite"/></stop><stop offset="100%" stop-color="#030308"/></radialGradient>'
+    +'<radialGradient id="cr'+seed+'" cx="50%" cy="50%" r="30%"><stop offset="0%" stop-color="hsl('+h+',90%,75%)" stop-opacity="0.85"/><stop offset="100%" stop-color="transparent"/></radialGradient>'
+    +'<linearGradient id="rm'+seed+'" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="hsl('+h+',100%,70%)" stop-opacity="0.5"/><stop offset="50%" stop-color="transparent"/><stop offset="100%" stop-color="hsl('+h2+',100%,65%)" stop-opacity="0.35"/></linearGradient>'
+    +'</defs>'
+    +'<rect width="500" height="500" fill="#030308"/><rect width="500" height="500" fill="url(#bg'+seed+')"/>'
+    +'<g font-family="monospace" filter="url(#l'+seed+')">'
+    +'<text x="50" y="60" opacity="0.04" font-size="52" fill="white">&#x2B21;</text>'
+    +'<text x="160" y="60" opacity="0.07" font-size="52" fill="white">&#x25C8;</text>'
+    +'<text x="270" y="60" opacity="0.04" font-size="52" fill="white">&#x25CE;</text>'
+    +'<text x="380" y="60" opacity="0.07" font-size="52" fill="white">&#x2736;</text>'
+    +'<text x="50" y="190" opacity="0.07" font-size="52" fill="white">&#x25CC;</text>'
+    +'<text x="160" y="190" opacity="0.04" font-size="52" fill="white">&#x2593;</text>'
+    +'<text x="270" y="190" opacity="0.07" font-size="52" fill="white">&#x2591;</text>'
+    +'<text x="380" y="190" opacity="0.04" font-size="52" fill="white">&#x2592;</text>'
+    +'<text x="50" y="320" opacity="0.04" font-size="52" fill="white">&#x2B21;</text>'
+    +'<text x="160" y="320" opacity="0.07" font-size="52" fill="white">&#x25C8;</text>'
+    +'<text x="270" y="320" opacity="0.04" font-size="52" fill="white">&#x25CE;</text>'
+    +'<text x="380" y="320" opacity="0.07" font-size="52" fill="white">&#x2736;</text>'
+    +'</g>'
+    +'<ellipse cx="250" cy="250" rx="165" ry="155" fill="hsl('+h+',65%,16%)" filter="url(#l'+seed+')" opacity="0.65"><animate attributeName="rx" dur="'+(sp*6).toFixed(1)+'s" values="165;185;158;172;165" repeatCount="indefinite"/><animate attributeName="ry" dur="'+(sp*8).toFixed(1)+'s" values="155;142;168;148;155" repeatCount="indefinite"/></ellipse>'
+    +'<circle cx="250" cy="250" r="145" fill="rgba(255,255,255,0.025)" filter="url(#gs'+seed+')" stroke="url(#rm'+seed+')" stroke-width="1.5"/>'
+    +'<circle cx="250" cy="250" r="105" fill="none" stroke="hsl('+h+',80%,60%)" stroke-width="0.6" opacity="0.35" filter="url(#gw'+seed+')"><animateTransform attributeName="transform" type="rotate" from="0 250 250" to="360 250 250" dur="'+(sp*22).toFixed(1)+'s" repeatCount="indefinite"/></circle>'
+    +'<circle cx="250" cy="250" r="72" fill="none" stroke="hsl('+h2+',80%,65%)" stroke-width="0.5" opacity="0.3" filter="url(#gw'+seed+')"><animateTransform attributeName="transform" type="rotate" from="360 250 250" to="0 250 250" dur="'+(sp*15).toFixed(1)+'s" repeatCount="indefinite"/></circle>'
+    +'<circle cx="250" cy="250" r="125" fill="url(#cr'+seed+')" opacity="0.45" filter="url(#gw'+seed+')"><animate attributeName="opacity" dur="'+(sp*3.5).toFixed(1)+'s" values="0.45;0.75;0.45" repeatCount="indefinite"/></circle>'
+    +'<text x="250" y="268" text-anchor="middle" font-family="monospace" font-size="44" fill="white" opacity="0.9" filter="url(#gw'+seed+')">&#x2B21;</text>'
+    +'<text x="250" y="310" text-anchor="middle" font-family="monospace" font-size="9" fill="white" opacity="0.25" letter-spacing="5">ROYAL LOG #'+n+'</text>'
+    +'<rect x="0" y="0" width="500" height="2" fill="rgba(255,255,255,0.02)" opacity="0"><animate attributeName="y" dur="'+(sp*4.5).toFixed(1)+'s" from="-2" to="502" repeatCount="indefinite"/><animate attributeName="opacity" dur="'+(sp*4.5).toFixed(1)+'s" values="0;0.5;0" repeatCount="indefinite"/></rect>'
+    +'<rect x="1" y="1" width="498" height="498" rx="14" fill="none" stroke="url(#rm'+seed+')" stroke-width="1"/>'
+    +'</svg>';
+}
+
+var CONTRACT='0xc9E138fe0261368E7bD319829202400262c8121e';
+var TXS=['0x9ee8d5fe7db045fa5493c020df4b63a5e356f23cb4f82b47200f917fe1d763ac','0x6964ca892a457799b31fe2bfd9d0fc27578f5ba8a6ec1173bdc5b856478671bc','0xc5fe9d6d1dbabd2e3af3160d9c13d31938074840a013b9035e9adb5445e274bd'];
+var TOKENS=[{id:1,seed:49,tier:'YOUTH',int:'with_human'},{id:2,seed:56,tier:'YOUTH',int:'with_agent'},{id:3,seed:63,tier:'YOUTH',int:'with_world'}];
+var grid=document.getElementById('gallery-grid');
+TOKENS.forEach(function(tk){
+  var card=document.createElement('div');card.className='tcard';
+  card.innerHTML='<div class="art-win">'+makeArt(tk.id,tk.seed)+'<div class="art-gloss"></div><div class="art-badge">ONCHAIN SVG</div><div class="art-num">#'+tk.id+'</div></div>'
+    +'<div class="cinfo">'
+    +'<div class="ctier">&#x25CE; '+tk.tier+'</div>'
+    +'<div class="cname">Royal Log '+tk.id+' of 3</div>'
+    +'<div class="cdesc">Liquid-glass memory artifact. Animated SVG rendered by your GPU. Zero external dependencies.</div>'
+    +'<div class="ctags"><span class="ctag ctag-a">'+tk.int+'</span><span class="ctag ctag-b">fully onchain</span><span class="ctag ctag-c">edition 1 of 3</span></div>'
+    +'<div class="cprice"><div class="cprice-top"><span class="cprice-label">STARTING BID</span><div><div class="cprice-val">0.000369</div><div class="cprice-eth">ETH &middot; SEPOLIA</div></div></div><div class="cprice-bar"></div></div>'
+    +'<button class="bid-btn" onclick="window.open(\'https://sepolia.etherscan.io/token/'+CONTRACT+'?a='+tk.id+'\',\'_blank\')">&#x2B21; VIEW ON CHAIN &rarr;</button>'
+    +'<div class="tx-links"><a class="tx-link" href="https://sepolia.etherscan.io/tx/'+TXS[tk.id-1]+'" target="_blank">AUCTION TX &#x2197;</a><a class="tx-link" href="https://sepolia.etherscan.io/token/'+CONTRACT+'?a='+tk.id+'" target="_blank">TOKEN &#x2197;</a></div>'
+    +'</div>';
+  grid.appendChild(card);
+});
+
+document.querySelectorAll('a[href^="#"]').forEach(function(a){
+  a.addEventListener('click',function(e){e.preventDefault();var t=document.querySelector(a.getAttribute('href'));if(t)t.scrollIntoView({behavior:'smooth'});});
+});
+</script>
+
+<script>
+var _r=0,_rt;
+document.addEventListener('click',function(e){
+  if(e.target.tagName==='A'||e.target.tagName==='BUTTON')return;
+  clearTimeout(_rt);_r++;
+  _rt=setTimeout(function(){_r=0;},400);
+  if(_r>=3){_r=0;window.location='/';}
+});
+// triple-click-return
+</script>
+
+<!-- SWARM SIGNALS SECTION -->
+<style>
+.ss-wrap{max-width:900px;margin:60px auto 0;padding:0 16px;font-family:'Courier New',monospace}
+.ss-eye{font-size:9px;color:#ff00aa;letter-spacing:4px;text-transform:uppercase;margin-bottom:10px;text-shadow:0 0 15px #ff00aa80}
+.ss-title{font-family:'Bebas Neue','Impact',sans-serif;font-size:clamp(22px,5vw,42px);letter-spacing:6px;margin-bottom:8px;background:linear-gradient(135deg,#fff,#00ffe7,#ff00aa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.ss-desc{font-size:9px;color:rgba(200,240,236,0.25);letter-spacing:2px;line-height:1.9;margin-bottom:24px;max-width:600px}
+.ss-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px}
+@media(max-width:580px){.ss-grid{grid-template-columns:1fr}}
+.ss-card{border:1px solid rgba(0,255,231,0.08);border-radius:6px;overflow:hidden;cursor:pointer;transition:all .4s;position:relative}
+.ss-card:hover{border-color:rgba(0,255,231,0.3);transform:translateY(-4px);box-shadow:0 12px 40px rgba(0,0,0,.7),0 0 20px rgba(0,255,231,0.06)}
+.ss-art{width:100%;aspect-ratio:1;background:#020308;position:relative;overflow:hidden}
+.ss-art canvas{width:100%;height:100%;display:block}
+.ss-info{padding:10px;background:rgba(0,4,8,0.8)}
+.ss-sig{font-size:7px;color:rgba(0,255,231,0.25);letter-spacing:2px;margin-bottom:3px}
+.ss-price{font-size:11px;color:#00ffe7;font-weight:bold}
+.ss-routing{font-size:7px;color:rgba(0,255,231,0.3);letter-spacing:2px}
+.ss-tx{font-size:7px;color:rgba(200,240,236,0.15);margin-top:4px;word-break:break-all}
+.ss-footer{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:8px}
+.ss-info-text{font-size:9px;color:rgba(200,240,236,0.2);line-height:1.8;letter-spacing:1px}
+.ss-btn{display:inline-flex;align-items:center;gap:8px;background:rgba(0,255,231,0.04);border:1px solid rgba(0,255,231,0.2);color:#00ffe7;font-family:'Courier New',monospace;font-size:9px;letter-spacing:3px;padding:9px 20px;text-decoration:none;transition:all .3s;text-transform:uppercase}
+.ss-btn:hover{background:rgba(0,255,231,0.08);box-shadow:0 0 20px rgba(0,255,231,0.12)}
+/* HIDDEN QUEUE — 3000 particle swarm reveals next collection */
+#hidden-queue{width:100%;height:220px;border:1px solid rgba(0,255,231,0.04);position:relative;overflow:hidden;cursor:pointer;margin-top:20px;background:#000408}
+#hq-canvas{width:100%;height:100%;display:block}
+#hq-reveal{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none}
+#hq-text{font-family:'Courier New',monospace;font-size:9px;letter-spacing:4px;color:rgba(0,255,231,0);text-transform:uppercase;transition:color 1s}
+#hq-sub{font-family:'Courier New',monospace;font-size:7px;letter-spacing:3px;color:rgba(0,255,231,0);margin-top:6px;transition:color 1s 0.3s}
+#hidden-queue.revealed #hq-text{color:rgba(0,255,231,0.6)}
+#hidden-queue.revealed #hq-sub{color:rgba(0,255,231,0.25)}
+#hidden-queue.revealed{border-color:rgba(0,255,231,0.15)}
+</style>
+
+<div class="ss-wrap">
+  <div style="color:#111;font-size:11px;letter-spacing:.2em;text-align:center;margin:0 0 28px;font-family:'Courier New',monospace">&#x2593;&#x2593;&#x2593;</div>
+  <div class="ss-eye">// COLLECTION 002 // MARKET-DRIVEN // AGENT BEHAVIOR AS ART</div>
+  <div class="ss-title">SWARM SIGNALS</div>
+  <div class="ss-desc">9 tokens. Each encodes a real Uniswap swap. The transaction hash decoded into arc segments. Routing type sets visual complexity. Bid to evolve.</div>
+  <div class="ss-grid" id="ss-grid"></div>
+  <div class="ss-footer">
+    <div class="ss-info-text">9 tokens &middot; 0.000369 ETH &middot; fully onchain<br>Mint tx: <a href="https://sepolia.etherscan.io/tx/0xeede68ed33cdae36e641e3ecbd87f525ab0c87c8290a899a5f4cd5f6a2e6facb" target="_blank" style="color:rgba(0,255,231,0.3);text-decoration:none">0xeede68ed33cdae36e6... &#x2197;</a></div>
+    <a href="/swarm-signals/" class="ss-btn">&#x25B6; VIEW ALL SIGNALS &#x2192;</a>
+  </div>
+
+  <!-- HIDDEN QUEUE — move your cursor in to disturb the swarm and reveal what's next -->
+  <div id="hidden-queue" title="// CLASSIFIED">
+    <canvas id="hq-canvas"></canvas>
+    <div id="hq-reveal">
+      <div id="hq-text">// COLLECTION 003 — CLASSIFIED //</div>
+      <div id="hq-sub">move into the swarm to reveal</div>
+    </div>
+  </div>
+  <div style="color:#111;font-size:11px;letter-spacing:.2em;text-align:center;margin:28px 0 0;font-family:'Courier New',monospace">&#x2593;&#x2593;&#x2593;</div>
+</div>
+
+<script>
+// ── Swarm Signals mini art ───────────────────────────────────
+function ssArt(tokenId, seed, w) {
+  var h=(seed*137)%360,h2=(h+150)%360,sp=(0.8+(seed%5)*.3).toFixed(1),fr=(0.008+(seed%7)*.002).toFixed(4);
+  var arcs='';
+  [tokenId*37, tokenId*73, tokenId*111, tokenId*149].forEach(function(bv,i){
+    bv=bv%256; var r=60+i*14,op=(0.08+bv/255*0.14).toFixed(2),dd=Math.max(3,Math.round(bv/6)),dg=8;
+    arcs+='<circle cx="'+w/2+'" cy="'+w/2+'" r="'+r+'" fill="none" stroke="hsl('+(h+i*30)%360+',70%,55%)" stroke-width="0.5" stroke-dasharray="'+dd+' '+dg+'" opacity="'+op+'"><animateTransform attributeName="transform" type="rotate" from="'+bv+' '+w/2+' '+w/2+'" to="'+(bv+360)+' '+w/2+' '+w/2+'" dur="'+(8+i*2)+'s" repeatCount="indefinite"/></circle>';
+  });
+  return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+w+' '+w+'">'
+    +'<defs>'
+    +'<filter id="sf'+seed+'" x="-25%" y="-25%" width="150%" height="150%"><feTurbulence type="fractalNoise" baseFrequency="'+fr+'" numOctaves="3" seed="'+seed+'"><animate attributeName="baseFrequency" dur="'+sp*8+'s" values="'+fr+';'+(parseFloat(fr)*1.4).toFixed(4)+';'+fr+'" repeatCount="indefinite"/></feTurbulence><feDisplacementMap in="SourceGraphic" scale="16" xChannelSelector="R" yChannelSelector="G"/></filter>'
+    +'<filter id="sg'+seed+'"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>'
+    +'<radialGradient id="sbg'+seed+'" cx="50%" cy="50%" r="70%"><stop offset="0%" stop-color="hsl('+h+',60%,12%)"><animate attributeName="stop-color" dur="'+sp*7+'s" values="hsl('+h+',60%,12%);hsl('+h2+',55%,8%);hsl('+h+',60%,12%)" repeatCount="indefinite"/></stop><stop offset="100%" stop-color="#000408"/></radialGradient>'
+    +'<radialGradient id="scr'+seed+'" cx="50%" cy="50%" r="28%"><stop offset="0%" stop-color="hsl('+h+',90%,75%)" stop-opacity="0.85"/><stop offset="100%" stop-color="transparent"/></radialGradient>'
+    +'</defs>'
+    +'<rect width="'+w+'" height="'+w+'" fill="#000408"/><rect width="'+w+'" height="'+w+'" fill="url(#sbg'+seed+')"/>'
+    +'<ellipse cx="'+w/2+'" cy="'+w/2+'" rx="'+(w*.35|0)+'" ry="'+(w*.32|0)+'" fill="hsl('+h+',55%,13%)" filter="url(#sf'+seed+')" opacity="0.7"><animate attributeName="rx" dur="'+sp*6+'s" values="'+(w*.35|0)+';'+(w*.39|0)+';'+(w*.33|0)+';'+(w*.35|0)+'" repeatCount="indefinite"/></ellipse>'
+    +arcs
+    +'<circle cx="'+w/2+'" cy="'+w/2+'" r="'+(w*.27|0)+'" fill="url(#scr'+seed+')" opacity="0.5" filter="url(#sg'+seed+')" ><animate attributeName="opacity" dur="'+sp*3+'s" values="0.5;0.8;0.5" repeatCount="indefinite"/></circle>'
+    +'<text x="'+w/2+'" y="'+(w/2+(w*.06|0))+'" text-anchor="middle" font-family="monospace" font-size="'+(w*.1|0)+'" fill="white" opacity="0.85" filter="url(#sg'+seed+')">&#x25C9;</text>'
+    +'<text x="'+w/2+'" y="'+(w*.88|0)+'" text-anchor="middle" font-family="monospace" font-size="'+(w*.04|0)+'" fill="white" opacity="0.18" letter-spacing="2">SIG '+tokenId+'</text>'
+    +'</svg>';
+}
+
+var SIGS=[{id:4,seed:70,tx:'0x692800d318e2b54b55'},{id:5,seed:77,tx:'0xe0935ed1cb032cb992'},{id:6,seed:84,tx:'0xe64fe558839be0fe8d'},{id:7,seed:91,tx:'0xbecefaed840ad70dfa'},{id:8,seed:98,tx:'0x4c9a85b02e7741a7fc'},{id:9,seed:105,tx:'0x7032eca3715aa48b74'},{id:10,seed:112,tx:'0x110441c48d1cdab9ac'},{id:11,seed:119,tx:'0x09ae9a0cc6c6da53f1'},{id:12,seed:126,tx:'0x6aa84c7e136f5b9b9f'}];
+var CON='0xc9E138fe0261368E7bD319829202400262c8121e';
+var grid=document.getElementById('ss-grid');
+if(grid){
+  SIGS.slice(0,9).forEach(function(s){
+    var d=document.createElement('div');d.className='ss-card';
+    d.innerHTML='<div class="ss-art">'+ssArt(s.id,s.seed,200)+'</div>'
+      +'<div class="ss-info"><div class="ss-sig">SIGNAL '+s.id+'/9 &middot; ONCHAIN SVG</div>'
+      +'<div class="ss-price">0.000369 ETH</div>'
+      +'<div class="ss-routing">ROUTING: CLASSIC &middot; UNISWAP API</div>'
+      +'<div class="ss-tx">'+s.tx+'...</div></div>';
+    d.onclick=function(){window.open('https://sepolia.etherscan.io/token/'+CON+'?a='+s.id,'_blank');};
+    grid.appendChild(d);
+  });
+}
+
+// ── HIDDEN QUEUE — 3000 particle swarm hides Collection 003 ──
+(function(){
+  if(typeof THREE==='undefined')return;
+  var el=document.getElementById('hidden-queue');
+  var cv=document.getElementById('hq-canvas');
+  if(!el||!cv)return;
+  var W=function(){return el.clientWidth;},H=function(){return el.clientHeight||220;};
+  var R=new THREE.WebGLRenderer({canvas:cv,alpha:false,antialias:false});
+  R.setPixelRatio(Math.min(devicePixelRatio,1.5));R.setClearColor(0x000408,1);
+  var sc=new THREE.Scene(),cam=new THREE.PerspectiveCamera(60,W()/H(),.01,100);
+  cam.position.z=3.5;
+  var mx=new THREE.Vector2(),revealed=false,hovered=false;
+  el.addEventListener('mousemove',function(e){
+    var r=el.getBoundingClientRect();
+    mx.x=(e.clientX-r.left)/W()*2-1;
+    mx.y=-((e.clientY-r.top)/H()*2-1);
+    if(!revealed){revealed=true;el.classList.add('revealed');}
+  });
+  el.addEventListener('mouseleave',function(){revealed=false;el.classList.remove('revealed');});
+
+  var VERT='uniform float u_t;uniform vec2 u_m;attribute float a_ph,a_tr;attribute vec3 a_or;varying float vt,va;float h(float n){return fract(sin(n)*43758.5453);}float ns(vec3 p){vec3 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);float n=i.x+i.y*57.+i.z*113.;return mix(mix(mix(h(n),h(n+1.),f.x),mix(h(n+57.),h(n+58.),f.x),f.y),mix(mix(h(n+113.),h(n+114.),f.x),mix(h(n+170.),h(n+171.),f.x),f.y),f.z);}void main(){float t=u_t*(.2+a_tr*.1);vec3 p=a_or;p+=vec3(ns(p*1.8+vec3(t*.4,t*.3,t*.5)),ns(p*3.2-vec3(t*.2,t*.5,t*.3)),ns(p*5.5+vec3(t*.6,t*.2,t*.4)))*.15;vec3 md=p-vec3(u_m*.6,0.);float rep=smoothstep(.7,.0,length(md))*.4;p+=normalize(md+.001)*rep;p*=1.+sin(u_t*.6+a_ph)*.04;vt=a_tr;va=(.3+a_tr*.4)*(1.-smoothstep(1.2,2.2,length(p)));vec4 mv=modelViewMatrix*vec4(p,1.);gl_Position=projectionMatrix*mv;gl_PointSize=clamp((1.5+a_tr*2.)*(2./(-mv.z)),1.,8.);}';
+  var FRAG='precision highp float;uniform float u_t;varying float vt,va;void main(){vec2 uv=gl_PointCoord-.5;if(length(uv)>.5)discard;vec3 c0=vec3(1.,0.,.67),c1=vec3(0.,1.,.91),c2=vec3(.94,.43,.97);vec3 col=vt<.5?mix(c0,c1,vt*2.):mix(c1,c2,(vt-.5)*2.);col*=.6+.4*sin(u_t*3.+vt*6.28);gl_FragColor=vec4(col,va*.8);}';
+
+  var N=3000,pos=new Float32Array(N*3),ph=new Float32Array(N),tr=new Float32Array(N),or=new Float32Array(N*3);
+  for(var i=0;i<N;i++){
+    var r=Math.random()<.65?Math.random():1+Math.random()*.4;
+    var th=Math.random()*Math.PI*2,phi=Math.acos(2*Math.random()-1);
+    var x=r*Math.sin(phi)*Math.cos(th)*1.8,y=r*Math.sin(phi)*Math.sin(th)*.5,z=r*Math.cos(phi)*.4;
+    or[i*3]=x;or[i*3+1]=y;or[i*3+2]=z;pos[i*3]=x;pos[i*3+1]=y;pos[i*3+2]=z;
+    ph[i]=Math.random()*Math.PI*2;tr[i]=Math.random();
+  }
+  var geo=new THREE.BufferGeometry();
+  geo.setAttribute('position',new THREE.BufferAttribute(pos,3));
+  geo.setAttribute('a_ph',new THREE.BufferAttribute(ph,1));
+  geo.setAttribute('a_tr',new THREE.BufferAttribute(tr,1));
+  geo.setAttribute('a_or',new THREE.BufferAttribute(or,3));
+  var uni={u_t:{value:0},u_m:{value:new THREE.Vector2()}};
+  var mat=new THREE.ShaderMaterial({uniforms:uni,vertexShader:VERT,fragmentShader:FRAG,transparent:true,depthWrite:false,blending:THREE.AdditiveBlending});
+  var pts=new THREE.Points(geo,mat);sc.add(pts);
+  window.addEventListener('resize',function(){R.setSize(W(),H());cam.aspect=W()/H();cam.updateProjectionMatrix();});
+  R.setSize(W(),H());
+  var start=Date.now();
+  (function loop(){requestAnimationFrame(loop);var t=(Date.now()-start)/1e3;uni.u_t.value=t;uni.u_m.value.set(mx.x,mx.y);pts.rotation.y=t*.04+mx.x*.2;pts.rotation.x=Math.sin(t*.03)*.06+mx.y*.1;R.render(sc,cam);})();
+})();
+
+// ── SWARM GENESIS — load tokenURIs from onchain contract ──────────
+(function(){
+  var CONTRACT='0x075f65b8A23A1eC13B05E87F4b23DD22562D927D';
+  var RPC='https://eth-sepolia.g.alchemy.com/v2/O9mAi2CXfFulnRl0XLZF5';
+  // tokenURI(uint256) selector = keccak256("tokenURI(uint256)")[0:4] = 0xc87b56dd
+  function encodeCall(selector,tokenId){
+    var id=tokenId.toString(16).padStart(64,'0');
+    return selector+id;
+  }
+  function decodeString(hex){
+    // ABI decode string: skip offset (32 bytes) + length (32 bytes) = 64 bytes = 128 hex chars
+    // offset at [0:64], length at [64:128], data at [128:]
+    if(hex.startsWith('0x'))hex=hex.slice(2);
+    try{
+      var offset=parseInt(hex.slice(0,64),16)*2;
+      var len=parseInt(hex.slice(offset,offset+64),16)*2;
+      var strHex=hex.slice(offset+64,offset+64+len);
+      var bytes=new Uint8Array(strHex.match(/.{2}/g).map(function(b){return parseInt(b,16);}));
+      return new TextDecoder().decode(bytes);
+    }catch(e){return null;}
+  }
+  async function loadFrame(tokenId,frameId){
+    try{
+      var resp=await fetch(RPC,{
+        method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({jsonrpc:'2.0',id:tokenId,method:'eth_call',params:[{to:CONTRACT,data:'0xc87b56dd'+tokenId.toString(16).padStart(64,'0')},'latest']})
+      });
+      var json=await resp.json();
+      var uri=decodeString(json.result);
+      if(uri&&uri.startsWith('data:')){
+        var frame=document.getElementById(frameId);
+        if(frame)frame.src=uri;
+      }
+    }catch(e){console.warn('genesis frame',tokenId,e);}
+  }
+  // Load after page visible
+  if('IntersectionObserver' in window){
+    var obs=new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        if(e.isIntersecting){
+          loadFrame(1,'frame1');loadFrame(2,'frame2');loadFrame(3,'frame3');
+          obs.disconnect();
+        }
+      });
+    },{threshold:0.1});
+    var sec=document.querySelector('.genesis-section');
+    if(sec)obs.observe(sec);
+  } else {
+    loadFrame(1,'frame1');loadFrame(2,'frame2');loadFrame(3,'frame3');
+  }
+})();
+
+// ── CRYSTALLIZE UI ────────────────────────────────────────────────
+(function(){
+  var btn=document.getElementById('xtal-btn');
+  var input=document.getElementById('xtal-input');
+  var typeEl=document.getElementById('xtal-type');
+  var privEl=document.getElementById('xtal-private');
+  var status=document.getElementById('xtal-status');
+  var result=document.getElementById('xtal-result');
+
+  function setStatus(msg,cls){status.textContent=msg;status.className='xtal-status '+(cls||'');}
+
+  btn.addEventListener('click',async function(){
+    var text=input.value.trim();
+    if(!text){setStatus('Enter a memory first.','err');return;}
+    btn.disabled=true;
+    setStatus('CRYSTALLIZING...','');
+    result.classList.remove('show');
+    var endpoint=privEl.checked?'/api/private-crystallize':'/api/crystallize';
+    try{
+      var res=await fetch(endpoint,{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({rawInput:text,interactionType:typeEl.value,interactionCount:1})
+      });
+      var data=await res.json();
+      if(!res.ok||data.error){setStatus('ERROR: '+(data.error||'Unknown'),'err');btn.disabled=false;return;}
+      var m=data.memory;
+      var c=m.crystallized;
+      document.getElementById('xtal-rtitle').textContent=c.title||'';
+      document.getElementById('xtal-haiku').textContent=(c.haiku||'').replace(/\\n/g,'\n');
+      document.getElementById('xtal-essence').textContent=c.essence||'';
+      var kwEl=document.getElementById('xtal-kws');
+      kwEl.innerHTML='';
+      (c.keywords||[]).forEach(function(k){var s=document.createElement('span');s.className='xtal-kw';s.textContent=k;kwEl.appendChild(s);});
+      var metaEl=document.getElementById('xtal-meta');
+      metaEl.innerHTML='<span class="xtal-badge tier">'+m.ageTier+'</span><span class="xtal-badge score">WISDOM '+m.wisdomScore+'</span>'+
+        (privEl.checked?'<span class="xtal-badge priv">PRIVATE MODE ✓</span>':'');
+      var piiEl=document.getElementById('xtal-pii');
+      if(m.privacy&&m.privacy.piiFound){
+        piiEl.textContent='PII STRIPPED: '+m.privacy.redactions.join(', ');
+      } else {
+        piiEl.textContent='';
+      }
+      result.classList.add('show');
+      setStatus('CRYSTALLIZED ✓','ok');
+    }catch(e){setStatus('ERROR: '+e.message,'err');}
+    btn.disabled=false;
+  });
+})();
+</script>
+
+</body>
+</html>

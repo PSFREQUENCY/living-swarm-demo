@@ -135,26 +135,26 @@ function mkAv(tier:any,skin:any,isP=false){
   const j:any={};
   const torso=new THREE.Group();torso.position.y=.55+skin.bH*.35;root.add(torso);j.torso=torso;
   const tm=new THREE.Mesh(g.torso,mB);(tm as any).scale.set(skin.sW*.5,skin.bH,1);tm.castShadow=true;torso.add(tm);
-  torso.add(Object.assign(new THREE.Mesh(new THREE.BoxGeometry(skin.sW*.35,skin.bH*.4,.02),mA),{position:new THREE.Vector3(0,0,.34)}));
+  torso.add((()=>{const _m=new THREE.Mesh(new THREE.BoxGeometry(skin.sW*.35,skin.bH*.4,.02),mA);_m.position.set(0,0,.34);return _m;})());
   const neck=new THREE.Group();neck.position.y=skin.bH*.5+.05;torso.add(neck);j.neck=neck;
   const hd=new THREE.Mesh(g.head,mH);hd.scale.setScalar(skin.hR);hd.position.y=skin.hR+.02;hd.castShadow=true;neck.add(hd);
-  neck.add(Object.assign(new THREE.Mesh(new THREE.BoxGeometry(skin.hR*.85,skin.hR*.22,skin.hR*.15),mV),{position:new THREE.Vector3(0,skin.hR+.02,skin.hR*.85)}));
+  neck.add((()=>{const _m=new THREE.Mesh(new THREE.BoxGeometry(skin.hR*.85,skin.hR*.22,skin.hR*.15),mV);_m.position.set(0,skin.hR+.02,skin.hR*.85);return _m;})());
   if(skin.lS!==2){[-1,1].forEach((s:number)=>{const sh=new THREE.Group();sh.position.set(s*skin.sW*.28,skin.bH*.38,0);torso.add(sh);j[s<0?'lS':'rS']=sh;
-    sh.add(Object.assign(new THREE.Mesh(g.uArm,mB),{position:new THREE.Vector3(0,-.22,0),castShadow:true}));
+    sh.add((()=>{const _m=new THREE.Mesh(g.uArm,mB);_m.position.set(0,-.22,0);_m.castShadow=true;return _m;})());
     const el=new THREE.Group();el.position.y=-.42;sh.add(el);j[s<0?'lE':'rE']=el;
-    el.add(Object.assign(new THREE.Mesh(g.lArm,mD),{position:new THREE.Vector3(0,-.2,0),castShadow:true}));
-    el.add(Object.assign(new THREE.Mesh(g.hand,mH),{position:new THREE.Vector3(0,-.4,0)}));});}
+    el.add((()=>{const _m=new THREE.Mesh(g.lArm,mD);_m.position.set(0,-.2,0);_m.castShadow=true;return _m;})());
+    el.add((()=>{const _m=new THREE.Mesh(g.hand,mH);_m.position.set(0,-.4,0);return _m;})());});}
   if(skin.lS!==2){[-1,1].forEach((s:number)=>{const hp=new THREE.Group();hp.position.set(s*.12,-skin.bH*.48,0);torso.add(hp);j[s<0?'lH':'rH']=hp;
-    hp.add(Object.assign(new THREE.Mesh(g.uLeg,mD),{position:new THREE.Vector3(0,-.22,0),castShadow:true}));
+    hp.add((()=>{const _m=new THREE.Mesh(g.uLeg,mD);_m.position.set(0,-.22,0);_m.castShadow=true;return _m;})());
     const kn=new THREE.Group();kn.position.y=-.42;hp.add(kn);j[s<0?'lK':'rK']=kn;
-    kn.add(Object.assign(new THREE.Mesh(g.lLeg,mB),{position:new THREE.Vector3(0,-.2,0),castShadow:true}));
-    kn.add(Object.assign(new THREE.Mesh(g.foot,mA),{position:new THREE.Vector3(0,-.4,.04)}));});}
+    kn.add((()=>{const _m=new THREE.Mesh(g.lLeg,mB);_m.position.set(0,-.2,0);_m.castShadow=true;return _m;})());
+    kn.add((()=>{const _m=new THREE.Mesh(g.foot,mA);_m.position.set(0,-.4,.04);return _m;})());});}
   else{const disc=new THREE.Mesh(g.hover,new THREE.MeshBasicMaterial({color:tier.h,transparent:true,opacity:.4}));disc.position.y=-skin.bH*.48-.15;torso.add(disc);j.disc=disc;}
   const aM2=new THREE.MeshBasicMaterial({color:tier.h,transparent:true,opacity:isP?.35:.18*tier.g,side:THREE.DoubleSide});
   const au=new THREE.Mesh(g.aura,aM2);au.rotation.x=-Math.PI/2;au.position.y=.02;root.add(au);
-  if(isP){root.add(Object.assign(new THREE.PointLight(tier.h,1.2,8),{position:new THREE.Vector3(0,1,0)}));
+  if(isP){root.add((()=>{const _l=new THREE.PointLight(tier.h,1.2,8);_l.position.set(0,1,0);return _l;})());
     const mk=new THREE.Mesh(new THREE.RingGeometry(.9,1.1,24),new THREE.MeshBasicMaterial({color:0x00ffc8,transparent:true,opacity:.5,side:THREE.DoubleSide}));mk.rotation.x=-Math.PI/2;mk.position.y=.05;root.add(mk);j.marker=mk;
-  }else if(tier.g>.8){root.add(Object.assign(new THREE.PointLight(tier.h,.4*tier.g,5),{position:new THREE.Vector3(0,1,0)}));}
+  }else if(tier.g>.8){root.add((()=>{const _l=new THREE.PointLight(tier.h,.4*tier.g,5);_l.position.set(0,1,0);return _l;})());}
   return{root,j,au,aM:aM2,mV,mB};
 }
 
@@ -183,16 +183,16 @@ function mkBld(zone:any){
   base.receiveShadow=true;base.position.y=.25;gr.add(base);
   const pr=new THREE.Mesh(new THREE.TorusGeometry(8,.05,4,32),new THREE.MeshBasicMaterial({color:zone.h,transparent:true,opacity:.3}));pr.rotation.x=Math.PI/2;pr.position.y=.1;gr.add(pr);
   let h=8;
-  if(zone.id==="forge"){h=12;const t=new THREE.Mesh(new THREE.CylinderGeometry(1.2,2.5,h,5),bM);t.position.y=h/2+.5;t.castShadow=true;gr.add(t);gr.add(Object.assign(new THREE.Mesh(new THREE.ConeGeometry(.5,3,5),aM),{position:new THREE.Vector3(0,h+2,0)}));}
+  if(zone.id==="forge"){h=12;const t=new THREE.Mesh(new THREE.CylinderGeometry(1.2,2.5,h,5),bM);t.position.y=h/2+.5;t.castShadow=true;gr.add(t);gr.add((()=>{const _m=new THREE.Mesh(new THREE.ConeGeometry(.5,3,5),aM);_m.position.set(0,h+2,0);return _m;})());}
   else if(zone.id==="nexus"){h=6;const d=new THREE.Mesh(new THREE.SphereGeometry(4,8,6,0,Math.PI*2,0,Math.PI/2),bM);d.position.y=.5;d.castShadow=true;gr.add(d);}
-  else if(zone.id==="vault"){h=10;const p=new THREE.Mesh(new THREE.ConeGeometry(5,h,4),bM);p.position.y=h/2+.5;p.rotation.y=Math.PI/4;p.castShadow=true;gr.add(p);const eye=new THREE.Mesh(new THREE.SphereGeometry(.8,10,8),new THREE.MeshBasicMaterial({color:zone.h,transparent:true,opacity:.8}));eye.position.y=h+2.5;eye.name="eye";gr.add(eye);gr.add(Object.assign(new THREE.PointLight(zone.h,2,15),{position:new THREE.Vector3(0,h+2.5,0)}));}
+  else if(zone.id==="vault"){h=10;const p=new THREE.Mesh(new THREE.ConeGeometry(5,h,4),bM);p.position.y=h/2+.5;p.rotation.y=Math.PI/4;p.castShadow=true;gr.add(p);const eye=new THREE.Mesh(new THREE.SphereGeometry(.8,10,8),new THREE.MeshBasicMaterial({color:zone.h,transparent:true,opacity:.8}));eye.position.y=h+2.5;eye.name="eye";gr.add(eye);gr.add((()=>{const _l=new THREE.PointLight(zone.h,2,15);_l.position.set(0,h+2.5,0);return _l;})());}
   else if(zone.id==="warroom"){h=6;const f=new THREE.Mesh(new THREE.BoxGeometry(6,h,6),bM);f.position.y=h/2+.5;f.castShadow=true;gr.add(f);const rd=new THREE.Mesh(new THREE.CylinderGeometry(.8,.05,.3,8,1,true),new THREE.MeshBasicMaterial({color:zone.h,transparent:true,opacity:.55}));rd.position.y=h+1;rd.name="radar";gr.add(rd);}
   else if(zone.id==="arena"){h=5;const o=new THREE.Mesh(new THREE.CylinderGeometry(5,5.5,h,16,1,true),bM);o.position.y=h/2+.5;o.castShadow=true;gr.add(o);}
   else if(zone.id==="market"){h=7;const hx=new THREE.Mesh(new THREE.CylinderGeometry(4,4.5,h,6,1,true),bM);hx.position.y=h/2+.5;hx.castShadow=true;gr.add(hx);}
-  else if(zone.id==="dojo"){h=6;const dj=new THREE.Mesh(new THREE.CylinderGeometry(5,5,h,4),bM);dj.position.y=h/2+.5;dj.rotation.y=Math.PI/4;dj.castShadow=true;gr.add(dj);[-4,4].forEach((x:number)=>{gr.add(Object.assign(new THREE.Mesh(new THREE.BoxGeometry(.3,4,.3),aM),{position:new THREE.Vector3(x,2.5,5)}));});gr.add(Object.assign(new THREE.Mesh(new THREE.BoxGeometry(9,.3,.3),aM),{position:new THREE.Vector3(0,4.7,5)}));}
-  else if(zone.id==="sanctuary"){h=8;const dome=new THREE.Mesh(new THREE.SphereGeometry(5,12,8,0,Math.PI*2,0,Math.PI/2),new THREE.MeshStandardMaterial({color:0x0a1a2a,emissive:0x22d3ee,emissiveIntensity:.1,roughness:.2,metalness:.6,transparent:true,opacity:.7,side:THREE.DoubleSide}));dome.position.y=.5;gr.add(dome);const hc=new THREE.Mesh(new THREE.SphereGeometry(1,8,6),new THREE.MeshBasicMaterial({color:0x22d3ee,transparent:true,opacity:.4}));hc.position.y=3;hc.name="healcore";gr.add(hc);gr.add(Object.assign(new THREE.PointLight(0x22d3ee,2,20),{position:new THREE.Vector3(0,4,0)}));}
+  else if(zone.id==="dojo"){h=6;const dj=new THREE.Mesh(new THREE.CylinderGeometry(5,5,h,4),bM);dj.position.y=h/2+.5;dj.rotation.y=Math.PI/4;dj.castShadow=true;gr.add(dj);[-4,4].forEach((x:number)=>{gr.add((()=>{const _m=new THREE.Mesh(new THREE.BoxGeometry(.3,4,.3),aM);_m.position.set(x,2.5,5);return _m;})());});gr.add((()=>{const _m=new THREE.Mesh(new THREE.BoxGeometry(9,.3,.3),aM);_m.position.set(0,4.7,5);return _m;})());}
+  else if(zone.id==="sanctuary"){h=8;const dome=new THREE.Mesh(new THREE.SphereGeometry(5,12,8,0,Math.PI*2,0,Math.PI/2),new THREE.MeshStandardMaterial({color:0x0a1a2a,emissive:0x22d3ee,emissiveIntensity:.1,roughness:.2,metalness:.6,transparent:true,opacity:.7,side:THREE.DoubleSide}));dome.position.y=.5;gr.add(dome);const hc=new THREE.Mesh(new THREE.SphereGeometry(1,8,6),new THREE.MeshBasicMaterial({color:0x22d3ee,transparent:true,opacity:.4}));hc.position.y=3;hc.name="healcore";gr.add(hc);gr.add((()=>{const _l=new THREE.PointLight(0x22d3ee,2,20);_l.position.set(0,4,0);return _l;})());}
   else if(zone.id==="portal"){h=8;const ring=new THREE.Mesh(new THREE.TorusGeometry(3.5,.3,8,24),aM);ring.position.y=5;ring.name="pring";gr.add(ring);const b2=new THREE.Mesh(new THREE.CylinderGeometry(2,3,3,8),bM);b2.position.y=1.5;b2.castShadow=true;gr.add(b2);const core=new THREE.Mesh(new THREE.SphereGeometry(2.5,8,6),new THREE.MeshBasicMaterial({color:zone.h,transparent:true,opacity:.15,side:THREE.DoubleSide}));core.position.y=5;core.name="pcore";gr.add(core);}
-  gr.add(Object.assign(new THREE.Mesh(new THREE.CylinderGeometry(.03,.5,4,6,1,true),new THREE.MeshBasicMaterial({color:zone.h,transparent:true,opacity:.05,side:THREE.DoubleSide})),{position:new THREE.Vector3(0,h+3,0)}));
+  gr.add((()=>{const _m=new THREE.Mesh(new THREE.CylinderGeometry(.03,.5,4,6,1,true),new THREE.MeshBasicMaterial({color:zone.h,transparent:true,opacity:.05,side:THREE.DoubleSide}));_m.position.set(0,h+3,0);return _m;})());
   const zL=new THREE.PointLight(zone.h,1.2,18);zL.position.y=h+1;gr.add(zL);gr.position.set(zone.x,0,zone.z);
   return{gr,pr,zL,h};
 }
@@ -262,7 +262,7 @@ export default function GhostTown(){
     if(!mob){mn.castShadow=true;mn.shadow.mapSize.set(1024,1024);mn.shadow.camera.near=1;mn.shadow.camera.far=120;(mn.shadow.camera as any).left=-60;(mn.shadow.camera as any).right=60;(mn.shadow.camera as any).top=60;(mn.shadow.camera as any).bottom=-60;}
     sc.add(mn);sc.add(new THREE.HemisphereLight(0x111133,0x050508,.25));
     const gnd=new THREE.Mesh(G().ground,new THREE.MeshStandardMaterial({color:0x060610,roughness:.95,metalness:.1}));gnd.rotation.x=-Math.PI/2;gnd.receiveShadow=true;sc.add(gnd);
-    sc.add(Object.assign(new THREE.GridHelper(200,100,0x0a0a1a,0x08081a),{position:new THREE.Vector3(0,.02,0)}));
+    sc.add((()=>{const _g=new THREE.GridHelper(200,100,0x0a0a1a,0x08081a);_g.position.set(0,.02,0);return _g;})());
     const rM=new THREE.MeshBasicMaterial({color:0x0a0a1a,transparent:true,opacity:.3});
     for(let i=0;i<Z.length;i++)for(let j=i+1;j<Z.length;j++){const a=Z[i],b=Z[j],dx=b.x-a.x,dz=b.z-a.z,d=Math.sqrt(dx*dx+dz*dz);const rd=new THREE.Mesh(new THREE.PlaneGeometry(.8,d),rM);rd.rotation.x=-Math.PI/2;rd.position.set((a.x+b.x)/2,.03,(a.z+b.z)/2);rd.rotation.z=-Math.atan2(dz,dx)+Math.PI/2;sc.add(rd);}
     const blds=Z.map(z=>{const b=mkBld(z);sc.add(b.gr);return{...b,zone:z};});

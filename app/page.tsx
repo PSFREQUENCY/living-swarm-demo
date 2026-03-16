@@ -237,6 +237,33 @@ footer{border-top:1px solid var(--border);padding:2rem 6vw;display:flex;justify-
     </a>
   </div>
 
+  <!-- ENJOY THE RIDE button — glitch-flashes every 3s -->
+  <a id="etr-btn" href="/game" style="position:absolute;bottom:80px;left:50%;transform:translateX(-50%);z-index:6;font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:4px;color:#00ffe7;text-decoration:none;border:1px solid rgba(0,255,231,0.4);border-radius:3px;padding:9px 28px;background:rgba(0,255,231,0.04);transition:all .2s;white-space:nowrap;" onmouseenter="this.style.background='rgba(0,255,231,0.12)';this.style.borderColor='rgba(0,255,231,0.9)';this.style.boxShadow='0 0 18px rgba(0,255,231,0.35)'" onmouseleave="this.style.background='rgba(0,255,231,0.04)';this.style.borderColor='rgba(0,255,231,0.4)';this.style.boxShadow='none'">ENJOY THE RIDE</a>
+  <script>
+  (function(){
+    var btn=document.getElementById('etr-btn');
+    var glitchChars='!@#$%^&*<>/\\|{}[]?';
+    var orig='ENJOY THE RIDE';
+    function glitch(){
+      var iters=0;
+      var iv=setInterval(function(){
+        var s='';
+        for(var i=0;i<orig.length;i++){
+          if(orig[i]===' '){s+=' ';}
+          else if(iters>8&&i<iters-4){s+=orig[i];}
+          else{s+=glitchChars[Math.floor(Math.random()*glitchChars.length)];}
+        }
+        btn.textContent=s;
+        btn.style.color=iters%2?'#ff00ff':'#00ffe7';
+        btn.style.textShadow=iters%2?'0 0 8px #ff00ff':'0 0 8px #00ffe7';
+        iters++;
+        if(iters>14){clearInterval(iv);btn.textContent=orig;btn.style.color='#00ffe7';btn.style.textShadow='none';}
+      },55);
+    }
+    glitch();
+    setInterval(glitch,3000);
+  })();
+  </script>
   <div style="position:absolute;bottom:32px;left:50%;transform:translateX(-50%);z-index:5;font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:4px;color:rgba(0,255,231,0.3);animation:float 2s ease-in-out infinite;">&#x2193; DESCEND &#x2193;</div>
   <div style="position:absolute;bottom:60px;right:24px;z-index:5;font-family:'Share Tech Mono',monospace;font-size:8px;letter-spacing:2px;color:rgba(0,255,231,0.1);text-align:right;line-height:2;">MOVE MOUSE TO<br>DISTURB THE SWARM</div>
 </section>

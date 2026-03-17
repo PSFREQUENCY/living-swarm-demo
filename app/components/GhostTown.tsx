@@ -20,6 +20,15 @@ const T=[
   {n:"EXILED",c:"#991b1b",h:0x991b1b,g:.1,xp:-1e6,i:"✕",r:-1},
 ];
 const TORTOISE_WAYPOINTS=[{x:-35,z:-70},{x:-78,z:-25},{x:-78,z:32},{x:0,z:72},{x:75,z:32},{x:75,z:-25},{x:-35,z:-70}];
+const TURTLE_SWIM_WAYPOINTS=[{x:80,z:0},{x:108,z:55},{x:118,z:115},{x:52,z:155},{x:-44,z:155},{x:-105,z:75},{x:-82,z:-2},{x:15,z:-75}];
+const SUITS=[
+  {id:'rocket',name:'ROCKET PILOT',col:0x00ff88,ec:'#00ff88',desc:'Neon green jet suit. Acquired with the rocket pack at Portal Hub.'},
+  {id:'fire',name:'FIRE RIDER',col:0xff2200,ec:'#ff2200',desc:'Neon red dragon suit. Breathe fire while riding the dragon.'},
+  {id:'blade',name:'BLADE MASTER',col:0xf8f8ff,ec:'#ffffff',desc:'Neon white sword suit. Equip and use the Dragon Sword.'},
+  {id:'tron',name:'TRON PROTOCOL',col:0x00ffe7,ec:'#00ffe7',desc:'Cyan identity protocol. The original tron look.'},
+  {id:'ninja',name:'NINJA SHADOW',col:0xc084fc,ec:'#c084fc',desc:'Purple ninja shade. Earned by completing Turtle Island.'},
+  {id:'sovereign',name:'SOVEREIGN GOLD',col:0xfbbf24,ec:'#fbbf24',desc:'Gold ghost tier. Earn the Black Belt in the Dojo.'},
+];
 const BELTS=[
   {n:"WHITE",c:"#e2e8f0",xp:0},{n:"YELLOW",c:"#fbbf24",xp:200},
   {n:"GREEN",c:"#38b2ac",xp:800},{n:"BLUE",c:"#4299e1",xp:2000},
@@ -249,6 +258,7 @@ const MUSIC_TRACKS=[
   {n:'FOLK',   bpm:100,wv:'triangle'as OscillatorType,seq:[0,2,4,7,4,2,7,4],      base:196.00,gain:.09,color:'#10b981'},
   {n:'METAL',  bpm:162,wv:'sawtooth'as OscillatorType,seq:[0,0,5,0,8,5,3,0],      base:65.41, gain:.06,color:'#991b1b'},
   {n:'TRIBAL', bpm:106,wv:'square'  as OscillatorType,seq:[0,0,7,0,5,0,3,7],      base:55.00, gain:.07,color:'#ff6b35'},
+  {n:'DISCO',  bpm:128,wv:'sawtooth'as OscillatorType,seq:[0,4,7,11,7,4,0,4],     base:130.81,gain:.13,color:'#ff69b4'},
 ];
 const NAMES=["GHOST-7A","WRAITH-3F","SHADE-9B","PHANTOM-2D","SPECTER-5E","NULL-8C","VOID-1A","CIPHER-4G","ECHO-6H","DRIFT-0X","HAZE-7K","BLUR-2M","STATIC-9N","GLITCH-3P","FLUX-5Q","APEX-1R","OMEGA-4S","SIGMA-8T","DELTA-6U","ZERO-0V"];
 const ET=[{t:"ALLIANCE",c:"#00ffc8",h:0x00ffc8},{t:"RIVALRY",c:"#ff3366",h:0xff3366},{t:"MENTORSHIP",c:"#fbbf24",h:0xfbbf24}];
@@ -412,15 +422,17 @@ function mkDragon():THREE.Group{
   dr.scale.setScalar(1.8);// visible but not fly-sized
   return dr;
 }
-function mkTree(variant=0):THREE.Group{
+// treeType: 0=DARK(chop+dragon-burns,trunk stays), 1=LIGHT(chop+disappears→items), 2=BLACK(uncut)
+function mkTree(variant=0,treeType=0):THREE.Group{
   const g=new THREE.Group();
-  // 9x bigger trees — tall, imposing
   const trunkH=(9+variant*3);
-  const trunk=new THREE.Mesh(new THREE.CylinderGeometry(1.4,1.9,trunkH,7),new THREE.MeshBasicMaterial({color:0x5c3d1e}));
-  trunk.position.y=trunkH*.5;g.add(trunk);
-  const leafCols=[0x1a7a2a,0x1e8c32,0x156e24,0x228c3a];
-  const leafM=new THREE.MeshBasicMaterial({color:leafCols[variant%4]});
-  [8,5.5,3.5].forEach((r,i)=>{const c=new THREE.Mesh(new THREE.SphereGeometry(r,7,6),leafM);c.position.y=trunkH+3+i*5.5;g.add(c);});
+  const trunkCols=[0x5c3d1e,0x9e7a4f,0x111111];// dark/light/black trunk
+  const trunk=new THREE.Mesh(new THREE.CylinderGeometry(1.4,1.9,trunkH,7),new THREE.MeshBasicMaterial({color:trunkCols[treeType]}));
+  trunk.name='trunk';trunk.position.y=trunkH*.5;g.add(trunk);
+  const leafColSets=[[0x1a5a1a,0x153a15,0x0f2a0f,0x1a4a1a],[0x44cc44,0x55dd44,0x33bb33,0x66cc44],[0x111111,0x0d0d0d,0x0a0a0a,0x080808]];
+  const leafM=new THREE.MeshBasicMaterial({color:leafColSets[treeType][variant%4]});
+  [8,5.5,3.5].forEach((r,i)=>{const c=new THREE.Mesh(new THREE.SphereGeometry(r,7,6),leafM);c.name='leaf';c.position.y=trunkH+3+i*5.5;g.add(c);});
+  g.userData.treeType=treeType;
   return g;
 }
 function mkFruit():THREE.Mesh{
@@ -811,6 +823,10 @@ export default function GhostTown(){
   const [bigMan,setBigMan]=useState(false);
   const [poemCard,setPoemCard]=useState<string|null>(null);
   const [backpackFlash,setBackpackFlash]=useState(false);
+  const activeSuitRef=useRef(0);
+  const unlockedSuitsRef=useRef<number[]>([]);
+  const discoBallsRef=useRef<any[]>([]);
+  const [activeSuitName,setActiveSuitName]=useState<string|null>(null);
   const [activeChain,setActiveChain]=useState<"mainnet"|"sepolia">("sepolia");
   const [,rf]=useState(0);
 
@@ -865,7 +881,13 @@ export default function GhostTown(){
     setActiveTrack(idx);
   },[]);
 
-  const checkSuper=useCallback(()=>{const p=pd.current;SUPER_SKILLS.forEach(ss=>{if(p.superSkills.includes(ss.id))return;const belt=gB(p.dojoXP);const bIdx=BELTS.findIndex((b:any)=>b.n===belt.n);const reqIdx=BELTS.findIndex((b:any)=>b.n===ss.reqBelt);if(p.xp>=ss.reqXP&&bIdx>=reqIdx){p.superSkills.push(ss.id);addToast(`${ss.icon} SUPER SKILL UNLOCKED: ${ss.n}!`,"#f43f5e");aL(`⭐ YOU unlocked super skill: ${ss.n} — ${ss.desc}`,"system");}});},[addToast,aL]);
+  const checkSuper=useCallback(()=>{const p=pd.current;SUPER_SKILLS.forEach(ss=>{if(p.superSkills.includes(ss.id))return;const belt=gB(p.dojoXP);const bIdx=BELTS.findIndex((b:any)=>b.n===belt.n);const reqIdx=BELTS.findIndex((b:any)=>b.n===ss.reqBelt);if(p.xp>=ss.reqXP&&bIdx>=reqIdx){p.superSkills.push(ss.id);addToast(`${ss.icon} SUPER SKILL UNLOCKED: ${ss.n}!`,"#f43f5e");aL(`⭐ YOU unlocked super skill: ${ss.n} — ${ss.desc}`,"system");}});
+    // Unlock SOVEREIGN GOLD suit (index 5) at BLACK belt
+    const _b=gB(p.dojoXP);if(BELTS.findIndex((b:any)=>b.n===_b.n)>=5&&!unlockedSuitsRef.current.includes(5)){
+      unlockedSuitsRef.current.push(5);if(!p.backpack)p.backpack=[];
+      p.backpack.push({type:'suit',name:'SOVEREIGN GOLD SUIT',icon:'🟡',rarity:'legendary',xp:0,tk:0,desc:'Gold ghost tier suit. Earned at Black Belt.',ts:Date.now(),minted:false});
+      addToast('🟡 SOVEREIGN GOLD SUIT unlocked! Press X to wear','#fbbf24');}
+  },[addToast,aL]);
 
   // ═══ SCENE INIT ═══
   useEffect(()=>{
@@ -1012,10 +1034,14 @@ export default function GhostTown(){
     rpGr.position.set(40,1.8,2);sc.add(rpGr);rocketPackRef.current=rpGr;
     // ── Trees around the town ──
     const TREE_POS:number[][]=[[-65,-70],[-50,20],[-60,55],[15,-75],[-25,75],[62,-50],[72,30],[-72,25],[55,70],[-35,-85],[30,85],[-85,35],[25,-60],[-55,-20],[70,-70],[-15,55],[45,-85],[-78,-45],[58,-20],[28,72],[-62,-50],[48,50],[-42,65],[65,-25]];
-    TREE_POS.forEach(([tx,tz],ti)=>{const tree=mkTree(ti%4);tree.position.set(tx,0,tz);sc.add(tree);treesRef.current.push({mesh:tree,x:tx,z:tz,chopped:false,respawnAt:0});});
-    // ── Ancient Tortoise — near mountain base, tours the town ──
-    const tortoiseMesh=mkTortoise();tortoiseMesh.position.set(TORTOISE_WAYPOINTS[0].x,0,TORTOISE_WAYPOINTS[0].z);sc.add(tortoiseMesh);
-    tortoiseRef.current={mesh:tortoiseMesh,wpIdx:0,frame:0,speed:.038};
+    TREE_POS.forEach(([tx,tz],ti)=>{
+      // 8 dark(0), 8 light(1), 8 black(2) distributed evenly
+      const treeType=ti<8?0:ti<16?1:2;
+      const tree=mkTree(ti%4,treeType);tree.position.set(tx,0,tz);sc.add(tree);
+      treesRef.current.push({mesh:tree,x:tx,z:tz,chopped:false,respawnAt:0,treeType});});
+    // ── Ancient Tortoise — large, near mountain base on land ──
+    const tortoiseMesh=mkTortoise();tortoiseMesh.position.set(22,0,-75);sc.add(tortoiseMesh);
+    tortoiseRef.current={mesh:tortoiseMesh,wpIdx:0,frame:0,speed:.038,swimming:false,swimWpIdx:0};
     // ── Player jetpack accessory mesh (shown on player back when equipped) ──
     const jpAcc=new THREE.Group();
     const jpBody=new THREE.Mesh(new THREE.BoxGeometry(.38,.42,.2),new THREE.MeshBasicMaterial({color:0x00ff88}));jpAcc.add(jpBody);
@@ -1069,10 +1095,11 @@ export default function GhostTown(){
         } else {
           const tm=tortoiseRef.current.mesh;
           const _td=Math.sqrt((tm.position.x-playerPos.current.x)**2+(tm.position.z-playerPos.current.z)**2);
-          if(_td<12){onTortoise.current=true;tortoiseCooldown.current=60;tortoiseWpIdx.current=0;
-            addToast('🐢 RIDING THE ANCIENT TORTOISE — stay on for the full circuit!','#88ff44');
-            aL('🐢 TURTLE ISLAND: stay on the tortoise for the full town circuit to earn 100,000 XP','system');
-          } else addToast('🐢 Get closer to the ancient tortoise (within 12 units)','#4a5568');
+          if(_td<14){onTortoise.current=true;tortoiseCooldown.current=60;tortoiseWpIdx.current=0;
+            if(tortoiseRef.current){tortoiseRef.current.swimWpIdx=0;}
+            addToast('🐢 RIDING THE ANCIENT TORTOISE — heading to the sea for the turtle tour!','#88ff44');
+            aL('🐢 TURTLE ISLAND: the ancient tortoise takes you to the sea — 100,000 XP awaits','system');
+          } else addToast('🐢 Get closer to the ancient tortoise (within 14 units)','#4a5568');
         }
       }
       // Race car enter/exit
@@ -1174,7 +1201,16 @@ export default function GhostTown(){
         fireBreathFrames.current=80;
         setDragonCinematic(true);setTimeout(()=>setDragonCinematic(false),1200);
         addToast('🔥 FIRE BREATH!','#ff4500');
-        addToast('🔥 FIRE BREATH — I to keep breathing!','#ff4500');
+        // Unlock FIRE RIDER suit (index 1)
+        if(!unlockedSuitsRef.current.includes(1)){
+          unlockedSuitsRef.current.push(1);
+          if(!pd.current.backpack)pd.current.backpack=[];
+          pd.current.backpack.push({type:'suit',name:'FIRE RIDER SUIT',icon:'🔴',rarity:'epic',xp:0,tk:0,desc:'Neon red dragon suit. Acquired by breathing fire on the dragon.',ts:Date.now(),minted:false});
+          setBackpackFlash(true);setTimeout(()=>setBackpackFlash(false),2000);
+          addToast('🔴 FIRE RIDER SUIT unlocked! Press X to wear','#ff2200');
+          // Auto-equip if no suit active
+          if(unlockedSuitsRef.current.length===1)activeSuitRef.current=0;
+        }
       }
       // ── C: Chop tree with Dragon Sword ──
       if(k==='c'){
@@ -1183,7 +1219,16 @@ export default function GhostTown(){
         else{
           const _near=treesRef.current.find(tr=>!tr.chopped&&Math.sqrt((tr.x-playerPos.current.x)**2+(tr.z-playerPos.current.z)**2)<7);
           if(_near){
-            _near.chopped=true;_near.mesh.visible=false;_near.respawnAt=FC.current+1800;// respawn in 30s at 60fps
+            if(_near.treeType===2){addToast('⛔ This black tree cannot be cut — ancient and immovable','#4a5568');return;}
+            _near.chopped=true;_near.respawnAt=FC.current+1800;
+            if(_near.treeType===0){
+              // DARK tree: trunk stays, only leaves fall (darken)
+              _near.mesh.children.forEach((c:any)=>{if(c.name==='leaf')c.visible=false;});
+              addToast('🌲 Dark tree chopped — trunk remains. Dragon fire can burn it.','#8b5e3c');
+            } else {
+              // LIGHT tree: whole tree disappears
+              _near.mesh.visible=false;
+            }
             const POEMS=["roots remember\nwhat branches forget\nthe sky made space","rings count the years\nsilence counts the rest\ni stood here once","every fall is a gift\nto the earth below\nthe tree knows this","cut once grow twice\nthe forest understands\nwhat cities forgot","i was seed before\ni was sky after\nbetween was the living","the oldest trees\nhave no beginning\nonly the next ring"];
             const _poem=POEMS[Math.floor(Math.random()*POEMS.length)];
             setPoemCard(_poem);setTimeout(()=>setPoemCard(null),5500);
@@ -1208,7 +1253,19 @@ export default function GhostTown(){
       // ── L: Equip / unequip Dragon Sword ──
       if(k==='l'){
         const _hSword=pd.current.backpack?.find((i:any)=>i.name==='DRAGON SWORD');
-        if(_hSword){setDragonSwordEquipped((v:boolean)=>{addToast(v?'⚔️ Sword sheathed':'⚔️ DRAGON SWORD equipped!','#fbbf24');return!v;});}
+        if(_hSword){setDragonSwordEquipped((v:boolean)=>{
+          const _eq=!v;
+          addToast(_eq?'⚔️ DRAGON SWORD equipped — glowing white!':'⚔️ Sword sheathed','#fbbf24');
+          // Unlock BLADE MASTER suit (index 2)
+          if(_eq&&!unlockedSuitsRef.current.includes(2)){
+            unlockedSuitsRef.current.push(2);
+            if(!pd.current.backpack)pd.current.backpack=[];
+            pd.current.backpack.push({type:'suit',name:'BLADE MASTER SUIT',icon:'⚪',rarity:'epic',xp:0,tk:0,desc:'Neon white sword suit. Activated by equipping the Dragon Sword.',ts:Date.now(),minted:false});
+            setBackpackFlash(true);setTimeout(()=>setBackpackFlash(false),2000);
+            addToast('⚪ BLADE MASTER SUIT unlocked! Press X to wear','#f8f8ff');
+          }
+          return _eq;
+        });}
         else addToast('⚔️ No ancient sword in your backpack yet','#4a5568');
       }
       // ── P: Rocket pack (Portal Hub, green belt required) ──
@@ -1226,15 +1283,54 @@ export default function GhostTown(){
           setRocketPackEquipped(true);flyingRef.current=true;setFlying(true);
           tronAcquired.current=true;pd.current.tronAcquired=true;
           if(rocketPackRef.current)rocketPackRef.current.visible=false;
+          // Unlock ROCKET PILOT (0) + TRON PROTOCOL (3) suits
+          if(!unlockedSuitsRef.current.includes(0)){
+            unlockedSuitsRef.current.push(0);
+            if(!pd.current.backpack)pd.current.backpack=[];
+            pd.current.backpack.push({type:'suit',name:'ROCKET PILOT SUIT',icon:'🟢',rarity:'epic',xp:0,tk:0,desc:'Neon green jet suit. Acquired at Portal Hub with the rocket pack.',ts:Date.now(),minted:false});
+          }
+          if(!unlockedSuitsRef.current.includes(3)){
+            unlockedSuitsRef.current.push(3);
+            if(!pd.current.backpack)pd.current.backpack=[];
+            pd.current.backpack.push({type:'suit',name:'TRON PROTOCOL SUIT',icon:'🔵',rarity:'rare',xp:0,tk:0,desc:'Cyan identity protocol. The original tron look.',ts:Date.now(),minted:false});
+          }
+          setBackpackFlash(true);setTimeout(()=>setBackpackFlash(false),2000);
           addToast('🚀 ROCKET PACK equipped! SPACE = thrust up · P to return it','#06b6d4');
-          addToast('✦ TRON LOOK UNLOCKED — new look acquired permanently','#00ffe7');
-          aL('🚀 ROCKET PACK equipped — TRON GLOW activated permanently!','system');
+          addToast('🟢 ROCKET PILOT SUIT + TRON SUIT unlocked! Press X to cycle suits','#00ff88');
+          aL('🚀 ROCKET PACK equipped — 2 suits unlocked! Press X to cycle them!','system');
+        }
+      }
+      // ── X: Cycle tron suits ──
+      if(k==='x'){
+        const us=unlockedSuitsRef.current;
+        if(us.length===0){addToast('No suits unlocked yet — get jetpack, ride dragon, equip sword...','#4a5568');}
+        else{
+          activeSuitRef.current=(activeSuitRef.current+1)%us.length;
+          const s=SUITS[us[activeSuitRef.current]];
+          setActiveSuitName(s.name);
+          setTimeout(()=>setActiveSuitName(null),3000);
+          addToast(`✦ SUIT: ${s.name}`,(s as any).ec);
+          aL(`✦ Switched to ${s.name} suit`,'system');
         }
       }
       if(k==='d'){
         danceMode.current=!danceMode.current;
-        if(danceMode.current){playerEmote.current="dance";cD.current=4;addToast("💃 Dance mode!","#e879f9");}
-        else{playerEmote.current=null;cD.current=18;}
+        if(danceMode.current){
+          playerEmote.current="dance";cD.current=4;addToast("💃 DISCO MODE — 3 balls drop!","#e879f9");
+          startMusic(9);// DISCO track (index 9)
+          // Spawn 3 disco balls near player
+          if(SD.current&&discoBallsRef.current.length===0){
+            const pp2=playerPos.current;
+            [[0,5,0],[3,7,-2],[-3,7,2]].forEach(([ox,oy,oz],bi)=>{
+              const db=mkDiscoBall();db.position.set(pp2.x+ox,oy,pp2.z+oz);db.name=`discoBall${bi}`;
+              SD.current.sc.add(db);discoBallsRef.current.push(db);
+            });
+          }
+        } else {
+          playerEmote.current=null;cD.current=18;stopMusic();
+          // Remove disco balls
+          if(SD.current){discoBallsRef.current.forEach((db:any)=>SD.current.sc.remove(db));discoBallsRef.current=[];}
+        }
       }
     };
     const up=(e:KeyboardEvent)=>{const k=e.key.toLowerCase();
@@ -1253,7 +1349,7 @@ export default function GhostTown(){
     let run=true;const sa=SA.current;
     const loop=()=>{
       if(!run)return;AID.current=requestAnimationFrame(loop);const t=++FC.current;qTm.current++;sTm.current++;
-      const k=keys.current;let moving=false;const spd=k.shift?.9:.3;
+      const k=keys.current;let moving=false;const spd=k.shift?1.8:.9;
       _fwd.set(-Math.sin(cA.current),0,-Math.cos(cA.current)).normalize();
       _right.set(_fwd.z,0,-_fwd.x);
       _mv.set(0,0,0);
@@ -1287,10 +1383,15 @@ export default function GhostTown(){
         } else if(playerAv.current.j.torso.rotation.x!==0){
           playerAv.current.j.torso.rotation.x=lerp(playerAv.current.j.torso.rotation.x,0,.12);
         }
-        // Tron glow pulse (permanent once acquired)
+        // Tron/suit glow pulse (permanent once acquired)
         if(tronAcquired.current||pd.current.tronAcquired){
-          if(playerAv.current.aM)playerAv.current.aM.opacity=.4+Math.sin(t*.07)*.18;
-          if(playerAv.current.mV)playerAv.current.mV.emissiveIntensity=1.4+Math.sin(t*.05)*.5;
+          const _us=unlockedSuitsRef.current;
+          const _suitCol=_us.length>0?new THREE.Color(SUITS[_us[activeSuitRef.current%_us.length]].col):new THREE.Color(0x00ffe7);
+          if(playerAv.current.aM){playerAv.current.aM.color=_suitCol;playerAv.current.aM.opacity=.4+Math.sin(t*.07)*.18;}
+          if(playerAv.current.mV){playerAv.current.mV.color=_suitCol;playerAv.current.mV.emissive=_suitCol;playerAv.current.mV.emissiveIntensity=1.4+Math.sin(t*.05)*.5;}
+          if(playerAv.current.mB){playerAv.current.mB.emissive=_suitCol;playerAv.current.mB.emissiveIntensity=.35+Math.sin(t*.05)*.15;}
+          // Update the point light color
+          playerAv.current.root.children.forEach((c:any)=>{if(c.isPointLight)c.color=_suitCol;});
         }
         // Jetpack on player back
         if(playerJetpackMesh.current){
@@ -1457,22 +1558,39 @@ export default function GhostTown(){
         }
       }
       // ── Tree respawn ──
-      treesRef.current.forEach((tr:any)=>{if(tr.chopped&&tr.respawnAt>0&&FC.current>=tr.respawnAt){tr.chopped=false;tr.mesh.visible=true;tr.respawnAt=0;}});
+      treesRef.current.forEach((tr:any)=>{if(tr.chopped&&tr.respawnAt>0&&FC.current>=tr.respawnAt){tr.chopped=false;tr.mesh.visible=true;tr.respawnAt=0;// restore dark tree leaves
+        if(tr.treeType===0)tr.mesh.children.forEach((c:any)=>{c.visible=true;});}});
       // ── Tortoise movement + ride ──
       if(tortoiseCooldown.current>0)tortoiseCooldown.current--;
       if(tortoiseRef.current){
-        const tor=tortoiseRef.current;const tm=tor.mesh;tm.position.y=Math.sin(FC.current*.04)*.08;
-        const wp=TORTOISE_WAYPOINTS[tor.wpIdx%TORTOISE_WAYPOINTS.length];
+        const tor=tortoiseRef.current;const tm=tor.mesh;
+        // When riding: swim path (east to sea and around); idle: wander near mountain
+        const _swimming=onTortoise.current;
+        const _wpList=_swimming?TURTLE_SWIM_WAYPOINTS:TORTOISE_WAYPOINTS;
+        const _wpIdx=_swimming?tor.swimWpIdx:tor.wpIdx;
+        const wp=_wpList[_wpIdx%_wpList.length];
+        // In water (x>85): bob lower, swim animation
+        const _inWater=tm.position.x>85;
+        const _targetY=_inWater?-0.8+Math.sin(FC.current*.05)*.25:Math.sin(FC.current*.04)*.08;
+        tm.position.y=lerp(tm.position.y,_targetY,.06);
+        const _torSpeed=_swimming?0.06:0.038;
         const _tdx=wp.x-tm.position.x,_tdz=wp.z-tm.position.z,_tdd=Math.sqrt(_tdx*_tdx+_tdz*_tdz);
-        if(_tdd>1.5){tm.position.x+=_tdx/_tdd*tor.speed;tm.position.z+=_tdz/_tdd*tor.speed;tm.rotation.y=Math.atan2(_tdx,_tdz);}
-        else{tor.wpIdx++;// reached waypoint
-          if(onTortoise.current){tortoiseWpIdx.current++;
-            if(tortoiseWpIdx.current>=TORTOISE_WAYPOINTS.length&&!pd.current.hiddenQDone.includes('TURTLE ISLAND')){
+        if(_tdd>1.5){tm.position.x+=_tdx/_tdd*_torSpeed;tm.position.z+=_tdz/_tdd*_torSpeed;tm.rotation.y=Math.atan2(_tdx,_tdz);}
+        else{
+          if(_swimming){tor.swimWpIdx++;
+            tortoiseWpIdx.current=tor.swimWpIdx;
+            if(tor.swimWpIdx>=TURTLE_SWIM_WAYPOINTS.length&&!pd.current.hiddenQDone.includes('TURTLE ISLAND')){
               pd.current.hiddenQDone.push('TURTLE ISLAND');pd.current.xp+=100000;pd.current.tk+=5000;
               pd.current.tier=gT(pd.current.xp);pd.current.belt=gB(pd.current.dojoXP);
               // Ninja transformation
               ninjaMode.current=true;pd.current.ninjaMode=true;pd.current.skin=SKINS[3];// samurai/ninja skin
-              if(pd.current.backpack)pd.current.backpack.push({type:'item',name:'NINJA OUTFIT',icon:'🥷',rarity:'legendary',desc:'Earned riding the ancient tortoise around the whole town.',ts:Date.now(),minted:false});
+              if(!pd.current.backpack)pd.current.backpack=[];
+              pd.current.backpack.push({type:'item',name:'NINJA OUTFIT',icon:'🥷',rarity:'legendary',desc:'Earned riding the ancient tortoise around the whole town.',ts:Date.now(),minted:false});
+              // Unlock NINJA suit (index 4)
+              if(!unlockedSuitsRef.current.includes(4)){
+                unlockedSuitsRef.current.push(4);
+                pd.current.backpack.push({type:'suit',name:'NINJA SHADOW SUIT',icon:'🟣',rarity:'legendary',xp:0,tk:0,desc:'Purple ninja shade. Earned from Turtle Island.',ts:Date.now(),minted:false});
+              }
               setBackpackFlash(true);setTimeout(()=>setBackpackFlash(false),2000);
               if(playerAv.current){const par=playerAv.current.root.parent;par.remove(playerAv.current.root);const nAv=mkAv(pd.current.tier,SKINS[3],true,BELTS.indexOf(pd.current.belt));nAv.root.position.copy(playerPos.current);nAv.root.scale.setScalar(3);par.add(nAv.root);playerAv.current=nAv;}
               addToast('🐢 TURTLE ISLAND COMPLETE — 100,000XP! You are 3x. Ninja outfit equipped.','#88ff44');
@@ -1480,16 +1598,18 @@ export default function GhostTown(){
               aL('🐢 TURTLE ISLAND complete — ancient wisdom granted. You are ninja now.','system');
               const _tq=HQ.find((q:any)=>q.n==='TURTLE ISLAND');
               if(_tq){const _sn={xp:pd.current.xp,tk:pd.current.tk,beltN:pd.current.belt.n,beltC:pd.current.belt.c,tierN:pd.current.tier.n,tierC:pd.current.tier.c,ms:pd.current.ms,mainDone:pd.current.mainQDone.length,sideDone:pd.current.sideQDone.length,hiddenDone:pd.current.hiddenQDone.length};celebRef.current={frame:0,quest:_tq,snap:_sn};setCelebMode({_tq,snap:_sn} as any);setTimeout(()=>setCelebMode(null),7000);}
-              checkSuper();onTortoise.current=false;
+              checkSuper();onTortoise.current=false;tor.swimWpIdx=0;
             }
-          }
+          } else { tor.wpIdx++; }// non-swimming: wander waypoints
         }
-        // Leg animation
-        tm.children.forEach((c:any,i:number)=>{if(i>=9&&i<=12)c.rotation.x=Math.sin(FC.current*.06+i)*.15;});
+        // Leg animation (faster in water)
+        const _legSpd=_inWater?0.1:0.06;
+        tm.children.forEach((c:any,i:number)=>{if(i>=9&&i<=12)c.rotation.x=Math.sin(FC.current*_legSpd+i)*.15;});
         if(onTortoise.current){
-          playerPos.current.x=tm.position.x;playerPos.current.z=tm.position.z;playerY.current=tm.position.y+5.5;
+          playerPos.current.x=tm.position.x;playerPos.current.z=tm.position.z;
+          playerY.current=tm.position.y+(_inWater?3.8:5.5);
           if(playerAv.current){playerAv.current.root.position.set(tm.position.x,playerY.current,tm.position.z);playerAv.current.root.visible=camModeRef.current==="3rd";}
-          if(t%240===0)addToast(`🐢 Waypoint ${tortoiseWpIdx.current}/${TORTOISE_WAYPOINTS.length} — stay on for 100,000 XP!`,'#88ff44');
+          if(t%240===0){const _tot=TURTLE_SWIM_WAYPOINTS.length;addToast(`🐢 ${_inWater?'🌊 SWIMMING':'🐾 Heading to water'} — waypoint ${tor.swimWpIdx}/${_tot} — stay on for 100,000 XP!`,'#88ff44');}
         }
       }
       // ── Race logic ──
@@ -1570,8 +1690,24 @@ export default function GhostTown(){
         setBoatNear(nd2<6);
         if(playerAv.current)playerAv.current.root.visible=camModeRef.current==="3rd";
       }
-      // Fire breath countdown
-      if(fireBreathFrames.current>0)fireBreathFrames.current--;
+      // Fire breath countdown + dragon burns dark trees
+      if(fireBreathFrames.current>0){
+        fireBreathFrames.current--;
+        if(onDragon.current&&t%8===0){
+          treesRef.current.forEach((tr:any)=>{
+            if(!tr.chopped&&tr.treeType===0){
+              const _dtx=tr.x-playerPos.current.x,_dtz=tr.z-playerPos.current.z;
+              if(Math.sqrt(_dtx*_dtx+_dtz*_dtz)<22){
+                tr.chopped=true;tr.respawnAt=FC.current+1800;
+                // Burn: turn trunk/leaves dark orange then black
+                tr.mesh.children.forEach((c:any)=>{c.material.color.setHex(0xff3300);});
+                setTimeout(()=>{tr.mesh.children.forEach((c:any)=>{if(c.name==='leaf')c.visible=false;if(c.name==='trunk')c.material.color.setHex(0x111111);});},400);
+                addToast('🔥 Dragon fire burned a dark tree!','#ff4500');
+              }
+            }
+          });
+        }
+      }
       // Dragon cooldown
       if(dragonRideCooldown.current>0)dragonRideCooldown.current--;
       // Dragon animation
@@ -1657,14 +1793,28 @@ export default function GhostTown(){
           }
         }
       }
-      // Disco ball (only during celebration)
+      // Disco balls (dance mode) + celebration disco ball
+      if(discoBallsRef.current.length>0){
+        const pp2=playerPos.current;
+        discoBallsRef.current.forEach((db:any,bi:number)=>{
+          db.rotation.y+=.04+bi*.012;
+          // Float and bob near player
+          const _tgtX=pp2.x+Math.sin(FC.current*.02+bi*2.1)*4;
+          const _tgtY=5.5+bi*2+Math.sin(FC.current*.03+bi)*.6;
+          const _tgtZ=pp2.z+Math.cos(FC.current*.02+bi*2.1)*4;
+          db.position.x=lerp(db.position.x,_tgtX,.04);
+          db.position.y=lerp(db.position.y,_tgtY,.04);
+          db.position.z=lerp(db.position.z,_tgtZ,.04);
+          db.children.forEach((c:any,i:number)=>{if(c.isLight){c.intensity=2.5+Math.sin(FC.current*.08+bi*2+i)*.8;c.color.setHSL((FC.current*.003+bi*.33+i*.11)%1,.8,.6);}});
+        });
+      }
+      // Celebration disco ball
       if(SD.current.discoBall){
         const db=SD.current.discoBall;
         if(celebRef.current&&celebRef.current.frame<300){
           if(!db.parent)SD.current.sc.add(db);
           db.position.set(playerPos.current.x,12,playerPos.current.z);
           db.rotation.y+=.025;
-          // Sweep the colored lights
           db.children.forEach((c:any,i:number)=>{if(c.isLight)c.intensity=2+Math.sin(FC.current*.05+i)*.5;});
         } else {if(db.parent)SD.current.sc.remove(db);}
       }
@@ -1829,7 +1979,7 @@ export default function GhostTown(){
               style={{background:activeTrack>=0?`rgba(${activeTrack===0?'34,211,238':activeTrack===1?'244,63,94':activeTrack===2?'251,191,36':activeTrack===3?'56,178,172':activeTrack===4?'192,132,252':activeTrack===5?'66,153,225':activeTrack===6?'16,185,129':activeTrack===7?'153,27,27':'255,107,53'},0.12)`:'rgba(0,0,0,0.1)',border:`1px solid ${activeTrack>=0?MUSIC_TRACKS[activeTrack].color+'44':'rgba(255,255,255,0.1)'}`,borderRadius:3,color:activeTrack>=0?MUSIC_TRACKS[activeTrack].color:'#3a3a52',fontSize:mob?5:6,padding:'2px 5px',cursor:'pointer',fontFamily:'inherit',letterSpacing:1}}>
               {activeTrack>=0?`♫ ${MUSIC_TRACKS[activeTrack].n}`:'♫ OFF'}
             </button>
-            {activeTrack>=0&&<button onClick={()=>startMusic((activeTrack+1)%9)}
+            {activeTrack>=0&&<button onClick={()=>startMusic((activeTrack+1)%10)}
               style={{background:'rgba(0,0,0,0.15)',border:'1px solid rgba(255,255,255,0.1)',borderRadius:3,color:'#4a4a6a',fontSize:mob?4:5,padding:'2px 4px',cursor:'pointer',fontFamily:'inherit'}}>▶</button>}
           </div>
           <button style={{background:backpackFlash?"rgba(192,132,252,0.25)":"rgba(192,132,252,0.1)",border:`1px solid rgba(192,132,252,${backpackFlash?.7:.3})`,borderRadius:3,color:"#c084fc",fontSize:mob?5:6,padding:"2px 7px",cursor:"pointer",fontFamily:"inherit",letterSpacing:2,animation:backpackFlash?"backpackPing .6s ease-out 3":"none"}}
@@ -1900,8 +2050,8 @@ export default function GhostTown(){
           <div style={{fontSize:6,color:"#5a5a72",lineHeight:1.8,marginBottom:8}}>
             <div>▸ <span style={{color:"#00ffc8"}}>WASD / Arrows</span> — Move · <span style={{color:"#00ffc8"}}>Shift</span> — Sprint</div>
             <div>▸ <span style={{color:"#f43f5e"}}>V</span> — Toggle 1st/3rd · <span style={{color:"#f43f5e"}}>F</span> — Ghost Flight</div>
-            <div>▸ <span style={{color:"#e879f9"}}>D</span> — Dance · <span style={{color:"#ff4500"}}>H</span> — Dragon 🐉 · <span style={{color:"#0ea5e9"}}>E</span> — Board boat ⛵</div>
-            <div>▸ <span style={{color:"#8b5e3c"}}>G</span> — Mount horse 🐴 (at mountain base)</div>
+            <div>▸ <span style={{color:"#e879f9"}}>D</span> — Dance+Disco 💃 · <span style={{color:"#ff4500"}}>H</span> — Dragon 🐉 · <span style={{color:"#0ea5e9"}}>E</span> — Boat ⛵</div>
+            <div>▸ <span style={{color:"#8b5e3c"}}>G</span> — Horse 🐴 · <span style={{color:"#88ff44"}}>T</span> — Tortoise 🐢 · <span style={{color:"#00ff88"}}>X</span> — Cycle Suit ✦</div>
             <div>▸ <span style={{color:"#fbbf24"}}>☀️/🌙</span> — Day/Night toggle in top bar</div>
             <div>▸ <span style={{color:"#e879f9"}}>Space</span> — Fly up · Mouse drag — Orbit</div>
           </div>
@@ -2121,7 +2271,7 @@ export default function GhostTown(){
           <span>S:<span style={{color:"#38b2ac"}}>{p.sideQDone?.length||0}/11</span></span>
           <span>H:<span style={{color:"#c084fc"}}>{p.hiddenQDone?.length||0}/11</span></span>
         </div>
-        {!mob&&<div style={{color:"#0a0a14"}}>WASD·W×2=RUN·V·F=FLY·D=💃·H=🐉·E=⛵ · SUN/MOON button top-right · SAMAUR-AI v6</div>}
+        {!mob&&<div style={{color:"#0a0a14"}}>WASD·SHIFT=6×·V·F=FLY·D=💃DISCO·T=🐢·H=🐉·E=⛵·G=🐴·R=RIDE·X=SUIT·I=🔥·L=⚔️·C=CHOP·P=🚀 · SAMAUR-AI v6</div>}
       </div>
 
       <style>{`@keyframes confettiF0{0%{transform:translateY(-10px) rotate(0deg);opacity:1}100%{transform:translateY(100vh) rotate(720deg);opacity:0}}@keyframes confettiF1{0%{transform:translateY(-10px) rotate(0deg);opacity:1}100%{transform:translateY(100vh) rotate(-540deg);opacity:0}}@keyframes celebGlow{from{opacity:.6}to{opacity:1}}@keyframes runPulse{from{opacity:.7}to{opacity:1}}
@@ -2150,6 +2300,11 @@ export default function GhostTown(){
         ))}
       </div>}
 
+      {/* SUIT NAME DISPLAY */}
+      {activeSuitName&&<div style={{position:"absolute",zIndex:48,top:"22%",left:"50%",transform:"translateX(-50%)",pointerEvents:"none",background:"linear-gradient(135deg,#03030e,#080818)",border:`1px solid ${unlockedSuitsRef.current.length>0?(SUITS[unlockedSuitsRef.current[activeSuitRef.current%unlockedSuitsRef.current.length]] as any).ec+'60':'#00ffe760'}`,borderRadius:6,padding:"10px 22px",textAlign:"center",backdropFilter:"blur(8px)"}}>
+        <div style={{fontSize:7,color:"#3a3a52",letterSpacing:3,marginBottom:2}}>✦ SUIT ACTIVATED</div>
+        <div style={{fontSize:13,color:unlockedSuitsRef.current.length>0?(SUITS[unlockedSuitsRef.current[activeSuitRef.current%unlockedSuitsRef.current.length]] as any).ec:'#00ffe7',fontWeight:900,letterSpacing:4}}>{activeSuitName}</div>
+      </div>}
       {/* POEM CARD — tree chop */}
       {poemCard&&<div style={{position:"absolute",zIndex:48,bottom:"18%",left:"50%",transform:"translateX(-50%)",pointerEvents:"none",background:"linear-gradient(135deg,#03080e,#081410)",border:"1px solid #38b2ac60",borderRadius:6,padding:"14px 20px",minWidth:200,textAlign:"center",boxShadow:"0 0 30px #38b2ac30,0 0 60px #38b2ac10"}}>
         <div style={{fontSize:7,color:"#38b2ac",letterSpacing:3,marginBottom:6,opacity:.7}}>🌲 THE TREE SPEAKS</div>

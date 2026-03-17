@@ -1719,7 +1719,7 @@ export default function GhostTown(){
               addToast('🥷 NINJA TRANSFORMATION — you have been changed permanently','#c084fc');
               aL('🐢 TURTLE ISLAND complete — ancient wisdom granted. You are ninja now.','system');
               const _tq=HQ.find((q:any)=>q.n==='TURTLE ISLAND');
-              if(_tq){const _sn={xp:pd.current.xp,tk:pd.current.tk,beltN:pd.current.belt.n,beltC:pd.current.belt.c,tierN:pd.current.tier.n,tierC:pd.current.tier.c,ms:pd.current.ms,mainDone:pd.current.mainQDone.length,sideDone:pd.current.sideQDone.length,hiddenDone:pd.current.hiddenQDone.length};celebRef.current={frame:0,quest:_tq,snap:_sn};setCelebMode({_tq,snap:_sn} as any);setTimeout(()=>setCelebMode(null),7000);}
+              if(_tq){const _sn={xp:pd.current.xp,tk:pd.current.tk,beltN:pd.current.belt.n,beltC:pd.current.belt.c,tierN:pd.current.tier.n,tierC:pd.current.tier.c,ms:pd.current.ms,mainDone:pd.current.mainQDone.length,sideDone:pd.current.sideQDone.length,hiddenDone:pd.current.hiddenQDone.length};celebRef.current={frame:0,quest:_tq,snap:_sn};setCelebMode({quest:_tq,snap:_sn});setTimeout(()=>setCelebMode(null),7000);}
               checkSuper();onTortoise.current=false;tor.swimWpIdx=0;
             }
           } else { tor.wpIdx++; }// non-swimming: wander waypoints

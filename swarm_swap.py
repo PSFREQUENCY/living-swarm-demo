@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-SWARM TRADE -- Real Sepolia Swap via Uniswap Trading API
+SWARMSWAP -- Real Sepolia Swap via Uniswap Trading API
 Produces a real TxID for the hackathon submission.
 Run: python3 swarm_swap.py
 Requirements: pip install eth-account requests
@@ -43,7 +43,7 @@ def rpc(method, params):
         raise Exception(f"RPC: {d['error']['message']}")
     return d['result']
 
-print('\n⬡  SWARM TRADE — Sepolia Live Swap')
+print('\n⬡  SWARMSWAP — Sepolia Live Swap')
 print('─' * 44)
 print(f'  Wallet: {WALLET}')
 print(f'  Swap:   0.001 ETH → WETH (wrap)')

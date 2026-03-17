@@ -184,7 +184,7 @@ footer{border-top:1px solid var(--border);padding:2rem 6vw;display:flex;justify-
 
 <div class="status">
   <div class="s-l"><span class="bl">▮</span>&nbsp;SYN-2026 // NODES: ██ // UP: <span id="uptime">00:00:00</span></div>
-  <div class="s-r" style="display:flex;gap:18px;align-items:center;"><a href="/royal-logs/" style="color:rgba(0,255,231,.38);text-decoration:none;transition:color .2s;cursor:pointer" onmouseenter="this.style.color='#00ffe7'" onmouseleave="this.style.color='rgba(0,255,231,.38)'">ROYAL LOGS</a><a href="/swap/" style="color:rgba(0,255,231,.38);text-decoration:none;transition:color .2s;cursor:pointer" onmouseenter="this.style.color='#00ffe7'" onmouseleave="this.style.color='rgba(0,255,231,.38)'">SWARM TRADE</a><a href="/data-room" style="color:rgba(160,100,255,.45);text-decoration:none;transition:color .2s;cursor:pointer" onmouseenter="this.style.color='#c084fc'" onmouseleave="this.style.color='rgba(160,100,255,.45)'">DATA ROOM</a><a href="/swarm-signals/" style="color:rgba(0,255,231,.38);text-decoration:none;transition:color .2s;cursor:pointer" onmouseenter="this.style.color='#00ffe7'" onmouseleave="this.style.color='rgba(0,255,231,.38)'">SIGNALS</a></div>
+  <div class="s-r" style="display:flex;gap:18px;align-items:center;"><a href="/royal-logs/" style="color:rgba(0,255,231,.38);text-decoration:none;transition:color .2s;cursor:pointer" onmouseenter="this.style.color='#00ffe7'" onmouseleave="this.style.color='rgba(0,255,231,.38)'">ROYAL LOGS</a><a href="/swap/" style="color:rgba(0,255,231,.38);text-decoration:none;transition:color .2s;cursor:pointer" onmouseenter="this.style.color='#00ffe7'" onmouseleave="this.style.color='rgba(0,255,231,.38)'">SWARMSWAP</a><a href="/data-room" style="color:rgba(160,100,255,.45);text-decoration:none;transition:color .2s;cursor:pointer" onmouseenter="this.style.color='#c084fc'" onmouseleave="this.style.color='rgba(160,100,255,.45)'">DATA ROOM</a><a href="/swarm-signals/" style="color:rgba(0,255,231,.38);text-decoration:none;transition:color .2s;cursor:pointer" onmouseenter="this.style.color='#00ffe7'" onmouseleave="this.style.color='rgba(0,255,231,.38)'">SIGNALS</a></div>
 </div>
 
 <section class="hero" style="position:relative;overflow:hidden;min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding:0;align-items:center;">
@@ -461,8 +461,8 @@ setInterval(fetchPrice,30000);setInterval(fetchUniRate,60000);
 .gx-cyan{background:linear-gradient(135deg,#fff,#00ffe7,#9b59ff,#ff00aa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
 .gx-gold::before{content:'ROYAL LOGS';position:absolute;top:0;left:0;background:linear-gradient(135deg,#00ffe7,#9b59ff);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:gxa 5s infinite;opacity:.45}
 .gx-gold::after{content:'ROYAL LOGS';position:absolute;top:0;left:0;background:linear-gradient(135deg,#ff00aa,#ffd700);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:gxb 5s infinite;opacity:.25}
-.gx-cyan::before{content:'SWARM TRADE';position:absolute;top:0;left:0;background:linear-gradient(135deg,#ff00aa,#00ffe7);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:gxa 4s infinite;opacity:.45}
-.gx-cyan::after{content:'SWARM TRADE';position:absolute;top:0;left:0;background:linear-gradient(135deg,#ffd700,#9b59ff);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:gxb 4s infinite;opacity:.25}
+.gx-cyan::before{content:'SWARMSWAP';position:absolute;top:0;left:0;background:linear-gradient(135deg,#ff00aa,#00ffe7);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:gxa 4s infinite;opacity:.45}
+.gx-cyan::after{content:'SWARMSWAP';position:absolute;top:0;left:0;background:linear-gradient(135deg,#ffd700,#9b59ff);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:gxb 4s infinite;opacity:.25}
 @keyframes gxa{0%,89%,100%{clip-path:none;transform:none}90%{clip-path:polygon(0 10%,100% 10%,100% 28%,0 28%);transform:translate(-3px,0) skewX(-3deg)}92%{clip-path:polygon(0 58%,100% 58%,100% 72%,0 72%);transform:translate(3px,0)}94%{clip-path:none}}
 @keyframes gxb{0%,86%,100%{clip-path:none;transform:none}87%{clip-path:polygon(0 35%,100% 35%,100% 48%,0 48%);transform:translate(2px,0) skewX(-2deg)}90%{clip-path:none}}
 .rl-ey{font-family:'Share Tech Mono',monospace;font-size:10px;color:#ff00aa;letter-spacing:4px;margin-bottom:10px;text-shadow:0 0 20px #ff00aa80}
@@ -530,7 +530,7 @@ setInterval(fetchPrice,30000);setInterval(fetchUniRate,60000);
 <div class="uni-s">
   <div class="rl-ey">&#x2B21; UNISWAP TRADING API // PERMIT2 // UNISWAPX // ARBITER-GATED</div>
   <div class="uni-hrow">
-    <div class="gx gx-cyan">SWARM TRADE</div>
+    <div class="gx gx-cyan">SWARMSWAP</div>
     <div class="rl-meta">real quotes &middot; <span>live routing</span> &middot; UniswapX &middot; <span>Permit2 EIP-712</span></div>
   </div>
   <div class="uni-cards">
@@ -544,7 +544,7 @@ setInterval(fetchPrice,30000);setInterval(fetchUniRate,60000);
       <div><div class="uni-sv">10+</div><div class="uni-sl">ROUTE TYPES</div></div>
       <div><div class="uni-sv">V2</div><div class="uni-sl">UNIV ROUTER</div></div>
     </div>
-    <a href="/swap/" class="ebtn ecyan">&#x25B6; OPEN SWARM TRADE &#x2192;</a>
+    <a href="/swap/" class="ebtn ecyan">&#x25B6; OPEN SWARMSWAP &#x2192;</a>
   </div>
 </div>
 <div class="sdiv">&#x2593;&#x2593;&#x2593;</div>
@@ -1017,7 +1017,8 @@ setInterval(fetchPrice,30000);setInterval(fetchUniRate,60000);
   <div>SYNTHESIS 2026 // MARCH 13–22 // synthesis.md</div>
   <div style="display:flex;gap:20px;justify-content:center;flex-wrap:wrap;margin:12px 0;font-size:9px;letter-spacing:.2em">
     <a href="/royal-logs/" style="color:rgba(255,215,0,.4);text-decoration:none">ROYAL LOGS</a>
-    <a href="/swap/" style="color:rgba(0,245,255,.4);text-decoration:none">SWARM TRADE</a>
+    <a href="/swap/" style="color:rgba(0,245,255,.4);text-decoration:none">SWARMSWAP</a>
+    <a href="/rebalance/" style="color:rgba(57,255,143,.5);text-decoration:none">SWARMFI</a>
     <a href="/data-room/" style="color:rgba(155,89,255,.4);text-decoration:none">DATA ROOM</a>
     <a href="https://sepolia.etherscan.io/address/0x4A6d6f8B23bf3ECD8EebeA73dcB582db6380Fc94" target="_blank" style="color:rgba(57,255,143,.4);text-decoration:none">ARBITER CONTRACT &#x2197;</a>
     <a href="https://github.com/PSFREQUENCY/living-swarm-demo" target="_blank" style="color:rgba(255,255,255,.2);text-decoration:none">GITHUB &#x2197;</a>

@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>SWARMFI // AUTONOMOUS REBALANCING</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--void:#030308;--gold:#ffd700;--cyan:#00f5ff;--violet:#9b59ff;--sage:#39ff8f;--red:#ff4455;--orange:#ff8c00;--plasma:#ff6ef7}
+html,body{background:var(--void);color:#c8c8d8;font-family:'JetBrains Mono','Courier New',monospace;min-height:100vh}
+::-webkit-scrollbar{width:2px}::-webkit-scrollbar-track{background:var(--void)}::-webkit-scrollbar-thumb{background:#1a1a3e}
+.page{max-width:860px;margin:0 auto;padding:72px 16px 60px}
+.eyebrow{font-size:9px;color:#1a1a3a;letter-spacing:.4em;text-transform:uppercase;margin-bottom:10px}
+.title{font-size:clamp(26px,6vw,52px);font-weight:800;line-height:.95;margin-bottom:8px;background:linear-gradient(135deg,#fff 0%,var(--sage) 35%,var(--cyan) 65%,var(--violet) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.sub{font-size:10px;color:#2a2a4a;letter-spacing:.18em;line-height:1.8;margin-bottom:28px}
+.card{background:rgba(10,10,26,.7);border:1px solid #1a1a3a;border-radius:14px;padding:20px;margin-bottom:14px}
+.ctitle{font-size:9px;color:#333;letter-spacing:.25em;text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:10px}.ctitle::after{content:'';flex:1;height:1px;background:#111}
+
+/* Agent pipeline */
+.pipeline{display:flex;gap:0;margin-bottom:20px;border:1px solid #111;border-radius:12px;overflow:hidden}
+.agent-tab{flex:1;padding:12px 8px;text-align:center;font-size:8px;letter-spacing:.15em;color:#222;border-right:1px solid #111;cursor:default;transition:all .3s;position:relative}
+.agent-tab:last-child{border-right:none}
+.agent-tab.idle{color:#222}
+.agent-tab.running{color:var(--cyan);background:rgba(0,245,255,.04);border-bottom:2px solid var(--cyan)}
+.agent-tab.done{color:var(--sage);background:rgba(57,255,143,.03)}
+.agent-tab.error{color:var(--red);background:rgba(255,68,85,.04)}
+.agent-badge{font-size:14px;font-weight:800;display:block;margin-bottom:3px}
+.agent-role{font-size:7px;opacity:.6;letter-spacing:.2em}
+.agent-erc{font-size:7px;color:#1a1a3a;margin-top:2px}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}.pulsing{animation:pulse 1s ease-in-out infinite}
+
+/* Portfolio display */
+.portgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.portbox{background:rgba(0,0,0,.4);border:1px solid #111;border-radius:10px;padding:12px}
+.portlabel{font-size:8px;color:#333;letter-spacing:.18em;margin-bottom:6px}
+.portval{font-size:18px;font-weight:800;color:#ddd}
+.portsub{font-size:8px;color:#333;margin-top:3px}
+.driftbar-wrap{margin-bottom:14px}
+.driftbar-label{display:flex;justify-content:space-between;font-size:8px;color:#333;margin-bottom:6px;letter-spacing:.15em}
+.driftbar-bg{height:6px;background:#0a0a0a;border-radius:3px;overflow:hidden;position:relative}
+.driftbar-center{position:absolute;left:50%;top:0;bottom:0;width:1px;background:#1a1a3a}
+.driftbar-fill{height:100%;border-radius:3px;transition:width .6s ease,background .3s}
+.dOK{background:var(--sage)}.dWARN{background:var(--gold)}.dHOT{background:var(--orange)}.dCRIT{background:var(--red)}
+
+/* Sliders */
+.ctrl-row{display:flex;align-items:center;gap:12px;margin-bottom:10px;flex-wrap:wrap}
+.ctrl-label{font-size:8px;color:#444;letter-spacing:.15em;min-width:140px}
+.ctrl-val{font-size:11px;color:var(--cyan);min-width:50px;text-align:right}
+input[type=range]{flex:1;-webkit-appearance:none;height:3px;background:#111;border-radius:2px;outline:none;min-width:100px}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:12px;height:12px;border-radius:50%;background:var(--cyan);cursor:pointer}
+
+/* Checks */
+.checks{display:flex;flex-direction:column;gap:5px;margin-bottom:12px}
+.check-row{display:flex;align-items:center;gap:8px;font-size:9px}
+.check-icon{font-size:10px;flex-shrink:0}
+.check-name{color:#444;letter-spacing:.1em;min-width:160px}
+.check-detail{color:#333;flex:1;font-size:8px}
+.cPASS .check-name{color:var(--sage)}.cFAIL .check-name{color:var(--red)}
+
+/* Risk meter */
+.risk-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.risk-label{font-size:9px;color:#333;letter-spacing:.15em}
+.risk-score{font-size:20px;font-weight:800}
+.rsPASS{color:var(--sage)}.rsLOG{color:var(--gold)}.rsHOLD{color:var(--orange)}.rsBLOCK{color:var(--red)}
+.risk-bar-bg{height:3px;background:#0a0a0a;border-radius:2px;overflow:hidden;margin-bottom:6px}
+.risk-bar-fill{height:100%;border-radius:2px;transition:width .5s}
+.rbPASS{background:var(--sage)}.rbLOG{background:var(--gold)}.rbHOLD{background:var(--orange)}.rbBLOCK{background:var(--red)}
+
+/* Buttons */
+.btn{width:100%;background:linear-gradient(135deg,rgba(57,255,143,.1),rgba(0,200,100,.05));border:1px solid rgba(57,255,143,.28);color:var(--sage);font-family:inherit;font-size:11px;font-weight:700;letter-spacing:.16em;padding:12px;border-radius:10px;cursor:pointer;transition:all .3s;text-transform:uppercase;margin-bottom:7px}
+.btn:hover:not(:disabled){background:linear-gradient(135deg,rgba(57,255,143,.18),rgba(0,200,100,.1));box-shadow:0 0 28px rgba(57,255,143,.18)}
+.btn:disabled{opacity:.3;cursor:not-allowed}
+.btncyan{background:linear-gradient(135deg,rgba(0,245,255,.1),rgba(155,89,255,.07));border-color:rgba(0,245,255,.28);color:var(--cyan)}
+.btncyan:hover:not(:disabled){background:linear-gradient(135deg,rgba(0,245,255,.18),rgba(155,89,255,.14));box-shadow:0 0 28px rgba(0,245,255,.18)}
+.btnexec{background:linear-gradient(135deg,rgba(255,215,0,.12),rgba(255,140,0,.07));border-color:rgba(255,215,0,.28);color:var(--gold)}
+.btnexec:hover:not(:disabled){box-shadow:0 0 28px rgba(255,215,0,.2)}
+
+/* Terminal */
+.term{background:#020208;border:1px solid #0a0a18;border-radius:10px;padding:12px;min-height:130px;max-height:280px;overflow-y:auto;font-size:10px;line-height:1.8}
+.ll{margin-bottom:1px}
+.lts{color:#1a1a3a}.la{color:var(--violet)}.ld{color:#444}.lok{color:var(--sage)}.lw{color:var(--gold)}.le{color:var(--red)}.ltx{color:var(--cyan)}.lp{color:var(--plasma)}.larb{color:var(--orange)}
+
+/* Wallet */
+.wrow{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.waddr{font-size:9px;color:#2a2a5a;background:rgba(0,0,0,.3);padding:5px 10px;border-radius:6px;border:1px solid #0a0a1a}
+.wcbtn{background:rgba(155,89,255,.1);border:1px solid rgba(155,89,255,.22);color:var(--violet);font-family:inherit;font-size:9px;letter-spacing:.1em;padding:5px 12px;border-radius:7px;cursor:pointer;transition:all .2s}.wcbtn:hover{background:rgba(155,89,255,.18)}
+.nettog{display:flex;gap:4px}.netbtn{background:rgba(0,0,0,.3);border:1px solid #1a1a3a;color:#333;font-family:inherit;font-size:8px;letter-spacing:.12em;padding:4px 10px;border-radius:6px;cursor:pointer;transition:all .2s}.netbtn.active{border-color:rgba(0,245,255,.4);color:var(--cyan);background:rgba(0,245,255,.06)}.netbtn:hover:not(.active){color:#666;border-color:#333}
+
+/* Signal badge */
+.sigbadge{display:inline-flex;align-items:center;gap:6px;font-size:9px;letter-spacing:.12em;padding:3px 10px;border-radius:10px;font-weight:700;margin-bottom:10px}
+.sigACTION{background:rgba(255,140,0,.1);border:1px solid rgba(255,140,0,.3);color:var(--orange)}
+.sigIDLE{background:rgba(57,255,143,.06);border:1px solid rgba(57,255,143,.15);color:var(--sage)}
+
+.disc{font-size:8px;color:#111;line-height:1.7;margin-top:8px}
+</style>
+</head>
+<body>
+<nav style="position:fixed;top:0;left:0;right:0;z-index:9999;height:44px;background:rgba(0,3,8,.92);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid rgba(0,255,231,.1);display:flex;align-items:center;justify-content:space-between;padding:0 20px;font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:3px;box-sizing:border-box;">
+  <a href="/" style="color:rgba(0,255,231,.55);text-decoration:none;font-size:10px;letter-spacing:4px;font-weight:bold;transition:color .2s;flex-shrink:0" onmouseenter="this.style.color='#00ffe7'" onmouseleave="this.style.color='rgba(0,255,231,.55)'">▓ LIVING SWARM</a>
+  <div style="display:flex;align-items:center;gap:16px;overflow-x:auto;">
+    <a href="/royal-logs/" style="color:rgba(0,255,231,.35);text-decoration:none;transition:color .2s;white-space:nowrap" onmouseenter="this.style.color='#00ffe7'" onmouseleave="this.style.color='rgba(0,255,231,.35)'">ROYAL LOGS</a>
+    <span style="color:rgba(0,255,231,.1);">·</span>
+    <a href="/swap/" style="color:rgba(0,255,231,.35);text-decoration:none;transition:color .2s;white-space:nowrap" onmouseenter="this.style.color='#00ffe7'" onmouseleave="this.style.color='rgba(0,255,231,.35)'">SWARMSWAP</a>
+    <span style="color:rgba(0,255,231,.1);">·</span>
+    <a href="/rebalance/" style="color:#00ffe7;text-decoration:none;white-space:nowrap">SWARMFI</a>
+    <span style="color:rgba(0,255,231,.1);">·</span>
+    <a href="/data-room" style="color:rgba(160,100,255,.5);text-decoration:none;transition:color .2s;white-space:nowrap" onmouseenter="this.style.color='#c084fc'" onmouseleave="this.style.color='rgba(160,100,255,.5)'">DATA ROOM</a>
+    <span style="color:rgba(0,255,231,.1);">·</span>
+    <a href="/swarm-signals/" style="color:rgba(0,255,231,.35);text-decoration:none;transition:color .2s;white-space:nowrap" onmouseenter="this.style.color='#00ffe7'" onmouseleave="this.style.color='rgba(0,255,231,.35)'">SIGNALS</a>
+  </div>
+</nav>
+
+<div class="page">
+  <div class="eyebrow">⬡ SWARMFI // AUTONOMOUS PORTFOLIO REBALANCING // ERC-8004 AGENTS</div>
+  <h1 class="title">SWARMFI</h1>
+  <div class="sub">SCOUT · STRATEGIST · GUARDIAN &middot; 3-AGENT AUTONOMOUS REBALANCING &middot; REAL UNISWAP EXECUTION</div>
+
+  <!-- Agent Pipeline -->
+  <div class="pipeline">
+    <div class="agent-tab idle" id="tab-scout">
+      <span class="agent-badge">◎</span>
+      SCOUT
+      <div class="agent-role">HERALD-01</div>
+      <div class="agent-erc">ERC-8004 #1</div>
+    </div>
+    <div class="agent-tab idle" id="tab-strategist">
+      <span class="agent-badge">⬡</span>
+      STRATEGIST
+      <div class="agent-role">ENGINEER-02</div>
+      <div class="agent-erc">ERC-8004 #2</div>
+    </div>
+    <div class="agent-tab idle" id="tab-guardian">
+      <span class="agent-badge">⬡</span>
+      GUARDIAN
+      <div class="agent-role">SENTINEL-03</div>
+      <div class="agent-erc">ERC-8004 #3</div>
+    </div>
+  </div>
+
+  <!-- Wallet -->
+  <div class="card">
+    <div class="ctitle">◎ WALLET</div>
+    <div class="wrow">
+      <div><div style="font-size:8px;color:#333;letter-spacing:.15em;margin-bottom:4px">ADDRESS</div><div class="waddr" id="waddr">NOT CONNECTED</div></div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
+        <div class="nettog">
+          <button class="netbtn" id="net-mainnet" onclick="setNet('mainnet')">MAINNET</button>
+          <button class="netbtn active" id="net-sepolia" onclick="setNet('sepolia')">SEPOLIA</button>
+        </div>
+        <button class="wcbtn" id="wcbtn" onclick="connectWallet()">CONNECT</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Config -->
+  <div class="card">
+    <div class="ctitle">⬡ REBALANCE CONFIG</div>
+    <div class="ctrl-row">
+      <span class="ctrl-label">TARGET ETH ALLOCATION</span>
+      <input type="range" id="sl-target" min="10" max="90" value="50" step="5" oninput="updateCtrls()"/>
+      <span class="ctrl-val" id="val-target">50%</span>
+    </div>
+    <div class="ctrl-row">
+      <span class="ctrl-label">DRIFT THRESHOLD</span>
+      <input type="range" id="sl-drift" min="2" max="20" value="5" step="1" oninput="updateCtrls()"/>
+      <span class="ctrl-val" id="val-drift">5%</span>
+    </div>
+    <div class="ctrl-row">
+      <span class="ctrl-label">MAX TRADE SIZE (ETH)</span>
+      <input type="range" id="sl-size" min="1" max="50" value="10" step="1" oninput="updateCtrls()"/>
+      <span class="ctrl-val" id="val-size">0.10 ETH</span>
+    </div>
+    <div class="ctrl-row">
+      <span class="ctrl-label">MAX SLIPPAGE</span>
+      <input type="range" id="sl-slip" min="1" max="30" value="5" step="1" oninput="updateCtrls()"/>
+      <span class="ctrl-val" id="val-slip">0.5%</span>
+    </div>
+    <button class="btn btncyan" id="runbtn" onclick="runRebalance()">◎ RUN SWARM ANALYSIS</button>
+  </div>
+
+  <!-- Portfolio -->
+  <div class="card" id="portcard" style="display:none">
+    <div class="ctitle">◎ PORTFOLIO STATE</div>
+    <div id="sigwrap" style="margin-bottom:10px"></div>
+    <div class="portgrid">
+      <div class="portbox">
+        <div class="portlabel">ETH BALANCE</div>
+        <div class="portval" id="p-ethbal">—</div>
+        <div class="portsub" id="p-ethval">$—</div>
+      </div>
+      <div class="portbox">
+        <div class="portlabel">USDC BALANCE</div>
+        <div class="portval" id="p-usdcbal">—</div>
+        <div class="portsub" id="p-usdcval">$—</div>
+      </div>
+    </div>
+    <div class="portgrid">
+      <div class="portbox">
+        <div class="portlabel">TOTAL PORTFOLIO</div>
+        <div class="portval" id="p-total">—</div>
+        <div class="portsub">USD VALUE</div>
+      </div>
+      <div class="portbox">
+        <div class="portlabel">ETH PRICE</div>
+        <div class="portval" id="p-price">—</div>
+        <div class="portsub">via UNISWAP QUOTE</div>
+      </div>
+    </div>
+    <div class="driftbar-wrap">
+      <div class="driftbar-label">
+        <span id="db-left">USDC</span>
+        <span id="db-center">DRIFT: <span id="db-drift">0%</span></span>
+        <span id="db-right">ETH</span>
+      </div>
+      <div class="driftbar-bg">
+        <div class="driftbar-center"></div>
+        <div class="driftbar-fill" id="driftfill" style="width:50%;margin-left:25%"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:8px;color:#1a1a3a;margin-top:4px">
+        <span id="db-ualloc">—</span>
+        <span style="color:#333">TARGET <span id="db-target">50/50</span></span>
+        <span id="db-ealloc">—</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Strategist Quote -->
+  <div class="card" id="quotecard" style="display:none">
+    <div class="ctitle">⬡ STRATEGIST QUOTE</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+      <div class="portbox"><div class="portlabel">TRADE</div><div class="portval" style="font-size:14px" id="q-trade">—</div></div>
+      <div class="portbox"><div class="portlabel">ROUTING</div><div class="portval" style="font-size:14px" id="q-route">—</div></div>
+      <div class="portbox"><div class="portlabel">YOU RECEIVE</div><div class="portval" style="font-size:14px;color:var(--sage)" id="q-out">—</div></div>
+      <div class="portbox"><div class="portlabel">GAS COST</div><div class="portval" style="font-size:14px" id="q-gas">—</div></div>
+      <div class="portbox"><div class="portlabel">PRICE IMPACT</div><div class="portval" style="font-size:14px" id="q-impact">—</div></div>
+      <div class="portbox"><div class="portlabel">PERMIT2</div><div class="portval" style="font-size:14px" id="q-permit">—</div></div>
+    </div>
+    <div id="q-verdict" style="font-size:9px;letter-spacing:.12em;padding:8px;border-radius:8px;margin-bottom:0;background:rgba(0,0,0,.3)"></div>
+  </div>
+
+  <!-- Guardian Checks -->
+  <div class="card" id="guardcard" style="display:none">
+    <div class="ctitle">⬡ GUARDIAN VALIDATION</div>
+    <div class="risk-row">
+      <span class="risk-label">RISK SCORE</span>
+      <span class="risk-score" id="g-score">0</span>
+    </div>
+    <div class="risk-bar-bg"><div class="risk-bar-fill" id="g-bar" style="width:0%"></div></div>
+    <div class="checks" id="g-checks"></div>
+    <div id="g-verdict" style="font-size:9px;letter-spacing:.12em;padding:8px 10px;border-radius:8px;margin-bottom:10px"></div>
+    <button class="btn btnexec pulsing" id="execbtn" style="display:none" onclick="executeSwap()">⬡ GUARDIAN APPROVED — EXECUTE SWAP</button>
+  </div>
+
+  <!-- Log -->
+  <div class="card">
+    <div class="ctitle">▶ SWARM LOG</div>
+    <div class="term" id="term">
+      <div class="ll"><span class="lts">[BOOT]</span> <span class="la">SWARMFI</span> <span class="ld">Autonomous rebalancing engine v1.0 // 3-agent loop</span></div>
+      <div class="ll"><span class="lts">[BOOT]</span> <span class="lp">Scout → Strategist → Guardian // ERC-8004 identities</span></div>
+      <div class="ll"><span class="lts">[WAIT]</span> <span class="ld">connect wallet and run analysis...</span></div>
+    </div>
+  </div>
+  <div class="disc">⚠ SwarmFI executes real swaps on Sepolia testnet. Guardian validation is live — BLOCK verdict aborts the trade. All agent decisions logged onchain via ArbitersLedger.sol.</div>
+</div>
+
+<script>
+var S = { wallet: null, chain: 11155111, result: null };
+
+function log(cls,key,msg){
+  var t=new Date().toTimeString().slice(0,8);
+  var el=document.createElement('div');el.className='ll';
+  el.innerHTML='<span class="lts">['+t+']</span> <span class="'+cls+'">'+key+'</span> <span class="ld">'+msg+'</span>';
+  var term=document.getElementById('term');term.appendChild(el);term.scrollTop=term.scrollHeight;
+}
+
+function setAgent(id, state) {
+  var el = document.getElementById('tab-' + id);
+  el.className = 'agent-tab ' + state;
+  if (state === 'running') el.querySelector('.agent-badge').classList.add('pulsing');
+  else el.querySelector('.agent-badge').classList.remove('pulsing');
+}
+
+function setNet(n) {
+  S.chain = n === 'mainnet' ? 1 : 11155111;
+  document.getElementById('net-mainnet').className = 'netbtn' + (n==='mainnet'?' active':'');
+  document.getElementById('net-sepolia').className = 'netbtn' + (n==='sepolia'?' active':'');
+  log('la','NETWORK', n.toUpperCase() + ' (chainId ' + S.chain + ')');
+}
+
+async function connectWallet() {
+  if (!window.ethereum) { log('le','WALLET','No wallet detected'); return; }
+  try {
+    var a = await window.ethereum.request({method:'eth_requestAccounts'});
+    S.wallet = a[0];
+    document.getElementById('waddr').textContent = a[0].slice(0,6)+'...'+a[0].slice(-4);
+    document.getElementById('wcbtn').textContent = 'CONNECTED';
+    document.getElementById('wcbtn').style.color = 'var(--sage)';
+    log('lok','WALLET', a[0]);
+  } catch(e) { log('le','WALLET_ERR', e.message); }
+}
+
+function updateCtrls() {
+  var t = parseInt(document.getElementById('sl-target').value);
+  var d = parseInt(document.getElementById('sl-drift').value);
+  var s = parseInt(document.getElementById('sl-size').value);
+  var sl = parseInt(document.getElementById('sl-slip').value);
+  document.getElementById('val-target').textContent = t + '%';
+  document.getElementById('val-drift').textContent = d + '%';
+  document.getElementById('val-size').textContent = (s/100).toFixed(2) + ' ETH';
+  document.getElementById('val-slip').textContent = (sl/10).toFixed(1) + '%';
+}
+
+async function runRebalance() {
+  var wallet = S.wallet || '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045';
+  var targetETH = parseInt(document.getElementById('sl-target').value) / 100;
+  var driftThreshold = parseInt(document.getElementById('sl-drift').value) / 100;
+  var maxSize = parseInt(document.getElementById('sl-size').value) / 100;
+  var maxSlip = parseInt(document.getElementById('sl-slip').value) / 10;
+
+  // Reset UI
+  ['scout','strategist','guardian'].forEach(function(a){setAgent(a,'idle');});
+  document.getElementById('portcard').style.display = 'none';
+  document.getElementById('quotecard').style.display = 'none';
+  document.getElementById('guardcard').style.display = 'none';
+  document.getElementById('execbtn').style.display = 'none';
+
+  var btn = document.getElementById('runbtn');
+  btn.disabled = true; btn.textContent = 'RUNNING SWARM...';
+
+  log('la','SWARM_START', 'wallet=' + wallet.slice(0,10) + '... target=' + (targetETH*100).toFixed(0) + '%ETH drift=' + (driftThreshold*100).toFixed(0) + '%');
+
+  // Phase 1: Scout
+  setAgent('scout','running');
+  log('lp','SCOUT','Herald-01 scanning portfolio state...');
+
+  try {
+    var r = await fetch('/api/swarm/rebalance', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        wallet: wallet,
+        chainId: S.chain,
+        targetETH: targetETH,
+        driftThreshold: driftThreshold,
+        maxTradeSizeETH: maxSize,
+        maxSlippagePct: maxSlip,
+        routingPreference: 'BEST_PRICE',
+      })
+    });
+    var d = await r.json();
+    if (!r.ok) { throw new Error(d.error || 'HTTP ' + r.status); }
+    S.result = d;
+
+    // Scout results
+    setAgent('scout','done');
+    var p = d.portfolio;
+    log('lok','SCOUT_OK', 'ETH=' + (p.eth_alloc*100).toFixed(1) + '% USDC=' + (p.usdc_alloc*100).toFixed(1) + '% drift=' + p.drift_pct);
+
+    if (d.trade) {
+      log('lw','SIGNAL', 'REBALANCE: sell ' + d.trade.amount_human + ' ' + d.trade.sell + ' → buy ' + d.trade.buy);
+    } else {
+      log('lok','SIGNAL','Portfolio balanced — no action needed');
+    }
+
+    renderPortfolio(d);
+
+    // Phase 2: Strategist
+    await delay(400);
+    setAgent('strategist','running');
+    log('lp','STRATEGIST','Engineer-02 evaluating Uniswap route...');
+    await delay(300);
+
+    var strat = d.agents.strategist.result;
+    if (strat.verdict === 'PROCEED') {
+      setAgent('strategist','done');
+      log('lok','QUOTE_OK', strat.routing_name + ' → ' + strat.output_amount + ' ' + strat.output_symbol + ' gas=' + strat.gas_fee_usd);
+    } else if (strat.verdict === 'SKIP') {
+      setAgent('strategist','done');
+      log('lok','STRATEGIST_SKIP', strat.reason);
+    } else {
+      setAgent('strategist','error');
+      log('lw','QUOTE_WARN', strat.reason);
+    }
+    renderStrategist(strat, d.trade);
+
+    // Phase 3: Guardian
+    await delay(400);
+    setAgent('guardian','running');
+    log('lp','GUARDIAN','Sentinel-03 running safety checks...');
+    await delay(300);
+
+    var guard = d.agents.guardian.result;
+    guard.checks.forEach(function(c) {
+      log(c.pass?'lok':'le', c.check, c.detail);
+    });
+
+    if (guard.approved) {
+      setAgent('guardian','done');
+      log('lok','GUARDIAN_APPROVED','✓ All checks passed — risk=' + guard.risk_score + '/100 band=' + guard.risk_band);
+    } else {
+      setAgent('guardian','error');
+      log('le','GUARDIAN_BLOCK', guard.abort_reason || 'Safety checks failed');
+    }
+    renderGuardian(guard);
+
+    // Attestation
+    log('ltx','ONCHAIN','ArbitersLedger.sol attestation sent');
+
+  } catch(e) {
+    ['scout','strategist','guardian'].forEach(function(a){setAgent(a,'error');});
+    log('le','SWARM_ERR', e.message);
+  }
+
+  btn.disabled = false; btn.textContent = '◎ RUN SWARM ANALYSIS';
+}
+
+function renderPortfolio(d) {
+  document.getElementById('portcard').style.display = '';
+  var p = d.portfolio;
+  document.getElementById('p-ethbal').textContent = p.eth_balance + ' ETH';
+  document.getElementById('p-ethval').textContent = '$' + p.eth_value_usd;
+  document.getElementById('p-usdcbal').textContent = '$' + p.usdc_balance;
+  document.getElementById('p-usdcval').textContent = 'USDC';
+  document.getElementById('p-total').textContent = '$' + p.total_value_usd;
+  document.getElementById('p-price').textContent = '$' + p.eth_price_usd.toLocaleString();
+  document.getElementById('db-drift').textContent = p.drift_pct;
+  document.getElementById('db-ealloc').textContent = (p.eth_alloc*100).toFixed(1) + '%';
+  document.getElementById('db-ualloc').textContent = (p.usdc_alloc*100).toFixed(1) + '%';
+  document.getElementById('db-target').textContent = (d.targets.eth*100).toFixed(0) + '/' + (d.targets.usdc*100).toFixed(0);
+
+  // Drift bar: center=50%, fill shows ETH allocation
+  var ethPct = p.eth_alloc * 100;
+  var absDrift = Math.abs(p.drift) * 100;
+  var fillClass = absDrift < 3 ? 'dOK' : absDrift < 7 ? 'dWARN' : absDrift < 15 ? 'dHOT' : 'dCRIT';
+  var fill = document.getElementById('driftfill');
+  fill.style.width = ethPct + '%';
+  fill.style.marginLeft = '0';
+  fill.className = 'driftbar-fill ' + fillClass;
+
+  var sig = document.getElementById('sigwrap');
+  if (d.trade) {
+    sig.innerHTML = '<span class="sigbadge sigACTION">⚡ REBALANCE SIGNAL — sell ' + d.trade.amount_human + ' ' + d.trade.sell + ' → ' + d.trade.buy + '</span>';
+  } else {
+    sig.innerHTML = '<span class="sigbadge sigIDLE">✓ BALANCED — drift within threshold</span>';
+  }
+}
+
+function renderStrategist(strat, trade) {
+  document.getElementById('quotecard').style.display = '';
+  var tradeStr = trade ? trade.amount_human + ' ' + trade.sell + ' → ' + trade.buy : 'N/A';
+  document.getElementById('q-trade').textContent = tradeStr;
+  document.getElementById('q-route').textContent = strat.routing_name;
+  document.getElementById('q-out').textContent = strat.verdict === 'PROCEED' ? strat.output_amount + ' ' + strat.output_symbol : '--';
+  document.getElementById('q-gas').textContent = strat.gas_fee_usd;
+  document.getElementById('q-impact').textContent = strat.price_impact_pct;
+  document.getElementById('q-permit').textContent = strat.permit2_required ? 'REQUIRED' : 'NOT NEEDED';
+  var vEl = document.getElementById('q-verdict');
+  var vColors = {PROCEED:'rgba(57,255,143,.08)', SKIP:'rgba(0,245,255,.06)', RETRY:'rgba(255,140,0,.08)'};
+  var vBorders = {PROCEED:'rgba(57,255,143,.2)', SKIP:'rgba(0,245,255,.15)', RETRY:'rgba(255,140,0,.2)'};
+  var vTextColors = {PROCEED:'var(--sage)', SKIP:'var(--cyan)', RETRY:'var(--orange)'};
+  vEl.style.background = vColors[strat.verdict] || 'rgba(0,0,0,.3)';
+  vEl.style.border = '1px solid ' + (vBorders[strat.verdict] || '#111');
+  vEl.style.color = vTextColors[strat.verdict] || '#666';
+  vEl.textContent = strat.verdict + ' — ' + strat.reason;
+}
+
+function renderGuardian(guard) {
+  document.getElementById('guardcard').style.display = '';
+  var sc = guard.risk_score, bd = guard.risk_band;
+  var scoreEl = document.getElementById('g-score');
+  scoreEl.textContent = sc + '/100';
+  scoreEl.className = 'risk-score rs' + bd;
+  var bar = document.getElementById('g-bar');
+  bar.style.width = sc + '%';
+  bar.className = 'risk-bar-fill rb' + bd;
+
+  var checksEl = document.getElementById('g-checks');
+  checksEl.innerHTML = '';
+  guard.checks.forEach(function(c) {
+    var row = document.createElement('div');
+    row.className = 'check-row ' + (c.pass ? 'cPASS' : 'cFAIL');
+    row.innerHTML = '<span class="check-icon">' + (c.pass ? '✓' : '✗') + '</span>' +
+      '<span class="check-name">' + c.check + '</span>' +
+      '<span class="check-detail">' + c.detail + '</span>';
+    checksEl.appendChild(row);
+  });
+
+  var vEl = document.getElementById('g-verdict');
+  if (guard.approved) {
+    vEl.style.background = 'rgba(57,255,143,.08)';
+    vEl.style.border = '1px solid rgba(57,255,143,.2)';
+    vEl.style.color = 'var(--sage)';
+    vEl.textContent = '✓ GUARDIAN APPROVED — all ' + guard.checks.length + ' checks passed';
+    document.getElementById('execbtn').style.display = '';
+  } else {
+    vEl.style.background = 'rgba(255,68,85,.06)';
+    vEl.style.border = '1px solid rgba(255,68,85,.2)';
+    vEl.style.color = 'var(--red)';
+    vEl.textContent = '✗ GUARDIAN BLOCKED — ' + (guard.abort_reason || 'safety checks failed');
+  }
+}
+
+async function executeSwap() {
+  if (!S.result || !S.result.swap_payload) { log('le','EXEC_ERR','No swap payload'); return; }
+  if (!S.wallet || !window.ethereum) { log('lw','EXEC','Connect wallet to broadcast'); return; }
+
+  var btn = document.getElementById('execbtn');
+  btn.disabled = true; btn.textContent = 'BUILDING TX...';
+
+  var payload = S.result.swap_payload;
+  log('la','EXEC','Building swap calldata...');
+
+  // Ensure correct chain
+  try {
+    var chainHex = S.chain === 1 ? '0x1' : '0xaa36a7';
+    var cur = await window.ethereum.request({method:'eth_chainId'});
+    if (cur !== chainHex) {
+      log('lw','NETWORK','Switching chain...');
+      await window.ethereum.request({method:'wallet_switchEthereumChain',params:[{chainId:chainHex}]});
+    }
+  } catch(e) { log('le','CHAIN_ERR', e.message); btn.disabled=false; return; }
+
+  // Permit2 signing if required
+  var sig = null;
+  var pd = payload.permitData;
+  if (pd) {
+    log('lp','PERMIT2','Requesting off-chain Permit2 signature...');
+    try {
+      sig = await window.ethereum.request({
+        method: 'eth_signTypedData_v4',
+        params: [S.wallet, JSON.stringify({
+          domain: pd.domain,
+          types: pd.types,
+          primaryType: pd.primaryType || 'PermitSingle',
+          message: pd.values || pd.message
+        })]
+      });
+      log('lok','PERMIT2_SIGNED', sig.slice(0,18)+'...');
+    } catch(e) { log('lw','PERMIT2_SKIP', e.message); }
+  }
+
+  // Call swap API
+  try {
+    var swapBody = { quote: payload.quote, urgency: 'urgent' };
+    if (sig && pd) { swapBody.signature = sig; swapBody.permitData = pd; }
+    var r = await fetch('/api/uniswap/swap', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify(swapBody)
+    });
+    var sd = await r.json();
+    if (!r.ok || sd.error) { throw new Error(sd.error || JSON.stringify(sd).slice(0,120)); }
+    var tx = sd.swap || sd;
+    log('lok','TX_READY','to=' + (tx.to||'--').slice(0,14)+'...');
+    if (sd.txFailureReasons && sd.txFailureReasons.length) log('lw','SIM_WARN', sd.txFailureReasons.join(', '));
+    else log('lok','SIMULATION','Passed');
+
+    // Broadcast
+    var hash = await window.ethereum.request({
+      method: 'eth_sendTransaction',
+      params: [{from: S.wallet, to: tx.to, value: tx.value||'0x0', data: tx.data, gas: tx.gasLimit}]
+    });
+    log('ltx','TX_HASH', hash);
+    log('lok','BROADCAST','Transaction submitted');
+    log('ltx','ETHERSCAN', 'sepolia.etherscan.io/tx/' + hash);
+    btn.textContent = '✓ SUBMITTED';
+    btn.style.color = 'var(--sage)';
+    btn.classList.remove('pulsing');
+  } catch(e) {
+    log('le','EXEC_ERR', e.message);
+    btn.disabled = false; btn.textContent = '⬡ GUARDIAN APPROVED — EXECUTE SWAP';
+  }
+}
+
+function delay(ms) { return new Promise(function(r){setTimeout(r,ms);}); }
+
+updateCtrls();
+window.addEventListener('load', function() {
+  if (window.ethereum) {
+    window.ethereum.request({method:'eth_accounts'}).then(function(a) {
+      if (a && a[0]) {
+        S.wallet = a[0];
+        document.getElementById('waddr').textContent = a[0].slice(0,6)+'...'+a[0].slice(-4);
+        document.getElementById('wcbtn').textContent = 'CONNECTED';
+        document.getElementById('wcbtn').style.color = 'var(--sage)';
+        log('lok','AUTO_CONNECT', a[0]);
+      }
+    }).catch(function(){});
+  }
+});
+</script>
+</body>
+</html>

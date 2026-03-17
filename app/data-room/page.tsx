@@ -71,7 +71,7 @@ export default function DataRoomPage() {
       <div style={{ display: 'flex', alignItems: 'center', gap: 16, overflowX: 'auto' }}>
         <a href="/royal-logs/" style={navLink('/royal-logs/', 'ROYAL LOGS')}>ROYAL LOGS</a>
         <span style={{ color: 'rgba(0,255,231,.1)', fontSize: 9 }}>·</span>
-        <a href="/swap/" style={navLink('/swap/', 'SWARM TRADE')}>SWARM TRADE</a>
+        <a href="/swap/" style={navLink('/swap/', 'SWARMSWAP')}>SWARMSWAP</a>
         <span style={{ color: 'rgba(0,255,231,.1)', fontSize: 9 }}>·</span>
         <a href="/data-room" style={navLink('/data-room', 'DATA ROOM', true)}>DATA ROOM</a>
         <span style={{ color: 'rgba(0,255,231,.1)', fontSize: 9 }}>·</span>

@@ -5,13 +5,22 @@ Produces a real TxID for the hackathon submission.
 Run: python3 swarm_swap.py
 Requirements: pip install eth-account requests
 """
-import json, sys, time, requests
+import json, sys, time, os, requests
+from pathlib import Path
 
-# CONFIG
-PRIVATE_KEY = 'SWAPPER_KEY_REDACTED'
-WALLET      = '0x054C9189dE85c3D6E74614F1659867362FC74B1e'
-RPC_URL     = 'https://eth-sepolia.g.alchemy.com/v2/ALCHEMY_KEY_REDACTED'
-API_KEY     = 'UNISWAP_KEY_REDACTED'
+# Load .env.local if present
+_env_path = Path(__file__).parent / '.env.local'
+if _env_path.exists():
+    for line in _env_path.read_text().splitlines():
+        if '=' in line and not line.startswith('#'):
+            k, _, v = line.partition('=')
+            os.environ.setdefault(k.strip(), v.strip())
+
+# CONFIG — set these in .env.local (never hardcode keys)
+PRIVATE_KEY = os.environ['SWAPPER_KEY']
+WALLET      = os.environ.get('SWAPPER_WALLET', '0x054C9189dE85c3D6E74614F1659867362FC74B1e')
+RPC_URL     = os.environ['SEPOLIA_RPC_URL']
+API_KEY     = os.environ['UNISWAP_API_KEY']
 CHAIN_ID    = 11155111
 
 # Sepolia tokens

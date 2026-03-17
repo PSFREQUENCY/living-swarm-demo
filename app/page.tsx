@@ -377,7 +377,7 @@ function miniSVG(seed,w){
 // ═══ SWARM GENESIS — load live tokenURIs from onchain contract ═══
 (function(){
   var C='0x075f65b8A23A1eC13B05E87F4b23DD22562D927D';
-  var RPC='https://eth-sepolia.g.alchemy.com/v2/ALCHEMY_KEY_REDACTED';
+  var RPC='/api/rpc/sepolia';
   function decode(hex){
     if(!hex||hex==='0x')return '';
     var h=hex.slice(2);

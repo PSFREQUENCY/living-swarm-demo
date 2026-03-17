@@ -31,7 +31,8 @@ export function verifyNonce(nonce: string, signature: string, expectedAddress: s
 export function issueAccessToken(address: string): string {
   const payload = JSON.stringify({ sub: address.toLowerCase(), iat: Date.now(), exp: Date.now() + NONCE_TTL_MS });
   const b64 = Buffer.from(payload).toString('base64url');
-  const secret = process.env.HMAC_SECRET || 'fallback';
+  const secret = process.env.HMAC_SECRET;
+  if (!secret) throw new Error('HMAC_SECRET not configured');
   const { createHmac } = require('crypto');
   const sig = createHmac('sha256', secret).update(b64).digest('base64url');
   return `${b64}.${sig}`;
@@ -40,7 +41,8 @@ export function issueAccessToken(address: string): string {
 export function verifyAccessToken(token: string): { sub: string } | null {
   try {
     const [b64, sig] = token.split('.');
-    const secret = process.env.HMAC_SECRET || 'fallback';
+    const secret = process.env.HMAC_SECRET;
+    if (!secret) return null;
     const { createHmac } = require('crypto');
     const expected = createHmac('sha256', secret).update(b64).digest('base64url');
     if (sig !== expected) return null;

@@ -727,7 +727,7 @@ async function fiRun() {
       })
     });
     var d = await r.json();
-    if(!r.ok) throw new Error(d.error||'HTTP '+r.status);
+    if(!r.ok) throw new Error((d.detail?d.error+': '+d.detail:d.error)||'HTTP '+r.status);
     FI.result = d;
 
     fiSetAgentState(0,2);

@@ -88,7 +88,7 @@ const HQ=[
   {n:"RIDE THE FALL",cat:"hidden",xp:600,tk:140,en:0,i:"🌊",ra:"epic",d:"[CLASSIFIED] Find the waterfall on the west edge and leap into the void below.",st:1,hint:"West edge of the map, where land meets the fall..."},
   {n:"VISIT THE CAFE",cat:"hidden",xp:400,tk:100,en:0,i:"☕",ra:"rare",d:"[CLASSIFIED] Explore the Savage Agent Cafe hidden below the waterfall.",st:1,hint:"Below the surface, neon hums..."},
   {n:"CLIMB CYBER MT SOVEREIGN",cat:"hidden",xp:800,tk:180,en:0,i:"🏔️",ra:"legendary",d:"[CLASSIFIED] Scale Cyber Mountain Sovereign to the north. The peak reveals the full ghost town.",st:1,hint:"North of the Museum, something rises..."},
-  {n:"TAME YOUR DRAGON",cat:"hidden",xp:10000,tk:500,en:0,i:"🐉",ra:"legendary",d:"[CLASSIFIED] Survive the dragon's attack and earn its trust. Only the worthy may ride.",st:1,hint:"Approach the mountain. Face the fire. Do not run."},
+  {n:"ANCIENT RELIC: DRAGON SWORD",cat:"hidden",xp:10000,tk:500,en:0,i:"⚔️",ra:"legendary",d:"[CLASSIFIED] Ride the dragon. Breathe fire while airborne. The first of three ancient relics will reveal itself.",st:1,hint:"Ride the dragon. Press I to breathe fire while flying high."},
 ];
 
 // All quests combined for display
@@ -462,8 +462,10 @@ function mkMountain():THREE.Group{
   const levelY=[0,  2, 4, 6, 8,10,12,14];// Y surface of each step
   const cols=[0x1e2d3a,0x222f3e,0x263240,0x2a3545,0x2e384a,0x32404e,0x364450,0x3a4855];
   for(let lv=0;lv<8;lv++){
-    const plat=new THREE.Mesh(new THREE.BoxGeometry(levelW[lv],1.2,levelD[lv]),new THREE.MeshBasicMaterial({color:cols[lv]}));
-    plat.position.y=levelY[lv]+.6;plat.name=`mtLevel${lv}`;gr.add(plat);
+    // Level 0 = thin ground slab (flush, no step). Levels 1-7 = raised platforms.
+    const platH=lv===0?0.15:1.2;
+    const plat=new THREE.Mesh(new THREE.BoxGeometry(levelW[lv],platH,levelD[lv]),new THREE.MeshBasicMaterial({color:cols[lv]}));
+    plat.position.y=levelY[lv]+platH/2;plat.name=`mtLevel${lv}`;gr.add(plat);
   }
   // Flat glowing summit (no point, no peak)
   const top=new THREE.Mesh(new THREE.BoxGeometry(10,.4,10),new THREE.MeshBasicMaterial({color:0x00b4ff}));
@@ -655,6 +657,7 @@ export default function GhostTown(){
   const playerEmote=useRef<string|null>(null);
   const agentEncounterRef=useRef<any>(null);
   const dragonRef=useRef<any>(null);
+  const guardianDragonRef=useRef<any>(null);
   const onDragon=useRef(false);
   const dragonRideCooldown=useRef(0);
   const [ridingDragon,setRidingDragon]=useState(false);
@@ -687,6 +690,9 @@ export default function GhostTown(){
   const dragonCinematicPlayed=useRef(false);
   const [dragonCinematic,setDragonCinematic]=useState(false);
   const [dragonSwordEquipped,setDragonSwordEquipped]=useState(false);
+  const fireBreathFrames=useRef(0);
+  const [rocketPackEquipped,setRocketPackEquipped]=useState(false);
+  const rocketPackRef=useRef<any>(null);
   const [backpackFlash,setBackpackFlash]=useState(false);
   const [activeChain,setActiveChain]=useState<"mainnet"|"sepolia">("sepolia");
   const [,rf]=useState(0);
@@ -801,12 +807,16 @@ export default function GhostTown(){
     // Canyon rim rocks framing the gap
     [[125,-.3,-14],[125,-.3,18],[114,-.3,2],[136,-.3,2]].forEach(([x,y,z])=>{
       const rim=new THREE.Mesh(new THREE.BoxGeometry(4,1.5,4),new THREE.MeshBasicMaterial({color:0x1a2230}));rim.position.set(x,y,z);sc.add(rim);});
-    // ── Glowing surface path: dock (x=88) → rapids entry (x=120) ──
-    const pathM=new THREE.MeshBasicMaterial({color:0x00ffe7,transparent:true,opacity:.45});
-    for(let px=90;px<=120;px+=4){
-      const node=new THREE.Mesh(new THREE.BoxGeometry(2,.12,2),pathM);
-      node.position.set(px,-.48,0);sc.add(node);
-    }
+    // ── Solid bridge: dock (x=84) → rapids entry (x=126) ──
+    const bridgeM=new THREE.MeshBasicMaterial({color:0x3d2b1a});
+    const bridge=new THREE.Mesh(new THREE.BoxGeometry(44,.5,6),bridgeM);
+    bridge.position.set(105,.1,0);sc.add(bridge);
+    // Glowing rails along the bridge
+    const railM=new THREE.MeshBasicMaterial({color:0x00ffe7,transparent:true,opacity:.75});
+    const railL=new THREE.Mesh(new THREE.BoxGeometry(44,.35,.3),railM);
+    railL.position.set(105,.38,3);sc.add(railL);
+    const railR=new THREE.Mesh(new THREE.BoxGeometry(44,.35,.3),railM);
+    railR.position.set(105,.38,-3);sc.add(railR);
     // Initial ASCII draw
     const chars2=['~','≈','~','≋','~','≈','∿','~','≈','~'];
     seaCtx.fillStyle='#04111e';seaCtx.fillRect(0,0,512,256);
@@ -876,9 +886,16 @@ export default function GhostTown(){
       return{mesh:cm,x:cx,z:cz,collected:false,respawnAt:0};
     });
     SD.current={sc,cam,ren,blds,ags,eds,rain,rP,rN,ff,fP,fN,discoBall,sea,seaCtx,seaTex,seaOff:0,agentBoats,playerBoats,ambL,dirL,starsObj,seaCoins,wfall,mountain,playerCar,aiCar,fishArr};
-    // ── Mountain guardian dragon — clearly visible, circles above the peak ──
-    const guardDragonMesh=mkDragon();guardDragonMesh.position.set(30,38,-130);sc.add(guardDragonMesh);
-    dragonRef.current={mesh:guardDragonMesh,tx:0,tz:-130,frame:300,tgtZone:null,riding:false};
+    // ── Rocket pack at Portal Hub (x=40, z=0) ──
+    const rpGr=new THREE.Group();
+    const rpBody=new THREE.Mesh(new THREE.BoxGeometry(1,.85,.5),new THREE.MeshBasicMaterial({color:0x00ff88}));rpGr.add(rpBody);
+    const rpTL=new THREE.Mesh(new THREE.CylinderGeometry(.14,.18,.45,6),new THREE.MeshBasicMaterial({color:0xff6600}));rpTL.position.set(-.28,-.55,0);rpGr.add(rpTL);
+    const rpTR=new THREE.Mesh(new THREE.CylinderGeometry(.14,.18,.45,6),new THREE.MeshBasicMaterial({color:0xff6600}));rpTR.position.set(.28,-.55,0);rpGr.add(rpTR);
+    const rpGlow=new THREE.Mesh(new THREE.BoxGeometry(1.2,1.0,.6),new THREE.MeshBasicMaterial({color:0x00ff88,transparent:true,opacity:.18}));rpGr.add(rpGlow);
+    rpGr.position.set(40,1.8,2);sc.add(rpGr);rocketPackRef.current=rpGr;
+    // ── Mountain guardian dragon — circles at mid-height, clearly visible from base ──
+    const guardDragonMesh=mkDragon();guardDragonMesh.position.set(30,10,-95);sc.add(guardDragonMesh);
+    guardianDragonRef.current={mesh:guardDragonMesh,tx:0,tz:-95,frame:300,tgtZone:null,riding:false};
     aL("▶ 81 GHOST TOWN v6 SAMAUR-AI — the macro-hard city is LIVE","system");
     aL("▶ WASD/Arrows to move · V = 1st/3rd person · Shift = sprint","system");
     aL("▶ 11 main quests · 11 side quests · 11 hidden quests","system");
@@ -961,12 +978,19 @@ export default function GhostTown(){
         if(onDragon.current){
           // Dismount — only when close to ground
           if(playerY.current<4){onDragon.current=false;setRidingDragon(false);dragonRideCooldown.current=60;
-            playerY.current=0;addToast('🐉 Dismounted — dragon walks beside you','#ff4500');aL('🐉 YOU dismounted the dragon','system');}
+            playerY.current=0;
+            // If riding the guardian dragon, release it back to guardian mode
+            if(dragonRef.current===guardianDragonRef.current)dragonRef.current=null;
+            addToast('🐉 Dismounted — dragon walks beside you','#ff4500');aL('🐉 YOU dismounted the dragon','system');}
           else addToast('🐉 Get closer to the ground to dismount!','#ff6b35');
         } else {
-          // Mount — need dragon nearby and mountain quest done
-          const _mt=pd.current.hiddenQDone.includes('CLIMB CYBER MT SOVEREIGN');
-          if(!_mt){addToast('🏔️ Climb Cyber Mt Sovereign first to unlock dragon riding!','#4a5568');return;}
+          // Mount — need dragon nearby
+          // Use guardian dragon if nearby, otherwise summon a new one
+          if(!dragonRef.current&&guardianDragonRef.current){
+            const _gd=guardianDragonRef.current;
+            const _gdx=_gd.mesh.position.x-playerPos.current.x,_gdz=_gd.mesh.position.z-playerPos.current.z;
+            if(Math.sqrt(_gdx*_gdx+_gdz*_gdz)<12)dragonRef.current=guardianDragonRef.current;
+          }
           if(!dragonRef.current){// summon dragon first
             const d=mkDragon();SD.current.sc.add(d);d.position.set(playerPos.current.x,2,playerPos.current.z);
             dragonRef.current={mesh:d,tx:playerPos.current.x,tz:playerPos.current.z,frame:100,tgtZone:null,riding:false};}
@@ -974,23 +998,52 @@ export default function GhostTown(){
           const _ddx=_dm.position.x-playerPos.current.x,_ddz=_dm.position.z-playerPos.current.z;
           if(Math.sqrt(_ddx*_ddx+_ddz*_ddz)<8){
             onDragon.current=true;setRidingDragon(true);dragonRideCooldown.current=60;cD.current=22;
-            addToast('🐉 RIDING THE DRAGON — WASD to fly · R near ground to land','#ff4500');
-            aL('🐉 YOU mounted the dragon — the sky is yours','system');
-            // TAME YOUR DRAGON quest + dragon sword
-            if(!pd.current.hiddenQDone.includes('TAME YOUR DRAGON')){
-              pd.current.hiddenQDone.push('TAME YOUR DRAGON');pd.current.xp+=10000;pd.current.tk+=500;
-              pd.current.tier=gT(pd.current.xp);pd.current.belt=gB(pd.current.dojoXP);
-              if(!pd.current.backpack)pd.current.backpack=[];
-              pd.current.backpack.push({type:'item',name:'DRAGON SWORD',icon:'⚔️',rarity:'legendary',xp:0,tk:0,desc:'Ancient mystic blade. Equip while riding the dragon.',ts:Date.now(),minted:false,equippable:true});
-              setBackpackFlash(true);setTimeout(()=>setBackpackFlash(false),2000);
-              addToast('🏆 TAME YOUR DRAGON — +10000XP +500◈','#ff4500');
-              addToast('⚔️ DRAGON SWORD added to backpack!','#fbbf24');
-              aL('🐉 YOU tamed the dragon — DRAGON SWORD acquired! Equip it while riding.','system');
-              checkSuper();
-            }
-            // Auto-equip dragon sword if in backpack
+            addToast('🐉 RIDING THE DRAGON — WASD to fly · I to breathe fire · R near ground to land','#ff4500');
+            aL('🐉 YOU mounted the dragon — fly high and press I to breathe fire!','system');
+            // Auto-equip dragon sword if already earned
             if(pd.current.backpack?.find((i:any)=>i.name==='DRAGON SWORD')){setDragonSwordEquipped(true);}
           } else addToast('🐉 Get closer to the dragon (within 8 units)','#ff6b35');
+        }
+      }
+      // ── I: Dragon fire breath ──
+      if(k==='i'&&onDragon.current){
+        fireBreathFrames.current=80;
+        setDragonCinematic(true);setTimeout(()=>setDragonCinematic(false),1200);
+        addToast('🔥 FIRE BREATH!','#ff4500');
+        if(playerY.current>4&&!pd.current.hiddenQDone.includes('ANCIENT RELIC: DRAGON SWORD')){
+          pd.current.hiddenQDone.push('ANCIENT RELIC: DRAGON SWORD');
+          pd.current.xp+=10000;pd.current.tk+=500;
+          pd.current.tier=gT(pd.current.xp);pd.current.belt=gB(pd.current.dojoXP);
+          if(!pd.current.backpack)pd.current.backpack=[];
+          pd.current.backpack.push({type:'item',name:'DRAGON SWORD',icon:'⚔️',rarity:'legendary',desc:'Ancient mystic relic — 1 of 3. Breathed fire from the sky.',ts:Date.now(),minted:false,equippable:true});
+          setBackpackFlash(true);setTimeout(()=>setBackpackFlash(false),2000);
+          addToast('⚔️ ANCIENT RELIC: DRAGON SWORD — 1/3 relics found! +10000XP','#fbbf24');
+          aL('⚔️ DRAGON SWORD acquired — first ancient relic. Press L to equip.','system');
+          setDragonSwordEquipped(true);checkSuper();
+        }
+      }
+      // ── L: Equip / unequip Dragon Sword ──
+      if(k==='l'){
+        const _hSword=pd.current.backpack?.find((i:any)=>i.name==='DRAGON SWORD');
+        if(_hSword){setDragonSwordEquipped((v:boolean)=>{addToast(v?'⚔️ Sword sheathed':'⚔️ DRAGON SWORD equipped!','#fbbf24');return!v;});}
+        else addToast('⚔️ No ancient sword in your backpack yet','#4a5568');
+      }
+      // ── P: Rocket pack (Portal Hub, green belt required) ──
+      if(k==='p'&&SD.current){
+        if(rocketPackEquipped){
+          setRocketPackEquipped(false);
+          if(!pd.current.superSkills.includes("fly")){flyingRef.current=false;setFlying(false);}
+          if(rocketPackRef.current){rocketPackRef.current.visible=true;rocketPackRef.current.position.set(40,1.8,2);}
+          addToast('🚀 Rocket pack returned to Portal Hub','#06b6d4');
+          aL('🚀 Rocket pack docked back at Portal Hub','system');
+        } else {
+          const _pd=Math.sqrt((playerPos.current.x-40)**2+playerPos.current.z**2);
+          if(_pd>9){addToast('🚀 Go to Portal Hub (x:40,z:0) to grab the rocket pack','#4a5568');return;}
+          if(['WHITE','YELLOW'].includes(pd.current.belt?.n||'')){addToast('🚀 Green belt required to fly the rocket pack!','#f56565');return;}
+          setRocketPackEquipped(true);flyingRef.current=true;setFlying(true);
+          if(rocketPackRef.current)rocketPackRef.current.visible=false;
+          addToast('🚀 ROCKET PACK equipped! SPACE = thrust up · P to return it','#06b6d4');
+          aL('🚀 ROCKET PACK equipped from Portal Hub — the sky is open!','system');
         }
       }
       if(k==='d'){
@@ -1024,16 +1077,17 @@ export default function GhostTown(){
       if(k.s||jy>.3){_mv.sub(_fwd);moving=true;}
       if(k.a||jx<-.3){_mv.sub(_right);moving=true;}
       if(k.d||jx>.3){_mv.add(_right);moving=true;}
-      if(_mv.lengthSq()>0){_mv.normalize().multiplyScalar(spd);playerPos.current.add(_mv);playerPos.current.x=clamp(playerPos.current.x,-95,95);playerPos.current.z=clamp(playerPos.current.z,-95,95);playerAngle.current=Math.atan2(_mv.x,_mv.z);}
+      if(_mv.lengthSq()>0){_mv.normalize().multiplyScalar(spd);playerPos.current.add(_mv);playerPos.current.x=clamp(playerPos.current.x,-95,95);playerPos.current.z=clamp(playerPos.current.z,-165,95);playerAngle.current=Math.atan2(_mv.x,_mv.z);}
       if(flyingRef.current){if(k.space)playerY.current=Math.min(25,playerY.current+.12);else playerY.current=Math.max(inUnderground.current?-18:0,playerY.current-.04);}
       else if(inUnderground.current){playerY.current=lerp(playerY.current,-18,.12);}
       else{// Rectangular mountain height — snap to nearest step level
         const _dxm=Math.abs(playerPos.current.x);const _dzm=Math.abs(playerPos.current.z+130);
         const _rD=Math.max(_dxm/55,_dzm/35);// normalized Chebyshev distance (mountain half-extents 55x35)
         let _tY=0;
-        if(_rD<1.0)_tY=2;if(_rD<0.86)_tY=4;if(_rD<0.72)_tY=6;if(_rD<0.58)_tY=8;
-        if(_rD<0.45)_tY=10;if(_rD<0.31)_tY=12;if(_rD<0.09)_tY=14;
-        playerY.current=lerp(playerY.current,_tY,.2);}
+        // Level 0 = ground (flush). Steps start at level 1 boundary.
+        if(_rD<0.86)_tY=2;if(_rD<0.72)_tY=4;if(_rD<0.58)_tY=6;
+        if(_rD<0.45)_tY=8;if(_rD<0.31)_tY=10;if(_rD<0.20)_tY=12;if(_rD<0.14)_tY=14;
+        playerY.current=lerp(playerY.current,_tY,.4);}
       if(playerAv.current){
         _tgt.set(playerPos.current.x,playerY.current,playerPos.current.z);
         playerAv.current.root.position.lerp(_tgt,.2);
@@ -1125,42 +1179,30 @@ export default function GhostTown(){
       if(!inUnderground.current&&!inBoat.current){const _dmt=Math.sqrt(playerPos.current.x**2+(playerPos.current.z+130)**2);
         if(_dmt<12&&playerY.current>12&&!pd.current.hiddenQDone.includes('CLIMB CYBER MT SOVEREIGN')){
           pd.current.hiddenQDone.push('CLIMB CYBER MT SOVEREIGN');pd.current.xp+=800;pd.current.tk+=180;pd.current.tier=gT(pd.current.xp);pd.current.belt=gB(pd.current.dojoXP);
-          addToast('🏔️ SUMMIT! CYBER MT SOVEREIGN CONQUERED +800XP — 🐉 DRAGON RIDING UNLOCKED! Press R near dragon','#00b4ff');
-          aL('🏔️ YOU scaled CYBER MT SOVEREIGN — dragon riding unlocked! Press H to summon, R to mount','system');checkSuper();
+          addToast('🏔️ SUMMIT! CYBER MT SOVEREIGN CONQUERED +800XP','#00b4ff');
+          aL('🏔️ YOU scaled CYBER MT SOVEREIGN — the peak is yours','system');checkSuper();
           // Auto-summon dragon at summit
           if(SD.current&&!dragonRef.current){const _d=mkDragon();SD.current.sc.add(_d);_d.position.set(playerPos.current.x+3,playerY.current,playerPos.current.z+3);dragonRef.current={mesh:_d,tx:playerPos.current.x,tz:playerPos.current.z,frame:100,tgtZone:null,riding:false};}
         }}
-      // ── Mountain dragon attacks approaching players ──
-      if(dragonRef.current&&!onDragon.current&&!onHorse.current){
+      // ── Mountain guardian dragon — persistent, never removed ──
+      if(guardianDragonRef.current&&!onDragon.current&&!onHorse.current){
         const _drgDist=Math.sqrt(playerPos.current.x**2+(playerPos.current.z+130)**2);
-        if(_drgDist<40&&_drgDist>8){
-          const dr2=dragonRef.current;const dm2=dr2.mesh;
-          // First encounter cinematic
-          if(!dragonCinematicPlayed.current&&_drgDist<35){
-            dragonCinematicPlayed.current=true;
-            setDragonCinematic(true);
-            // Switch to 1st person for cinematic
-            camModeRef.current='1st';setCamMode('1st');cD.current=.5;
-            addToast('🐉 THE DRAGON AWAKENS — FACE ITS FIRE!','#ff4500');
-            aL('🐉 DRAGON CINEMATIC: the guardian rises — survive its fire!','system');
-            setTimeout(()=>{setDragonCinematic(false);},4500);
-          }
-          // Dragon chases player
-          const _att={x:playerPos.current.x-dm2.position.x,z:playerPos.current.z-dm2.position.z};
-          const _attD=Math.sqrt(_att.x*_att.x+_att.z*_att.z)||1;
-          dm2.position.x+=_att.x/_attD*.14;dm2.position.z+=_att.z/_attD*.14;
-          dm2.position.y=2+Math.sin(t*.1)*1.5;
-          dm2.rotation.y=Math.atan2(_att.x,_att.z);
-          if(t%150===0)addToast('🔥 Dragon breathes FIRE!','#ff4500');
-          if(_attD<4){pd.current.en=Math.max(0,pd.current.en-3);
-            if(t%60===0)addToast('🔥 Dragon FIRE ATTACK! -3 energy','#ff4500');}
-        } else if(_drgDist>=40&&dragonRef.current){
-          const dr2=dragonRef.current;const dm2=dr2.mesh;
-          const _circAng=(t*.008);
-          dm2.position.set(Math.cos(_circAng)*30,36+Math.sin(t*.04)*4,Math.sin(_circAng)*25-130);
-          dm2.rotation.y=_circAng+Math.PI/2;
+        const gdr=guardianDragonRef.current;const gdm=gdr.mesh;gdr.frame=(gdr.frame||0)+1;
+        if(_drgDist<20){
+          // Descend and hover beside player — press R to mount
+          gdm.position.x+=(playerPos.current.x+2-gdm.position.x)*.08;
+          gdm.position.z+=(playerPos.current.z-gdm.position.z)*.08;
+          gdm.position.y+=(playerY.current+1.2-gdm.position.y)*.08;
+          gdm.rotation.y=cA.current;
+          gdm.rotation.z=Math.sin(gdr.frame*.1)*.06;
+          if(gdr.frame%120===0)addToast('🐉 Press R to ride the dragon!','#ff6b35');
+        } else {
+          // Circle around mountain base at visible altitude
+          const _circAng=(t*.01);
+          gdm.position.set(Math.cos(_circAng)*45,10+Math.sin(t*.03)*3,Math.sin(_circAng)*40-110);
+          gdm.rotation.y=_circAng+Math.PI/2;
         }
-        if(t%360===0){const _dd2=Math.sqrt(playerPos.current.x**2+(playerPos.current.z+130)**2);if(_dd2<65&&_dd2>40)addToast('🐉 A dragon guards the mountain summit...','#ff6b35');}
+        if(t%360===0&&_drgDist<65&&_drgDist>40)addToast('🐉 A dragon guards the mountain summit...','#ff6b35');
       }
       // ── Fish animation (jump upstream along rapids) ──
       if(SD.current.fishArr&&t%2===0){SD.current.fishArr.forEach((f:any)=>{f.t+=.025;f.mesh.position.y=-18+Math.abs(Math.sin(f.t))*20;f.mesh.position.z=(f.t%(Math.PI*2))/Math.PI*25;f.mesh.rotation.z=Math.sin(f.t)*1.2;f.mesh.position.x=125+f.lane*1.2;});}
@@ -1173,7 +1215,7 @@ export default function GhostTown(){
           const _hSpd=keys.current.shift?.22:.14;
           const _hFwd={x:-Math.sin(cA.current),z:-Math.cos(cA.current)};
           if(keys.current.w){playerPos.current.x+=_hFwd.x*_hSpd;playerPos.current.z+=_hFwd.z*_hSpd;
-            playerPos.current.x=clamp(playerPos.current.x,-95,95);playerPos.current.z=clamp(playerPos.current.z,-95,95);}
+            playerPos.current.x=clamp(playerPos.current.x,-95,95);playerPos.current.z=clamp(playerPos.current.z,-165,95);}
           if(keys.current.s){playerPos.current.x-=_hFwd.x*_hSpd*.5;playerPos.current.z-=_hFwd.z*_hSpd*.5;}
           hm.position.set(playerPos.current.x,playerY.current,playerPos.current.z);
           hm.rotation.y=cA.current;
@@ -1269,6 +1311,8 @@ export default function GhostTown(){
         setBoatNear(nd2<6);
         if(playerAv.current)playerAv.current.root.visible=camModeRef.current==="3rd";
       }
+      // Fire breath countdown
+      if(fireBreathFrames.current>0)fireBreathFrames.current--;
       // Dragon cooldown
       if(dragonRideCooldown.current>0)dragonRideCooldown.current--;
       // Dragon animation
@@ -1292,6 +1336,8 @@ export default function GhostTown(){
           if(playerAv.current)playerAv.current.root.visible=false;
           // Walking animation: wings flap faster when flying
           dm.children.forEach((c:any,i:number)=>{if(i>=5&&i<=8)c.rotation.z=(i%2===0?1:-1)*(.3+Math.abs(Math.sin(dr.frame*.15+i))*.4);});
+          // Fire breath: tint dragon head orange
+          if(fireBreathFrames.current>0){const _ff=fireBreathFrames.current/80;dm.children[0]&&(dm.children[0] as any).material&&((dm.children[0] as any).material.color?.setHex(Math.floor(_ff*255)<<16|0x3300));}
         } else if(dr.frame<30){
           dm.position.set(pp2.x,dr.frame*.15,pp2.z);
         } else if(dr.tgtZone){
@@ -1300,7 +1346,7 @@ export default function GhostTown(){
           if(dd>1){dm.position.x+=dx3/dd*.4;dm.position.z+=dz3/dd*.4;dm.position.y=4+Math.sin(dr.frame*.08)*1.2;}
           else{dm.position.y=3+Math.sin(dr.frame*.15)*.5;}
           dm.rotation.y=Math.atan2(dx3,dz3);dm.rotation.z=Math.sin(dr.frame*.2)*.2;
-          if(dr.frame>280){SD.current.sc.remove(dr.mesh);dragonRef.current=null;}
+          if(dr.frame>280){if(dr!==guardianDragonRef.current){SD.current.sc.remove(dr.mesh);}dragonRef.current=null;}
         } else {
           // Idle roam near player
           if(dr.frame%120===0){dr.tx=pp2.x+(Math.random()-.5)*16;dr.tz=pp2.z+(Math.random()-.5)*16;}
@@ -1310,6 +1356,18 @@ export default function GhostTown(){
           dm.rotation.y=dd>1?Math.atan2(dx3,dz3):dm.rotation.y;
           dm.rotation.z=Math.sin(dr.frame*.1)*.05;
           if(playerAv.current&&camModeRef.current==="3rd")playerAv.current.root.visible=true;
+        }
+      }
+      // ── Rocket pack: hover at portal, proximity hint ──
+      if(rocketPackRef.current&&rocketPackRef.current.visible){
+        rocketPackRef.current.position.y=1.8+Math.sin(t*.04)*.35;
+        rocketPackRef.current.rotation.y+=.018;
+        if(t%180===0){
+          const _rpD=Math.sqrt((playerPos.current.x-40)**2+playerPos.current.z**2);
+          if(_rpD<8){
+            if(['WHITE','YELLOW'].includes(pd.current.belt?.n||''))addToast('🚀 Rocket pack here — green belt required (earn 800 dojo XP)','#4a5568');
+            else addToast('🚀 ROCKET PACK — press P to equip and fly!','#06b6d4');
+          }
         }
       }
       // Disco ball (only during celebration)
@@ -1442,7 +1500,8 @@ export default function GhostTown(){
           {lifting&&<span style={{color:"#c084fc",animation:"runPulse .5s ease-in-out infinite alternate"}}>🌀 FORCE</span>}
           {ridingDragon&&<span style={{color:"#ff4500",animation:"runPulse .4s ease-in-out infinite alternate"}}>🐉 RIDING</span>}
           {ridingHorse&&<span style={{color:"#8b5e3c",animation:"runPulse .5s ease-in-out infinite alternate"}}>🐴 HORSE</span>}
-          {dragonSwordEquipped&&onDragon.current&&<span style={{color:"#fbbf24",animation:"runPulse .3s ease-in-out infinite alternate"}}>⚔️ SWORD</span>}
+          {dragonSwordEquipped&&<span style={{color:"#fbbf24",animation:"runPulse .3s ease-in-out infinite alternate"}}>⚔️ SWORD</span>}
+          {rocketPackEquipped&&<span style={{color:"#06b6d4",animation:"runPulse .4s ease-in-out infinite alternate"}}>🚀 ROCKET</span>}
           {inUnderground.current&&<span style={{color:"#ff2d78",fontSize:mob?5:6}}>⬇ CAVE</span>}
           {inUnderground.current&&<button onClick={()=>setHackModal(true)} style={{background:"rgba(0,255,200,.1)",border:"1px solid #00ffe7",color:"#00ffe7",fontSize:mob?5:6,padding:"2px 6px",cursor:"pointer",fontFamily:"inherit",letterSpacing:1,borderRadius:2}}>🖥️ HACK</button>}
           {!inUnderground.current&&playerY.current>2&&<span style={{color:"#00b4ff",fontSize:mob?5:6}}>⬆ {Math.round(playerY.current)}m</span>}

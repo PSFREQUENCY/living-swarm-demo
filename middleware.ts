@@ -1,9 +1,18 @@
 // Gap 6 — SENTRY-03: HMAC inter-agent request verification
-// Runs on Edge Runtime; verifies X-Swarm-Sig on all /api/swarm/* routes
+// Runs on Edge Runtime; verifies X-Swarm-Sig on internal /api/swarm/internal/* routes
+// Public demo routes (execute, status, log, capabilities) are exempt — browser-callable
 
 import { NextRequest, NextResponse } from 'next/server';
 
 const SWARM_AGENT_ROUTES = /^\/api\/swarm\//;
+
+// These are public-facing demo endpoints — no HMAC required
+const PUBLIC_SWARM_PATHS = new Set([
+  '/api/swarm/execute',
+  '/api/swarm/status',
+  '/api/swarm/log',
+  '/api/swarm/capabilities',
+]);
 
 function timingSafeEqual(a: string, b: string): boolean {
   if (a.length !== b.length) return false;
@@ -25,6 +34,11 @@ async function hmacSign(secret: string, message: string): Promise<string> {
 
 export async function middleware(req: NextRequest) {
   if (!SWARM_AGENT_ROUTES.test(req.nextUrl.pathname)) {
+    return NextResponse.next();
+  }
+
+  // Public demo endpoints — bypass HMAC, allow browser calls
+  if (PUBLIC_SWARM_PATHS.has(req.nextUrl.pathname)) {
     return NextResponse.next();
   }
 

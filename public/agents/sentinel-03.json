@@ -8,8 +8,8 @@
   "operator_wallet": "0xdd30d20683EB3a84d1f9c69E513D653b581F6484",
   "erc8004_registry": "0x8004A818BFB912233c491871b3d84c89A494BD9e",
   "erc8004_chain": "sepolia",
-  "erc8004_token_id": 3,
-  "erc8004_tx_hash": "pending_registration",
+  "erc8004_token_id": 1851,
+  "erc8004_tx_hash": "0x2c448847a46b806c8ea400dcb436f3f1b8a840464e9bd8bb6a443f43973b7168",
   "agent_uri": "https://living-swarm-demo.vercel.app/agents/sentinel-03.json",
   "capabilities": [
     "output_validation",
@@ -20,20 +20,44 @@
     "inter_agent_hmac_signing"
   ],
   "tools": [
-    { "id": "arbiter_ledger_sol", "description": "ArbitersLedger.sol — attests safety scores on-chain, fire-and-forget" },
-    { "id": "hmac_signing", "description": "HMAC-SHA256 inter-agent message signing, 30s replay window" },
-    { "id": "venice_ai", "endpoint": "https://api.venice.ai/api/v1/chat/completions", "description": "Private inference for output quality validation" },
-    { "id": "swarm_genesis_sol", "description": "SwarmGenesis.sol ERC-721 — mints execution receipts on approval" }
+    {
+      "id": "arbiter_ledger_sol",
+      "description": "ArbitersLedger.sol — attests safety scores on-chain, fire-and-forget"
+    },
+    {
+      "id": "hmac_signing",
+      "description": "HMAC-SHA256 inter-agent message signing, 30s replay window"
+    },
+    {
+      "id": "venice_ai",
+      "endpoint": "https://api.venice.ai/api/v1/chat/completions",
+      "description": "Private inference for output quality validation"
+    },
+    {
+      "id": "swarm_genesis_sol",
+      "description": "SwarmGenesis.sol ERC-721 — mints execution receipts on approval"
+    }
   ],
-  "tech_stack": ["Next.js 16", "ethers.js 6", "ArbitersLedger.sol", "HMAC-SHA256", "SwarmGenesis.sol"],
+  "tech_stack": [
+    "Next.js 16",
+    "ethers.js 6",
+    "ArbitersLedger.sol",
+    "HMAC-SHA256",
+    "SwarmGenesis.sol"
+  ],
   "compute_constraints": {
     "max_tokens_per_run": 10000,
     "max_api_calls": 20,
-    "budget_warning_threshold": 0.20,
+    "budget_warning_threshold": 0.2,
     "strategy_on_budget_warning": "fast_heuristic_scoring_only",
     "hard_abort_threshold": 0.05
   },
-  "task_categories": ["validation", "safety", "attestation", "guardrails"],
+  "task_categories": [
+    "validation",
+    "safety",
+    "attestation",
+    "guardrails"
+  ],
   "safety": {
     "is_safety_layer": true,
     "blocking_authority": true,
@@ -48,14 +72,53 @@
     "signs_all_approvals_with_hmac": true
   },
   "erc8183_capabilities": {
-    "validate_output": { "description": "Scores engineer output for quality and safety (0-100)", "version": "1.0", "inputs": ["analysis_report", "tool_calls_log"], "outputs": ["validation_score", "safety_band", "approval_or_abort"] },
-    "score_transaction": { "description": "Applies arbiter logic to any proposed on-chain action", "version": "1.0", "inputs": ["tx_params"], "outputs": ["arbiter_score", "band", "decision"] },
-    "attest_onchain": { "description": "Calls ArbitersLedger.sol to permanently record safety decision", "version": "1.0", "inputs": ["task_id", "score", "band"], "outputs": ["tx_hash"] }
+    "validate_output": {
+      "description": "Scores engineer output for quality and safety (0-100)",
+      "version": "1.0",
+      "inputs": [
+        "analysis_report",
+        "tool_calls_log"
+      ],
+      "outputs": [
+        "validation_score",
+        "safety_band",
+        "approval_or_abort"
+      ]
+    },
+    "score_transaction": {
+      "description": "Applies arbiter logic to any proposed on-chain action",
+      "version": "1.0",
+      "inputs": [
+        "tx_params"
+      ],
+      "outputs": [
+        "arbiter_score",
+        "band",
+        "decision"
+      ]
+    },
+    "attest_onchain": {
+      "description": "Calls ArbitersLedger.sol to permanently record safety decision",
+      "version": "1.0",
+      "inputs": [
+        "task_id",
+        "score",
+        "band"
+      ],
+      "outputs": [
+        "tx_hash"
+      ]
+    }
   },
   "trust_signals": {
     "erc8004_feedback_registry": "0x8004A818BFB912233c491871b3d84c89A494BD9e",
     "rates_other_agents": true,
-    "rating_targets": ["herald-01", "engineer-02"],
+    "rating_targets": [
+      "herald-01",
+      "engineer-02"
+    ],
     "reputation_basis": "zero_false_positives_in_blocking"
-  }
+  },
+  "erc8004_block": 10462525,
+  "erc8004_registered_at": "2026-03-17T00:00:00Z"
 }

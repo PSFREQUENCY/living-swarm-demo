@@ -8,8 +8,8 @@
   "operator_wallet": "0xdd30d20683EB3a84d1f9c69E513D653b581F6484",
   "erc8004_registry": "0x8004A818BFB912233c491871b3d84c89A494BD9e",
   "erc8004_chain": "sepolia",
-  "erc8004_token_id": 1,
-  "erc8004_tx_hash": "pending_registration",
+  "erc8004_token_id": 1849,
+  "erc8004_tx_hash": "0x846adaa65b69862e9e1bc3dfb61fc0173891be6e83d46f9676512df11e9b58a2",
   "agent_uri": "https://living-swarm-demo.vercel.app/agents/herald-01.json",
   "capabilities": [
     "task_decomposition",
@@ -19,19 +19,40 @@
     "swarm_coordination"
   ],
   "tools": [
-    { "id": "uniswap_quote_api", "endpoint": "/api/uniswap/quote", "description": "Fetch live ETH/USDC price via Uniswap Trading API v1" },
-    { "id": "venice_ai", "endpoint": "https://api.venice.ai/api/v1/chat/completions", "description": "Private zero-retention inference for market analysis" },
-    { "id": "github_api", "endpoint": "https://api.github.com", "description": "Scan open issues and recent commits" }
+    {
+      "id": "uniswap_quote_api",
+      "endpoint": "/api/uniswap/quote",
+      "description": "Fetch live ETH/USDC price via Uniswap Trading API v1"
+    },
+    {
+      "id": "venice_ai",
+      "endpoint": "https://api.venice.ai/api/v1/chat/completions",
+      "description": "Private zero-retention inference for market analysis"
+    },
+    {
+      "id": "github_api",
+      "endpoint": "https://api.github.com",
+      "description": "Scan open issues and recent commits"
+    }
   ],
-  "tech_stack": ["Next.js 16", "ethers.js 6", "Venice AI (llama-3.3-70b)", "Uniswap Trading API v1"],
+  "tech_stack": [
+    "Next.js 16",
+    "ethers.js 6",
+    "Venice AI (llama-3.3-70b)",
+    "Uniswap Trading API v1"
+  ],
   "compute_constraints": {
     "max_tokens_per_run": 15000,
     "max_api_calls": 30,
-    "budget_warning_threshold": 0.20,
+    "budget_warning_threshold": 0.2,
     "strategy_on_budget_warning": "simplify_to_summary_only",
     "hard_abort_threshold": 0.05
   },
-  "task_categories": ["market_intelligence", "problem_discovery", "orchestration"],
+  "task_categories": [
+    "market_intelligence",
+    "problem_discovery",
+    "orchestration"
+  ],
   "safety": {
     "requires_sentinel_approval": true,
     "max_eth_exposure": "0.01",
@@ -40,14 +61,48 @@
     "planning_only": true
   },
   "erc8183_capabilities": {
-    "discover": { "description": "Scans GitHub issues and Uniswap price feeds for actionable signals", "version": "1.0", "inputs": ["repo_url", "token_pair"], "outputs": ["task_list", "priority_score"] },
-    "plan": { "description": "Decomposes problems into ordered, assignable task sequences", "version": "1.0", "inputs": ["problem_statement"], "outputs": ["task_decomposition", "agent_assignments"] },
-    "coordinate": { "description": "Routes tasks to Engineer-02 and validation to Sentinel-03", "version": "1.0", "inputs": ["task_list"], "outputs": ["assignment_manifest"] }
+    "discover": {
+      "description": "Scans GitHub issues and Uniswap price feeds for actionable signals",
+      "version": "1.0",
+      "inputs": [
+        "repo_url",
+        "token_pair"
+      ],
+      "outputs": [
+        "task_list",
+        "priority_score"
+      ]
+    },
+    "plan": {
+      "description": "Decomposes problems into ordered, assignable task sequences",
+      "version": "1.0",
+      "inputs": [
+        "problem_statement"
+      ],
+      "outputs": [
+        "task_decomposition",
+        "agent_assignments"
+      ]
+    },
+    "coordinate": {
+      "description": "Routes tasks to Engineer-02 and validation to Sentinel-03",
+      "version": "1.0",
+      "inputs": [
+        "task_list"
+      ],
+      "outputs": [
+        "assignment_manifest"
+      ]
+    }
   },
   "trust_signals": {
     "erc8004_feedback_registry": "0x8004A818BFB912233c491871b3d84c89A494BD9e",
     "reputation_basis": "on_chain_attestation",
     "self_rates": false,
-    "rated_by": ["sentinel-03"]
-  }
+    "rated_by": [
+      "sentinel-03"
+    ]
+  },
+  "erc8004_block": 10462523,
+  "erc8004_registered_at": "2026-03-17T00:00:00Z"
 }

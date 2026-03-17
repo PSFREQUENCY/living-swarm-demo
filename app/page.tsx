@@ -637,7 +637,7 @@ setInterval(fetchPrice,30000);setInterval(fetchUniRate,60000);
   <!-- Agent identity cards -->
   <div class="sw-agents">
     <div class="sw-agent sw-a-herald">
-      <div class="sw-a-id">ERC-8004 &middot; TOKEN #1 &middot; SEPOLIA</div>
+      <div class="sw-a-id">ERC-8004 &middot; TOKEN #1849 &middot; SEPOLIA</div>
       <div class="sw-a-name" style="color:#00ffe7">&#x2665; HERALD-01</div>
       <div class="sw-a-role" style="color:#00ffe7">PLANNER &middot; DISCOVER &middot; DECOMPOSE</div>
       <div class="sw-a-erc">REGISTRY: 0x8004A818...BD9e<br>CAPS: task_decomposition &middot; market_analysis &middot; swarm_coordination</div>
@@ -645,7 +645,7 @@ setInterval(fetchPrice,30000);setInterval(fetchUniRate,60000);
       <div class="sw-a-bl" id="bud-herald-lbl">BUDGET &mdash;/15,000 tokens</div>
     </div>
     <div class="sw-agent sw-a-engineer">
-      <div class="sw-a-id">ERC-8004 &middot; TOKEN #2 &middot; SEPOLIA</div>
+      <div class="sw-a-id">ERC-8004 &middot; TOKEN #1850 &middot; SEPOLIA</div>
       <div class="sw-a-name" style="color:#ff00aa">&#x2665; ENGINEER-02</div>
       <div class="sw-a-role" style="color:#ff00aa">DEVELOPER &middot; EXECUTE &middot; TOOL USE</div>
       <div class="sw-a-erc">REGISTRY: 0x8004A818...BD9e<br>TOOLS: uniswap_quote &middot; venice_ai &middot; crystallize_api</div>
@@ -653,7 +653,7 @@ setInterval(fetchPrice,30000);setInterval(fetchUniRate,60000);
       <div class="sw-a-bl" id="bud-engineer-lbl">BUDGET &mdash;/25,000 tokens</div>
     </div>
     <div class="sw-agent sw-a-sentinel">
-      <div class="sw-a-id">ERC-8004 &middot; TOKEN #3 &middot; SEPOLIA</div>
+      <div class="sw-a-id">ERC-8004 &middot; TOKEN #1851 &middot; SEPOLIA</div>
       <div class="sw-a-name" style="color:#aaff00">&#x2665; SENTINEL-03</div>
       <div class="sw-a-role" style="color:#aaff00">QA VALIDATOR &middot; ZERO-TRUST &middot; ALWAYS ON</div>
       <div class="sw-a-erc">REGISTRY: 0x8004A818...BD9e<br>SAFETY: arbiter_ledger &middot; hmac_signing &middot; onchain_attest</div>

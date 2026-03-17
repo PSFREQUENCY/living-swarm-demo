@@ -441,10 +441,30 @@ function miniSVG(seed,w){
       }
     }).catch(function(){});
   }
-  // Stagger loads to avoid hammering RPC
+  // Also load the full-size genesis grid iframes (gnf1/gnf2/gnf3)
+  function loadIframe(tokenId,frameId,loaderId){
+    var padded=tokenId.toString(16).padStart(64,'0');
+    fetch(RPC,{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({jsonrpc:'2.0',id:tokenId+10,method:'eth_call',
+        params:[{to:C,data:'0xc87b56dd'+padded},'latest']})})
+    .then(function(r){return r.json();})
+    .then(function(d){
+      var uri=decode(d.result);
+      if(uri&&uri.startsWith('data:')){
+        var fr=document.getElementById(frameId);
+        var lo=document.getElementById(loaderId);
+        if(fr){fr.src=uri;}
+        if(lo){lo.style.opacity='0';setTimeout(function(){lo.style.display='none';},600);}
+      }
+    }).catch(function(){});
+  }
+  // Stagger all 6 loads — thumbnails first, full grid second
   setTimeout(function(){loadFrame(1,'hn1');},400);
   setTimeout(function(){loadFrame(2,'hn2');},800);
   setTimeout(function(){loadFrame(3,'hn3');},1200);
+  setTimeout(function(){loadIframe(1,'gnf1','gnl1');},700);
+  setTimeout(function(){loadIframe(2,'gnf2','gnl2');},1100);
+  setTimeout(function(){loadIframe(3,'gnf3','gnl3');},1500);
 })();
 
 // ═══ LIVE MARKET DATA ══════════════════════════════════════

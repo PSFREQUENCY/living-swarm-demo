@@ -1,9 +1,9 @@
 import { NextResponse } from 'next/server';
 
 const AGENTS = [
-  { id: 'herald-01',   role: 'PLANNER',      erc8004_token: 1, status: 'ACTIVE', erc8004_registry: '0x8004A818BFB912233c491871b3d84c89A494BD9e' },
-  { id: 'engineer-02', role: 'DEVELOPER',    erc8004_token: 2, status: 'ACTIVE', erc8004_registry: '0x8004A818BFB912233c491871b3d84c89A494BD9e' },
-  { id: 'sentinel-03', role: 'QA_VALIDATOR', erc8004_token: 3, status: 'ALWAYS_ON', erc8004_registry: '0x8004A818BFB912233c491871b3d84c89A494BD9e' },
+  { id: 'herald-01',   role: 'SCOUT',      erc8004_token: 1849, status: 'ACTIVE',    erc8004_registry: '0x8004A818BFB912233c491871b3d84c89A494BD9e', erc8004_tx: '0x846adaa65b69862e9e1bc3dfb61fc0173891be6e83d46f9676512df11e9b58a2' },
+  { id: 'engineer-02', role: 'STRATEGIST', erc8004_token: 1850, status: 'ACTIVE',    erc8004_registry: '0x8004A818BFB912233c491871b3d84c89A494BD9e', erc8004_tx: '0x25009c2e8c8f1afd0e6f37889318d8cdbd5e4c7596b2864162977c2101ba4f2a' },
+  { id: 'sentinel-03', role: 'GUARDIAN',   erc8004_token: 1851, status: 'ALWAYS_ON', erc8004_registry: '0x8004A818BFB912233c491871b3d84c89A494BD9e', erc8004_tx: '0x2c448847a46b806c8ea400dcb436f3f1b8a840464e9bd8bb6a443f43973b7168' },
 ];
 
 export async function GET() {

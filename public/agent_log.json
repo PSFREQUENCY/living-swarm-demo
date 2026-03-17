@@ -2,8 +2,8 @@
   "schema_version": "1.0",
   "swarm_id": "swarm-2026-0317-001",
   "session_id": "sess_8a3f9b2c",
-  "started_at": 1742220001000,
-  "completed_at": 1742220047000,
+  "started_at": 1773756001000,
+  "completed_at": 1773756047000,
   "duration_ms": 46000,
   "status": "completed",
   "task": "ETH/USDC market intelligence + strategy recommendation",
@@ -48,7 +48,7 @@
   "entries": [
     {
       "seq": 1,
-      "ts": 1742220001000,
+      "ts": 1773756001000,
       "agent": "herald-01",
       "erc8004_token": 1849,
       "phase": "discover",
@@ -59,13 +59,13 @@
     },
     {
       "seq": 2,
-      "ts": 1742220003000,
+      "ts": 1773756003000,
       "agent": "herald-01",
       "erc8004_token": 1849,
       "phase": "discover",
       "action": "market_scan",
       "tool": "uniswap_quote_api",
-      "message": "Calling Uniswap Trading API v1 — ETH/USDC 0.1 ETH quote",
+      "message": "Calling Uniswap Trading API v1 \u2014 ETH/USDC 0.1 ETH quote",
       "input": {
         "tokenIn": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
         "tokenOut": "0xA0b86991c6218b36c1d19D4a2E9Eb0cE3606eB48",
@@ -77,7 +77,7 @@
     },
     {
       "seq": 3,
-      "ts": 1742220005200,
+      "ts": 1773756005200,
       "agent": "herald-01",
       "erc8004_token": 1849,
       "phase": "discover",
@@ -96,7 +96,7 @@
     },
     {
       "seq": 4,
-      "ts": 1742220006000,
+      "ts": 1773756006000,
       "agent": "herald-01",
       "erc8004_token": 1849,
       "phase": "plan",
@@ -129,7 +129,7 @@
     },
     {
       "seq": 5,
-      "ts": 1742220008000,
+      "ts": 1773756008000,
       "agent": "engineer-02",
       "erc8004_token": 1850,
       "phase": "execute",
@@ -140,7 +140,7 @@
     },
     {
       "seq": 6,
-      "ts": 1742220009000,
+      "ts": 1773756009000,
       "agent": "engineer-02",
       "erc8004_token": 1850,
       "phase": "execute",
@@ -162,7 +162,7 @@
     },
     {
       "seq": 7,
-      "ts": 1742220019000,
+      "ts": 1773756019000,
       "agent": "engineer-02",
       "erc8004_token": 1850,
       "phase": "execute",
@@ -188,7 +188,7 @@
     },
     {
       "seq": 8,
-      "ts": 1742220020000,
+      "ts": 1773756020000,
       "agent": "engineer-02",
       "erc8004_token": 1850,
       "phase": "execute",
@@ -199,7 +199,7 @@
     },
     {
       "seq": 9,
-      "ts": 1742220021000,
+      "ts": 1773756021000,
       "agent": "engineer-02",
       "erc8004_token": 1850,
       "phase": "execute",
@@ -215,7 +215,7 @@
     },
     {
       "seq": 10,
-      "ts": 1742220022000,
+      "ts": 1773756022000,
       "agent": "sentinel-03",
       "erc8004_token": 1851,
       "phase": "validate",
@@ -226,7 +226,7 @@
     },
     {
       "seq": 11,
-      "ts": 1742220024000,
+      "ts": 1773756024000,
       "agent": "sentinel-03",
       "erc8004_token": 1851,
       "phase": "validate",
@@ -247,7 +247,7 @@
     },
     {
       "seq": 12,
-      "ts": 1742220026000,
+      "ts": 1773756026000,
       "agent": "sentinel-03",
       "erc8004_token": 1851,
       "phase": "validate",
@@ -265,7 +265,7 @@
     },
     {
       "seq": 13,
-      "ts": 1742220030000,
+      "ts": 1773756030000,
       "agent": "sentinel-03",
       "erc8004_token": 1851,
       "phase": "validate",
@@ -283,7 +283,7 @@
     },
     {
       "seq": 14,
-      "ts": 1742220030500,
+      "ts": 1773756030500,
       "agent": "sentinel-03",
       "erc8004_token": 1851,
       "phase": "validate",
@@ -302,7 +302,7 @@
     },
     {
       "seq": 15,
-      "ts": 1742220032000,
+      "ts": 1773756032000,
       "agent": "engineer-02",
       "erc8004_token": 1850,
       "phase": "submit",
@@ -323,7 +323,7 @@
     },
     {
       "seq": 16,
-      "ts": 1742220047000,
+      "ts": 1773756047000,
       "agent": "herald-01",
       "erc8004_token": 1849,
       "phase": "submit",

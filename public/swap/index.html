@@ -549,6 +549,7 @@ async function ensureChain(chainObj){
 
 async function getQuote(){
   setStep(1);
+  if(!SW.wallet){log('lw','NO_WALLET','Connect wallet to trade with your address — running read-only quote on demo wallet','term');}
   if(window.ethereum&&SW.wallet){var ok=await ensureChain(SW.chain);if(!ok)return;}
   var ti=document.getElementById('tin').value,to=document.getElementById('tout').value,amt=document.getElementById('amtin').value||'0.1';
   var im=SYMS[ti.toLowerCase()]||{s:'?',d:18},om=SYMS[to.toLowerCase()]||{s:'?',d:18};
@@ -698,6 +699,7 @@ function fiSetAgentState(idx, state) {
 }
 
 async function fiRun() {
+  if(!FI.wallet){log('lw','NO_WALLET','Connect wallet to rebalance your portfolio — running analysis on demo wallet (read-only)','fi-term');}
   var wallet = FI.wallet || '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045';
   var targetETH = parseInt(document.getElementById('fi-target').value)/100;
   var driftThreshold = parseInt(document.getElementById('fi-drift').value)/100;

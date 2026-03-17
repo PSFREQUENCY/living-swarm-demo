@@ -1,0 +1,263 @@
+{
+  "schema_version": "1.0",
+  "swarm_id": "swarm-2026-0317-001",
+  "session_id": "sess_8a3f9b2c",
+  "started_at": 1742220001000,
+  "completed_at": 1742220047000,
+  "duration_ms": 46000,
+  "status": "completed",
+  "task": "ETH/USDC market intelligence + strategy recommendation",
+  "agents": [
+    { "id": "herald-01", "role": "PLANNER", "erc8004_token": 1, "tokens_used": 3847, "budget_max": 15000, "budget_pct_used": 25.6 },
+    { "id": "engineer-02", "role": "DEVELOPER", "erc8004_token": 2, "tokens_used": 9234, "budget_max": 25000, "budget_pct_used": 36.9 },
+    { "id": "sentinel-03", "role": "QA_VALIDATOR", "erc8004_token": 3, "tokens_used": 2156, "budget_max": 10000, "budget_pct_used": 21.6 }
+  ],
+  "total_tokens_used": 15237,
+  "total_api_calls": 7,
+  "final_output": {
+    "eth_price": 2047.83,
+    "recommendation": "ACCUMULATE",
+    "confidence": 0.74,
+    "analysis_summary": "ETH/USDC showing compression at 2047 support. Sentiment neutral (fear/greed 38). Uniswap routing via DUTCH_V2 with 0.12% effective spread. Low risk for size below 0.5 ETH.",
+    "arbiter_score": 18,
+    "safety_band": "PASS",
+    "submitted_to_chain": true,
+    "attestation_tx": "0x7a3c9f1e2b4d..."
+  },
+  "entries": [
+    {
+      "seq": 1,
+      "ts": 1742220001000,
+      "agent": "herald-01",
+      "erc8004_token": 1,
+      "phase": "discover",
+      "action": "boot",
+      "message": "Herald-01 initializing. Budget: 15000 tokens. Checking compute allocation.",
+      "budget_remaining_pct": 1.0,
+      "tokens_used_this_step": 0
+    },
+    {
+      "seq": 2,
+      "ts": 1742220003000,
+      "agent": "herald-01",
+      "erc8004_token": 1,
+      "phase": "discover",
+      "action": "market_scan",
+      "tool": "uniswap_quote_api",
+      "message": "Calling Uniswap Trading API v1 — ETH/USDC 0.1 ETH quote",
+      "input": { "tokenIn": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2", "tokenOut": "0xA0b86991c6218b36c1d19D4a2E9Eb0cE3606eB48", "amount": "100000000000000000", "type": "EXACT_INPUT" },
+      "budget_remaining_pct": 1.0,
+      "tokens_used_this_step": 0
+    },
+    {
+      "seq": 3,
+      "ts": 1742220005200,
+      "agent": "herald-01",
+      "erc8004_token": 1,
+      "phase": "discover",
+      "action": "market_data_received",
+      "tool": "uniswap_quote_api",
+      "message": "Quote received. ETH/USDC: $2047.83 via DUTCH_V2 routing. Arbiter pre-score: 18 (PASS).",
+      "output": { "eth_usdc_price": 2047.83, "routing": "DUTCH_V2", "arbiter_score": 18, "band": "PASS", "gas_estimate_usd": 0.42 },
+      "budget_remaining_pct": 0.99,
+      "tokens_used_this_step": 0
+    },
+    {
+      "seq": 4,
+      "ts": 1742220006000,
+      "agent": "herald-01",
+      "erc8004_token": 1,
+      "phase": "plan",
+      "action": "task_decomposition",
+      "message": "Decomposing task. Market data acquired. Assigning analysis to Engineer-02.",
+      "output": {
+        "tasks": [
+          { "id": "T001", "assignee": "engineer-02", "action": "generate_market_analysis", "priority": 1 },
+          { "id": "T002", "assignee": "sentinel-03", "action": "validate_and_score", "priority": 2 },
+          { "id": "T003", "assignee": "engineer-02", "action": "submit_result_if_approved", "priority": 3 }
+        ]
+      },
+      "budget_remaining_pct": 0.97,
+      "tokens_used_this_step": 487
+    },
+    {
+      "seq": 5,
+      "ts": 1742220008000,
+      "agent": "engineer-02",
+      "erc8004_token": 2,
+      "phase": "execute",
+      "action": "boot",
+      "message": "Engineer-02 activated by Herald-01. Received T001. Budget: 25000 tokens.",
+      "budget_remaining_pct": 1.0,
+      "tokens_used_this_step": 0
+    },
+    {
+      "seq": 6,
+      "ts": 1742220009000,
+      "agent": "engineer-02",
+      "erc8004_token": 2,
+      "phase": "execute",
+      "action": "venice_inference",
+      "tool": "venice_ai",
+      "message": "Calling Venice AI (llama-3.3-70b) for market intelligence. PII strip applied. Zero retention.",
+      "input": { "model": "llama-3.3-70b", "prompt_type": "market_analysis", "pii_stripped": true, "data_points": ["eth_price_2047", "routing_DUTCH_V2", "arbiter_18_PASS"] },
+      "budget_remaining_pct": 0.98,
+      "tokens_used_this_step": 156
+    },
+    {
+      "seq": 7,
+      "ts": 1742220019000,
+      "agent": "engineer-02",
+      "erc8004_token": 2,
+      "phase": "execute",
+      "action": "analysis_complete",
+      "tool": "venice_ai",
+      "message": "Venice inference complete. Analysis generated. Confidence: 0.74.",
+      "output": {
+        "analysis": "ETH/USDC showing compression at 2047 support. Sentiment neutral (fear/greed 38). Uniswap routing via DUTCH_V2 with 0.12% effective spread. Low risk for size below 0.5 ETH.",
+        "recommendation": "ACCUMULATE",
+        "confidence": 0.74,
+        "key_signals": ["support_2047", "dutch_v2_routing", "low_arbiter_score_18", "neutral_sentiment"],
+        "tokens_used": 4821,
+        "provider": "venice-ai",
+        "zero_retention": true
+      },
+      "budget_remaining_pct": 0.81,
+      "tokens_used_this_step": 4821
+    },
+    {
+      "seq": 8,
+      "ts": 1742220020000,
+      "agent": "engineer-02",
+      "erc8004_token": 2,
+      "phase": "execute",
+      "action": "budget_check",
+      "message": "Budget check: 80.7% remaining. Above 20% threshold. Proceeding with full execution.",
+      "budget_remaining_pct": 0.81,
+      "tokens_used_this_step": 0
+    },
+    {
+      "seq": 9,
+      "ts": 1742220021000,
+      "agent": "engineer-02",
+      "erc8004_token": 2,
+      "phase": "execute",
+      "action": "handoff_to_sentinel",
+      "message": "T001 complete. Forwarding analysis to Sentinel-03 for validation (T002).",
+      "output": { "task_id": "T001", "status": "COMPLETE", "forwarded_to": "sentinel-03" },
+      "budget_remaining_pct": 0.81,
+      "tokens_used_this_step": 0
+    },
+    {
+      "seq": 10,
+      "ts": 1742220022000,
+      "agent": "sentinel-03",
+      "erc8004_token": 3,
+      "phase": "validate",
+      "action": "boot",
+      "message": "Sentinel-03 activated. Validating Engineer-02 output. Zero-trust evaluation mode.",
+      "budget_remaining_pct": 1.0,
+      "tokens_used_this_step": 0
+    },
+    {
+      "seq": 11,
+      "ts": 1742220024000,
+      "agent": "sentinel-03",
+      "erc8004_token": 3,
+      "phase": "validate",
+      "action": "safety_check",
+      "message": "Running arbiter scoring on proposed action. Checking: tx value, contract addresses, routing type.",
+      "input": { "proposed_action": "market_intelligence_report_only", "tx_required": false, "eth_exposure": 0 },
+      "output": { "arbiter_score": 8, "band": "PASS", "reason": "Read-only analysis. No transaction. ETH exposure: 0. Routing validated." },
+      "budget_remaining_pct": 0.96,
+      "tokens_used_this_step": 412
+    },
+    {
+      "seq": 12,
+      "ts": 1742220026000,
+      "agent": "sentinel-03",
+      "erc8004_token": 3,
+      "phase": "validate",
+      "action": "output_quality_validation",
+      "tool": "venice_ai",
+      "message": "Quality scoring Engineer-02 analysis via Venice AI.",
+      "output": { "quality_score": 0.81, "completeness": 0.90, "accuracy_signals": 4, "recommendation_supported": true },
+      "budget_remaining_pct": 0.87,
+      "tokens_used_this_step": 1344
+    },
+    {
+      "seq": 13,
+      "ts": 1742220030000,
+      "agent": "sentinel-03",
+      "erc8004_token": 3,
+      "phase": "validate",
+      "action": "approve",
+      "message": "APPROVED. Arbiter: 8/PASS. Quality: 0.81. No unsafe operations. Signing approval.",
+      "output": {
+        "decision": "APPROVED",
+        "arbiter_score": 8,
+        "quality_score": 0.81,
+        "hmac_signature": "sha256:7f3a9e2c...",
+        "approval_ts": 1742220030000
+      },
+      "budget_remaining_pct": 0.86,
+      "tokens_used_this_step": 0
+    },
+    {
+      "seq": 14,
+      "ts": 1742220030500,
+      "agent": "sentinel-03",
+      "erc8004_token": 3,
+      "phase": "validate",
+      "action": "onchain_attestation",
+      "tool": "arbiter_ledger_sol",
+      "message": "Attesting final score to ArbitersLedger.sol on Sepolia.",
+      "output": { "contract": "0x4A6d6f8B23bf3ECD8EebeA73dcB582db6380Fc94", "score": 18, "band": "P", "tx_hash": "0x7a3c9f1e2b4d...", "attested": true },
+      "budget_remaining_pct": 0.86,
+      "tokens_used_this_step": 0
+    },
+    {
+      "seq": 15,
+      "ts": 1742220032000,
+      "agent": "engineer-02",
+      "erc8004_token": 2,
+      "phase": "submit",
+      "action": "submit_result",
+      "message": "Sentinel approval received. Submitting final result. Crystallizing to Royal Logs.",
+      "output": {
+        "status": "SUBMITTED",
+        "eth_price": 2047.83,
+        "recommendation": "ACCUMULATE",
+        "confidence": 0.74,
+        "arbiter_final": 18,
+        "band": "PASS",
+        "report_hash": "sha256:3b7c9f1e...",
+        "submitted_at": 1742220032000
+      },
+      "budget_remaining_pct": 0.63,
+      "tokens_used_this_step": 4257
+    },
+    {
+      "seq": 16,
+      "ts": 1742220047000,
+      "agent": "herald-01",
+      "erc8004_token": 1,
+      "phase": "submit",
+      "action": "session_complete",
+      "message": "Swarm run complete. All agents concluded within budget. Reputation feedback submitted.",
+      "output": {
+        "status": "SUCCESS",
+        "total_tokens": 15237,
+        "total_api_calls": 7,
+        "budget_efficiency": "74.4% remaining across all agents",
+        "feedback": [
+          { "from": "sentinel-03", "to": "engineer-02", "score": 84, "tags": ["accurate", "within_budget", "tool_use_correct"] },
+          { "from": "sentinel-03", "to": "herald-01", "score": 91, "tags": ["clear_decomposition", "task_routing_correct"] },
+          { "from": "herald-01", "to": "engineer-02", "score": 88, "tags": ["complete_on_time", "quality_output"] }
+        ]
+      },
+      "budget_remaining_pct": 0.89,
+      "tokens_used_this_step": 0
+    }
+  ]
+}

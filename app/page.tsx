@@ -574,6 +574,216 @@ setInterval(fetchPrice,30000);setInterval(fetchUniRate,60000);
 </div>
 <div class="sdiv" style="padding-bottom:40px">&#x2593;&#x2593;&#x2593;</div>
 
+<!-- ══════ SOVEREIGN SWARM — LIVE EXECUTION FEED ══════ -->
+<style>
+.sw-wrap{border:1px solid rgba(0,255,229,.1);background:rgba(0,4,8,.97);margin:0 0 0 0;padding:2.5rem 6vw;position:relative;overflow:hidden}
+.sw-wrap::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent,transparent 60px,rgba(0,255,229,.012) 60px,rgba(0,255,229,.012) 61px),repeating-linear-gradient(0deg,transparent,transparent 60px,rgba(0,255,229,.012) 60px,rgba(0,255,229,.012) 61px);pointer-events:none}
+.sw-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;flex-wrap:wrap;gap:.5rem}
+.sw-title{font-family:'Orbitron',sans-serif;font-size:clamp(1.2rem,3vw,2rem);font-weight:900;color:transparent;-webkit-text-stroke:1px rgba(0,255,229,.5);letter-spacing:.1em}
+.sw-status{font-size:.55rem;letter-spacing:.25em;color:rgba(0,255,229,.35);display:flex;align-items:center;gap:.5rem}
+.sw-dot{width:6px;height:6px;border-radius:50%;background:#00ffe7;box-shadow:0 0 8px #00ffe7;animation:pulse 1.5s ease-in-out infinite}
+.sw-agents{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:rgba(0,255,229,.07);margin-bottom:1.5rem}
+@media(max-width:640px){.sw-agents{grid-template-columns:1fr}}
+.sw-agent{background:var(--void);padding:1rem;position:relative;overflow:hidden}
+.sw-agent::after{content:'';position:absolute;top:0;left:0;right:0;height:1px}
+.sw-a-herald::after{background:linear-gradient(90deg,transparent,#00ffe7,transparent)}
+.sw-a-engineer::after{background:linear-gradient(90deg,transparent,#ff00aa,transparent)}
+.sw-a-sentinel::after{background:linear-gradient(90deg,transparent,#aaff00,transparent)}
+.sw-a-id{font-size:.48rem;color:rgba(255,255,255,.12);letter-spacing:.25em;margin-bottom:.25rem}
+.sw-a-name{font-family:'Orbitron',sans-serif;font-size:.65rem;font-weight:700;margin-bottom:.2rem}
+.sw-a-role{font-size:.52rem;letter-spacing:.12em;margin-bottom:.5rem;opacity:.55}
+.sw-a-erc{font-family:'VT323',monospace;font-size:.72rem;opacity:.4;word-break:break-all;line-height:1.3}
+.sw-a-budget{margin-top:.5rem;height:2px;background:rgba(255,255,255,.06);border-radius:1px;position:relative}
+.sw-a-budget-fill{height:100%;border-radius:1px;position:absolute;left:0;top:0;transition:width .8s ease}
+.sw-a-bl{font-size:.45rem;color:rgba(255,255,255,.2);margin-top:.2rem;letter-spacing:.08em}
+.sw-feed{background:#000;border:1px solid rgba(0,255,229,.08);font-family:'VT323',monospace;font-size:.95rem;line-height:1.65;max-height:360px;overflow-y:auto}
+.sw-feed-bar{padding:.4rem 1rem;background:rgba(0,255,229,.03);border-bottom:1px solid rgba(0,255,229,.06);font-size:.52rem;letter-spacing:.2em;color:rgba(0,255,229,.25);display:flex;justify-content:space-between;align-items:center}
+.sw-feed-body{padding:1rem 1.2rem}
+.sw-entry{margin:.04rem 0;display:flex;gap:.5rem;align-items:flex-start}
+.sw-seq{color:rgba(255,255,255,.1);min-width:2.5rem;font-size:.75rem}
+.sw-ts{color:rgba(0,255,229,.2);font-size:.72rem;min-width:5rem}
+.sw-agent-tag{font-size:.72rem;min-width:5.5rem;font-weight:700}
+.sw-tag-herald{color:#00ffe7}.sw-tag-engineer{color:#ff00aa}.sw-tag-sentinel{color:#aaff00}
+.sw-phase{color:rgba(255,255,255,.15);font-size:.68rem;min-width:3.5rem}
+.sw-msg{color:rgba(200,240,236,.5);font-size:.78rem;flex:1;line-height:1.4}
+.sw-score{font-size:.65rem;color:rgba(170,255,0,.6);margin-left:.5rem}
+.sw-actions{display:flex;gap:.75rem;margin-top:1.2rem;flex-wrap:wrap;align-items:center}
+.sw-btn{display:inline-flex;align-items:center;gap:.4rem;padding:.5rem 1.2rem;font-family:'Share Tech Mono',monospace;font-size:.6rem;letter-spacing:.2em;border-radius:2px;cursor:pointer;transition:all .2s;text-decoration:none;border:none}
+.sw-btn-run{background:rgba(0,255,229,.06);border:1px solid rgba(0,255,229,.3);color:#00ffe7}
+.sw-btn-run:hover{background:rgba(0,255,229,.14);box-shadow:0 0 16px rgba(0,255,229,.2)}
+.sw-btn-run:disabled{opacity:.35;cursor:not-allowed}
+.sw-btn-dl{background:rgba(170,255,0,.06);border:1px solid rgba(170,255,0,.25);color:#aaff00}
+.sw-btn-dl:hover{background:rgba(170,255,0,.12)}
+.sw-btn-caps{background:rgba(255,0,170,.05);border:1px solid rgba(255,0,170,.2);color:#ff69b4}
+.sw-btn-caps:hover{background:rgba(255,0,170,.1)}
+.sw-meta{font-size:.5rem;color:rgba(255,255,255,.12);letter-spacing:.12em;margin-top:.8rem;line-height:1.9}
+.sw-meta a{color:rgba(0,255,229,.35);text-decoration:none}.sw-meta a:hover{color:#00ffe7}
+.sw-run-status{font-size:.58rem;letter-spacing:.1em;padding:.3rem .7rem;border-radius:2px;display:none}
+.sw-run-ok{background:rgba(170,255,0,.1);border:1px solid rgba(170,255,0,.3);color:#aaff00}
+.sw-run-err{background:rgba(255,0,0,.08);border:1px solid rgba(255,0,0,.25);color:#ff4444}
+.sw-run-ing{background:rgba(0,255,229,.06);border:1px solid rgba(0,255,229,.2);color:#00ffe7;animation:pulse 1.2s ease-in-out infinite}
+.sw-8183{margin-top:1rem;padding:.8rem 1rem;background:rgba(255,0,170,.03);border:1px solid rgba(255,0,170,.1);border-radius:2px}
+.sw-8183-title{font-size:.52rem;letter-spacing:.25em;color:rgba(255,0,170,.45);margin-bottom:.5rem}
+.sw-caps{display:flex;gap:.4rem;flex-wrap:wrap}
+.sw-cap{font-size:.48rem;padding:.2rem .5rem;border:1px solid rgba(255,0,170,.15);color:rgba(255,0,170,.5);letter-spacing:.08em;border-radius:1px}
+</style>
+
+<div class="sw-wrap" id="swarm-live-section">
+  <div class="sw-header">
+    <div class="sw-title">SOVEREIGN SWARM</div>
+    <div class="sw-status"><div class="sw-dot"></div><span>3 AGENTS LIVE &middot; ERC-8004 &middot; ERC-8183</span></div>
+  </div>
+
+  <!-- Agent identity cards -->
+  <div class="sw-agents">
+    <div class="sw-agent sw-a-herald">
+      <div class="sw-a-id">ERC-8004 &middot; TOKEN #1 &middot; SEPOLIA</div>
+      <div class="sw-a-name" style="color:#00ffe7">&#x2665; HERALD-01</div>
+      <div class="sw-a-role" style="color:#00ffe7">PLANNER &middot; DISCOVER &middot; DECOMPOSE</div>
+      <div class="sw-a-erc">REGISTRY: 0x8004A818...BD9e<br>CAPS: task_decomposition &middot; market_analysis &middot; swarm_coordination</div>
+      <div class="sw-a-budget"><div class="sw-a-budget-fill" style="width:0%;background:#00ffe7" id="bud-herald"></div></div>
+      <div class="sw-a-bl" id="bud-herald-lbl">BUDGET &mdash;/15,000 tokens</div>
+    </div>
+    <div class="sw-agent sw-a-engineer">
+      <div class="sw-a-id">ERC-8004 &middot; TOKEN #2 &middot; SEPOLIA</div>
+      <div class="sw-a-name" style="color:#ff00aa">&#x2665; ENGINEER-02</div>
+      <div class="sw-a-role" style="color:#ff00aa">DEVELOPER &middot; EXECUTE &middot; TOOL USE</div>
+      <div class="sw-a-erc">REGISTRY: 0x8004A818...BD9e<br>TOOLS: uniswap_quote &middot; venice_ai &middot; crystallize_api</div>
+      <div class="sw-a-budget"><div class="sw-a-budget-fill" style="width:0%;background:#ff00aa" id="bud-engineer"></div></div>
+      <div class="sw-a-bl" id="bud-engineer-lbl">BUDGET &mdash;/25,000 tokens</div>
+    </div>
+    <div class="sw-agent sw-a-sentinel">
+      <div class="sw-a-id">ERC-8004 &middot; TOKEN #3 &middot; SEPOLIA</div>
+      <div class="sw-a-name" style="color:#aaff00">&#x2665; SENTINEL-03</div>
+      <div class="sw-a-role" style="color:#aaff00">QA VALIDATOR &middot; ZERO-TRUST &middot; ALWAYS ON</div>
+      <div class="sw-a-erc">REGISTRY: 0x8004A818...BD9e<br>SAFETY: arbiter_ledger &middot; hmac_signing &middot; onchain_attest</div>
+      <div class="sw-a-budget"><div class="sw-a-budget-fill" style="width:0%;background:#aaff00" id="bud-sentinel"></div></div>
+      <div class="sw-a-bl" id="bud-sentinel-lbl">BUDGET &mdash;/10,000 tokens</div>
+    </div>
+  </div>
+
+  <!-- Live execution feed -->
+  <div class="sw-feed">
+    <div class="sw-feed-bar">
+      <span>&#x25AE; EXECUTION LOG &mdash; DISCOVER &#x2192; PLAN &#x2192; EXECUTE &#x2192; VALIDATE &#x2192; SUBMIT</span>
+      <span id="sw-log-meta"></span>
+    </div>
+    <div class="sw-feed-body" id="sw-feed-body">
+      <div class="sw-entry"><span class="sw-seq">--</span><span class="sw-msg" style="color:rgba(0,255,229,.25);font-style:italic">Fetching latest execution log...</span></div>
+    </div>
+  </div>
+
+  <!-- ERC-8183 capability manifest display -->
+  <div class="sw-8183">
+    <div class="sw-8183-title">// ERC-8183 CAPABILITY MANIFEST &mdash; MACHINE READABLE</div>
+    <div class="sw-caps" id="sw-caps-list">
+      <span class="sw-cap">discover</span><span class="sw-cap">plan</span><span class="sw-cap">task_decomposition</span>
+      <span class="sw-cap">market_analysis</span><span class="sw-cap">code_generation</span><span class="sw-cap">api_orchestration</span>
+      <span class="sw-cap">defi_interaction</span><span class="sw-cap">output_validation</span><span class="sw-cap">transaction_safety_scoring</span>
+      <span class="sw-cap">guardrail_enforcement</span><span class="sw-cap">onchain_attestation</span><span class="sw-cap">inter_agent_hmac_signing</span>
+    </div>
+  </div>
+
+  <!-- Action buttons -->
+  <div class="sw-actions">
+    <button class="sw-btn sw-btn-run" id="sw-run-btn" onclick="triggerSwarmRun()">&#x25B6; RUN SWARM — LIVE EXECUTION</button>
+    <a class="sw-btn sw-btn-dl" href="/agent_log.json" download>&#x2193; DOWNLOAD agent_log.json</a>
+    <a class="sw-btn sw-btn-caps" href="/agents/herald-01.json" target="_blank">&#x2197; HERALD MANIFEST</a>
+    <a class="sw-btn sw-btn-caps" href="/agents/engineer-02.json" target="_blank">&#x2197; ENGINEER MANIFEST</a>
+    <a class="sw-btn sw-btn-caps" href="/agents/sentinel-03.json" target="_blank">&#x2197; SENTINEL MANIFEST</a>
+    <span class="sw-run-status" id="sw-run-status"></span>
+  </div>
+
+  <div class="sw-meta">
+    ERC-8004 REGISTRY: <a href="https://sepolia.etherscan.io/address/0x8004A818BFB912233c491871b3d84c89A494BD9e" target="_blank">0x8004A818...BD9e</a> &nbsp;&middot;&nbsp;
+    ARBITER: <a href="https://sepolia.etherscan.io/address/0x4A6d6f8B23bf3ECD8EebeA73dcB582db6380Fc94" target="_blank">ArbitersLedger.sol</a> &nbsp;&middot;&nbsp;
+    ERC-8183: <a href="https://eips.ethereum.org/EIPS/eip-8183" target="_blank">eip-8183</a> &nbsp;&middot;&nbsp;
+    STATUS: <a href="/api/swarm/status" target="_blank">/api/swarm/status</a>
+  </div>
+</div>
+
+<script>
+(function(){
+  var PHASE_COLORS={'discover':'#00ffe7','plan':'#00c8ff','execute':'#ff00aa','validate':'#aaff00','submit':'#fbbf24','abort':'#ff4444'};
+  var AGENT_CLASS={'herald-01':'sw-tag-herald','engineer-02':'sw-tag-engineer','sentinel-03':'sw-tag-sentinel'};
+
+  function fmtTs(ts){var d=new Date(ts);return d.toISOString().replace('T',' ').slice(11,19);}
+
+  function renderFeed(entries){
+    var body=document.getElementById('sw-feed-body');
+    if(!body||!entries||!entries.length){if(body)body.innerHTML='<div class="sw-entry"><span class="sw-msg" style="color:rgba(255,255,255,.2)">No entries.</span></div>';return;}
+    var last=entries.slice(-12);
+    body.innerHTML=last.map(function(e){
+      var pc=PHASE_COLORS[e.phase]||'rgba(255,255,255,.3)';
+      var ac=AGENT_CLASS[e.agent]||'';
+      var score=e.output&&e.output.arbiter_score!=null?\`<span class="sw-score">ARB:\${e.output.arbiter_score}</span>\`:'';
+      var budg=e.budget_remaining_pct!=null?\`<span style="font-size:.6rem;color:rgba(255,255,255,.18);margin-left:.4rem">[\${Math.round(e.budget_remaining_pct*100)}%]</span>\`:'';
+      return\`<div class="sw-entry"><span class="sw-seq" style="color:rgba(255,255,255,.12)">\${String(e.seq).padStart(2,'0')}</span><span class="sw-ts">\${fmtTs(e.ts)}</span><span class="sw-agent-tag \${ac}">\${e.agent||''}</span><span class="sw-phase" style="color:\${pc}">\${e.phase||''}</span><span class="sw-msg">\${e.message||''}</span>\${score}\${budg}</div>\`;
+    }).join('');
+    body.scrollTop=body.scrollHeight;
+  }
+
+  function updateBudgets(agents){
+    if(!agents)return;
+    agents.forEach(function(a){
+      var key=a.id==='herald-01'?'herald':a.id==='engineer-02'?'engineer':'sentinel';
+      var fill=document.getElementById('bud-'+key);
+      var lbl=document.getElementById('bud-'+key+'-lbl');
+      if(fill&&a.tokens_used){fill.style.width=Math.min(100,(a.tokens_used/a.budget_max*100).toFixed(1))+'%';}
+      if(lbl&&a.tokens_used){lbl.textContent='BUDGET '+a.tokens_used.toLocaleString()+'/'+a.budget_max.toLocaleString()+' tokens';}
+    });
+  }
+
+  function loadLog(){
+    fetch('/agent_log.json?_='+Date.now(),{cache:'no-store'})
+      .then(function(r){return r.json();})
+      .then(function(data){
+        if(data.entries){
+          renderFeed(data.entries);
+          updateBudgets(data.agents);
+          var meta=document.getElementById('sw-log-meta');
+          if(meta&&data.swarm_id)meta.textContent='RUN: '+data.swarm_id+' · '+data.status.toUpperCase();
+        }
+      })
+      .catch(function(){
+        var body=document.getElementById('sw-feed-body');
+        if(body)body.innerHTML='<div class="sw-entry"><span class="sw-msg" style="color:rgba(255,255,255,.18)">Click RUN SWARM to execute the autonomous loop live.</span></div>';
+      });
+  }
+
+  window.triggerSwarmRun=function(){
+    var btn=document.getElementById('sw-run-btn');
+    var status=document.getElementById('sw-run-status');
+    if(!btn||!status)return;
+    btn.disabled=true;btn.textContent='⟳ EXECUTING...';
+    status.className='sw-run-status sw-run-ing';status.textContent='Running autonomous loop — Herald → Engineer → Sentinel...';status.style.display='inline-flex';
+    fetch('/api/swarm/execute',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({})})
+      .then(function(r){return r.json();})
+      .then(function(data){
+        btn.disabled=false;btn.textContent='▶ RUN SWARM — LIVE EXECUTION';
+        if(data.entries){
+          renderFeed(data.entries);
+          updateBudgets(data.agents);
+          var meta=document.getElementById('sw-log-meta');
+          if(meta&&data.swarm_id)meta.textContent='RUN: '+data.swarm_id+' · COMPLETE';
+          status.className='sw-run-status sw-run-ok';
+          status.textContent='✓ RUN COMPLETE — '+data.total_tokens_used+' tokens · '+data.total_api_calls+' steps · ETH $'+(data.final_output&&data.final_output.eth_price?data.final_output.eth_price.toFixed(2):'—');
+        } else if(data.error){
+          status.className='sw-run-status sw-run-err';status.textContent='Error: '+data.error.slice(0,80);
+        }
+      })
+      .catch(function(e){
+        btn.disabled=false;btn.textContent='▶ RUN SWARM — LIVE EXECUTION';
+        status.className='sw-run-status sw-run-err';status.textContent='Network error. Check console.';
+      });
+  };
+
+  // Load static log on page load
+  loadLog();
+})();
+</script>
+<!-- ══════ END SOVEREIGN SWARM ══════ -->
+
 <section class="s">
   <div class="s-lbl">// HOVER TO PROBE — SYSTEM RESISTS FULL INSPECTION</div>
   <h2 class="s-ttl neon-stroke">THE NODES</h2>

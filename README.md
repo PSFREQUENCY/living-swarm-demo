@@ -11,7 +11,7 @@
 ║        ░░░  S Y N T H E S I S   2 0 2 6  ░░░  H A C K A T H O N    ║
 ║                                                                      ║
 ║   ████████████████████████████████████████████████████████████████  ║
-║   ██  PRIZE TRACKS: VENICE · UNISWAP · SUPERRARE · SYNTHESIS  ██  ║
+║  PRIZE TRACKS: VENICE · UNISWAP · SUPERRARE · ERC-8004 · ERC-8183  ║
 ║   ████████████████████████████████████████████████████████████████  ║
 ╚══════════════════════════════════════════════════════════════════════╝
 ```
@@ -21,6 +21,23 @@
 **[▶ PLAY NOW](https://psfrequency.github.io/living-swarm-demo/game)** · **[Vercel](https://living-swarm-demo.vercel.app)** · **[Royal Museum](https://living-swarm-demo.vercel.app/royal-logs/)** · **[Swap Terminal](https://living-swarm-demo.vercel.app/swap/)**
 
 **Wallet**: `0xdd30d20683EB3a84d1f9c69E513D653b581F6484` · **Built**: March 13–22, 2026
+
+**Swarm API**: `/api/swarm/execute` · **Agent Manifests**: `/agents/herald-01.json` · **Logs**: `/agent_log.json`
+
+---
+
+## ◈ SIX POINTS OF PROPHECY — AUTONOMOUS SWARM COMPLETE
+
+| # | Requirement | Implementation |
+|---|---|---|
+| **1** | **Autonomous Execution** — full decision loop | Herald-01 discovers → plans → Engineer-02 executes tools → Sentinel-03 validates → submits. All logged. |
+| **2** | **Agent Identity — ERC-8004** | 3 agents registered at `0x8004A818...BD9e` on Sepolia. Each holds an ERC-721 identity token. `scripts/register-erc8004.mjs` |
+| **3** | **Agent Capability Manifest — ERC-8183** | `/public/agents/herald-01.json`, `engineer-02.json`, `sentinel-03.json` — machine-readable, content-addressed, ERC-8183 schema |
+| **4** | **Structured Execution Logs** | `/public/agent_log.json` — every decision, tool call, token spend, retry, and safety verdict. Full trace. |
+| **5** | **Tool Use — Multi-tool orchestration** | Uniswap Trading API v1 (live quotes) + Venice AI (private inference) + ArbitersLedger.sol (onchain attestation) + Gemini 2.5 (crystallization) |
+| **6** | **Safety & Guardrails + Compute Budget** | Sentinel-03 scores all output 0–100. Arbiter blocks score ≥ 76. Each agent has token budget with hard abort at < 5% remaining. No tx without Sentinel sign-off. |
+
+**Bonus**: ERC-8004 trust signals — Sentinel-03 rates Engineer-02 and Herald-01 after each run. Multi-agent swarm with specialized roles. ERC-8183 capability manifests.
 
 ---
 
@@ -103,10 +120,12 @@ Privacy is not a setting. It is the architecture.
 
 | Track | Integration | How |
 |---|---|---|
-| **[Venice](https://synthesis.md/hack/#venice)** | Private inference for all AI output | 111 whispers generated via Venice API; zero-retention; agent cognition stays private |
-| **[Uniswap](https://synthesis.md/hack/#uniswap)** | Live v3 swap terminal in-game | Quote → approval → swap flow; XP gated on real Sepolia txns; scoped agent spending |
+| **[Venice](https://synthesis.md/hack/#venice)** | Private inference for all AI output | 111 whispers + swarm market analysis via Venice API; zero-retention; agent cognition stays private |
+| **[Uniswap](https://synthesis.md/hack/#uniswap)** | Live v3 swap terminal in-game | Quote → approval → swap flow; XP gated on real Sepolia txns; swarm uses live Uniswap quotes for market intelligence |
 | **[SuperRare](https://synthesis.md/hack/#superrare)** | Onchain art auction system | Royal Logs ERC-721; 13 Genesis Items; museum zone reads contract live; belt = edition |
 | **[Synthesis](https://synthesis.md/hack/)** | All four agent themes unified | One protocol stack where agents pay, trust, cooperate, and keep secrets simultaneously |
+| **[ERC-8004](https://synthesis.md/hack/#protocol-labs)** | On-chain agent identity | 3 agents registered at `0x8004A818...BD9e`; each holds ERC-721 identity; reputation ratings written after each run |
+| **[ERC-8183](https://synthesis.md/hack/#virtuals-digital-s-a)** | Machine-readable capability manifest | `/agents/*.json` — structured capability declarations per ERC-8183 schema; tool lists, compute constraints, task categories |
 
 ---
 

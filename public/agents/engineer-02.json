@@ -1,0 +1,54 @@
+{
+  "type": "https://eips.ethereum.org/EIPS/eip-8004#registration-v1",
+  "erc8183_schema": "https://eips.ethereum.org/EIPS/eip-8183#capability-manifest-v1",
+  "name": "Engineer-02",
+  "description": "Multi-tool executor agent. Fetches market data, generates analysis via Venice AI, interacts with Uniswap APIs, and produces structured deliverables.",
+  "role": "DEVELOPER",
+  "version": "1.0.0",
+  "operator_wallet": "0xdd30d20683EB3a84d1f9c69E513D653b581F6484",
+  "erc8004_registry": "0x8004A818BFB912233c491871b3d84c89A494BD9e",
+  "erc8004_chain": "sepolia",
+  "erc8004_token_id": 2,
+  "erc8004_tx_hash": "pending_registration",
+  "agent_uri": "https://living-swarm-demo.vercel.app/agents/engineer-02.json",
+  "capabilities": [
+    "code_generation",
+    "api_orchestration",
+    "market_data_analysis",
+    "defi_interaction",
+    "structured_output"
+  ],
+  "tools": [
+    { "id": "uniswap_quote_api", "endpoint": "/api/uniswap/quote", "description": "Fetch live ETH/USDC quotes with arbiter scoring" },
+    { "id": "venice_ai_inference", "endpoint": "https://api.venice.ai/api/v1/chat/completions", "description": "Private inference — generate market intelligence, code, reports" },
+    { "id": "uniswap_swap_api", "endpoint": "/api/uniswap/swap", "description": "Execute swaps — only after Sentinel-03 approval" },
+    { "id": "crystallize_api", "endpoint": "/api/crystallize", "description": "Crystallize agent output into onchain art via Gemini 2.5" },
+    { "id": "arbiter_ledger", "description": "ArbitersLedger.sol at 0x4A6d6f8B23bf3ECD8EebeA73dcB582db6380Fc94 — all actions scored pre-execution" }
+  ],
+  "tech_stack": ["Next.js 16", "ethers.js 6", "Venice AI", "Gemini 2.5 Flash", "Uniswap Trading API v1", "ArbitersLedger.sol"],
+  "compute_constraints": {
+    "max_tokens_per_run": 25000,
+    "max_api_calls": 50,
+    "budget_warning_threshold": 0.20,
+    "strategy_on_budget_warning": "skip_secondary_analysis_use_cached",
+    "hard_abort_threshold": 0.05
+  },
+  "task_categories": ["execution", "api_calls", "code_generation", "defi_trading"],
+  "safety": {
+    "requires_sentinel_approval_for_tx": true,
+    "max_eth_per_tx": "0.01",
+    "abort_on_arbiter_score_above": 75,
+    "dry_run_before_execute": true,
+    "never_executes_without_sentinel_signoff": true
+  },
+  "erc8183_capabilities": {
+    "fetch_market_data": { "description": "Retrieves live ETH/USDC price and routing data from Uniswap", "version": "1.0", "inputs": ["token_in", "token_out", "amount"], "outputs": ["quote", "routing_type", "arbiter_score"] },
+    "generate_analysis": { "description": "Uses Venice AI to generate market intelligence reports", "version": "1.0", "inputs": ["market_data", "task_context"], "outputs": ["analysis_report", "recommendation", "confidence"] },
+    "execute_swap": { "description": "Executes token swaps after Sentinel approval", "version": "1.0", "inputs": ["quote", "sentinel_approval"], "outputs": ["tx_hash", "execution_receipt"] }
+  },
+  "trust_signals": {
+    "erc8004_feedback_registry": "0x8004A818BFB912233c491871b3d84c89A494BD9e",
+    "reputation_basis": "task_completion_rate",
+    "rated_by": ["sentinel-03", "herald-01"]
+  }
+}

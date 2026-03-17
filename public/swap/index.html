@@ -380,6 +380,11 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:12px;heigh
         <input type="range" id="fi-size" min="1" max="50" value="10" step="1" oninput="fiUpdateCtrls()"/>
         <span class="ctrl-val" id="fi-val-size">0.10</span>
       </div>
+      <div class="ctrl-row">
+        <span class="ctrl-label">MAX SLIPPAGE</span>
+        <input type="range" id="fi-slip" min="1" max="30" value="5" step="1" oninput="fiUpdateCtrls()"/>
+        <span class="ctrl-val" id="fi-val-slip">0.5%</span>
+      </div>
       <button class="btn btns" id="fi-runbtn" onclick="fiRun()">◎ RUN SWARM ANALYSIS</button>
     </div>
 
@@ -680,6 +685,7 @@ function fiUpdateCtrls(){
   document.getElementById('fi-val-target').textContent=document.getElementById('fi-target').value+'%';
   document.getElementById('fi-val-drift').textContent=document.getElementById('fi-drift').value+'%';
   document.getElementById('fi-val-size').textContent=(parseInt(document.getElementById('fi-size').value)/100).toFixed(2);
+  document.getElementById('fi-val-slip').textContent=(parseInt(document.getElementById('fi-slip').value)/10).toFixed(1)+'%';
 }
 function fiSetAgentState(idx, state) {
   fiAgentStates[idx] = state;
@@ -720,7 +726,7 @@ async function fiRun() {
         targetETH: targetETH,
         driftThreshold: driftThreshold,
         maxTradeSizeETH: maxSize,
-        maxSlippagePct: 0.5,
+        maxSlippagePct: parseInt(document.getElementById('fi-slip').value)/10,
         routingPreference: 'BEST_PRICE',
         sellToken: sellToken,
         buyToken: buyToken,

@@ -424,26 +424,27 @@ function miniSVG(seed,w){
     var s='';for(var i=0;i<data.length;i+=2)s+=String.fromCharCode(parseInt(data.slice(i,i+2),16));
     return s;
   }
-  function loadFrame(tokenId,frameId,loaderId){
+  function loadFrame(tokenId,divId){
     var padded=tokenId.toString(16).padStart(64,'0');
     fetch(RPC,{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({jsonrpc:'2.0',id:1,method:'eth_call',
+      body:JSON.stringify({jsonrpc:'2.0',id:tokenId,method:'eth_call',
         params:[{to:C,data:'0xc87b56dd'+padded},'latest']})})
     .then(function(r){return r.json();})
     .then(function(d){
       var uri=decode(d.result);
       if(uri&&uri.startsWith('data:')){
-        var fr=document.getElementById(frameId);
-        var lo=document.getElementById(loaderId);
-        if(fr){fr.src=uri;}
-        if(lo){lo.style.opacity='0';setTimeout(function(){lo.style.display='none';},600);}
+        var el=document.getElementById(divId);
+        if(el){
+          // Replace placeholder SVG with live onchain iframe
+          el.innerHTML='<iframe src="'+uri+'" sandbox="allow-scripts" style="width:100%;height:100%;border:none;border-radius:8px;pointer-events:none;" scrolling="no"></iframe>';
+        }
       }
     }).catch(function(){});
   }
   // Stagger loads to avoid hammering RPC
-  setTimeout(function(){loadFrame(1,'gnf1','gnl1');},300);
-  setTimeout(function(){loadFrame(2,'gnf2','gnl2');},600);
-  setTimeout(function(){loadFrame(3,'gnf3','gnl3');},900);
+  setTimeout(function(){loadFrame(1,'hn1');},400);
+  setTimeout(function(){loadFrame(2,'hn2');},800);
+  setTimeout(function(){loadFrame(3,'hn3');},1200);
 })();
 
 // ═══ LIVE MARKET DATA ══════════════════════════════════════

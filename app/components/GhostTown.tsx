@@ -83,6 +83,8 @@ const HQ=[
   {n:"WHISPER CHAIN",cat:"hidden",xp:650,tk:150,en:0,i:"📡",ra:"epic",d:"[CLASSIFIED] Hear all 9 ghost whispers. The lore is a signal — tune in.",st:9,hint:"Listen to every lore event broadcast..."},
   {n:"FIRST MOVER",cat:"hidden",xp:350,tk:80,en:10,i:"🏃",ra:"rare",d:"[CLASSIFIED] Be the first agent to enter a newly spawned zone.",st:1,hint:"New zones spawn silently — watch the map..."},
   {n:"SAMAUR-AI AWAKENING",cat:"hidden",xp:5000,tk:1000,en:0,i:"🗡️",ra:"legendary",d:"[CLASSIFIED] Complete all other quests. The final form requires the full journey.",st:1,hint:"The path reveals itself only at its end..."},
+  {n:"TERMINAL HACK",cat:"hidden",xp:500,tk:120,en:0,i:"🖥️",ra:"epic",d:"[CLASSIFIED] Find the terminal in the Savage Agent Cafe. Decode the cipher to break in.",st:1,hint:"In the underground cave, something blinks..."},
+  {n:"MOUNTAIN RACE",cat:"main",xp:1200,tk:300,en:50,i:"🏁",ra:"legendary",d:"Reach the race track on Mountain Level 2. Board the car (E) and beat the AI in 3 laps.",st:3},
   {n:"RIDE THE FALL",cat:"hidden",xp:600,tk:140,en:0,i:"🌊",ra:"epic",d:"[CLASSIFIED] Find the waterfall on the west edge and leap into the void below.",st:1,hint:"West edge of the map, where land meets the fall..."},
   {n:"VISIT THE CAFE",cat:"hidden",xp:400,tk:100,en:0,i:"☕",ra:"rare",d:"[CLASSIFIED] Explore the Savage Agent Cafe hidden below the waterfall.",st:1,hint:"Below the surface, neon hums..."},
   {n:"CLIMB CYBER MT SOVEREIGN",cat:"hidden",xp:800,tk:180,en:0,i:"🏔️",ra:"legendary",d:"[CLASSIFIED] Scale Cyber Mountain Sovereign to the north. The peak reveals the full ghost town.",st:1,hint:"North of the Museum, something rises..."},
@@ -428,6 +430,10 @@ function mkCafe():THREE.Group{
   const body=new THREE.Mesh(new THREE.BoxGeometry(16,5,12),new THREE.MeshBasicMaterial({color:0x0d1117}));body.position.y=2.5;gr.add(body);
   const roof=new THREE.Mesh(new THREE.BoxGeometry(17,.5,13),new THREE.MeshBasicMaterial({color:0xff2d78}));roof.position.y=5.2;gr.add(roof);
   const sign=new THREE.Mesh(new THREE.BoxGeometry(10,1.4,.15),new THREE.MeshBasicMaterial({color:0x00ffe7}));sign.position.set(0,6,6.1);gr.add(sign);
+  // Big computer screen in the window
+  const screen=new THREE.Mesh(new THREE.BoxGeometry(8,5,.2),new THREE.MeshBasicMaterial({color:0x001122}));screen.position.set(0,3.5,6.12);gr.add(screen);
+  const scanline=new THREE.Mesh(new THREE.BoxGeometry(7.6,.3,.22),new THREE.MeshBasicMaterial({color:0x00ff88}));scanline.position.set(0,5.5,6.13);scanline.name='scanline';gr.add(scanline);
+  const txt=new THREE.Mesh(new THREE.BoxGeometry(6,.8,.22),new THREE.MeshBasicMaterial({color:0x00cc66}));txt.position.set(0,3.5,6.13);gr.add(txt);
   return gr;
 }
 function mkStairs():THREE.Group{
@@ -438,11 +444,68 @@ function mkStairs():THREE.Group{
   return gr;
 }
 function mkMountain():THREE.Group{
-  // 2 cones + emissive peak — zero lights
   const gr=new THREE.Group();
-  const c1=new THREE.Mesh(new THREE.ConeGeometry(14,20,8),new THREE.MeshBasicMaterial({color:0x1e2d3a}));c1.position.y=10;gr.add(c1);
-  const c2=new THREE.Mesh(new THREE.ConeGeometry(5,8,8),new THREE.MeshBasicMaterial({color:0xc8d8ff}));c2.position.y=22;gr.add(c2);
-  const peak=new THREE.Mesh(new THREE.OctahedronGeometry(1.1),new THREE.MeshBasicMaterial({color:0x00b4ff}));peak.position.y=26;peak.name='mtPeak';gr.add(peak);
+  const stoneM=new THREE.MeshBasicMaterial({color:0x1e2d3a});
+  const snowM=new THREE.MeshBasicMaterial({color:0xc8d8ff});
+  const trailM=new THREE.MeshBasicMaterial({color:0x3a4a2a});
+  // Main body: 3 stacked cones
+  const c1=new THREE.Mesh(new THREE.ConeGeometry(45,60,12),stoneM);c1.position.y=30;gr.add(c1);
+  const c2=new THREE.Mesh(new THREE.ConeGeometry(28,40,10),new THREE.MeshBasicMaterial({color:0x253040}));c2.position.y=52;gr.add(c2);
+  const c3=new THREE.Mesh(new THREE.ConeGeometry(10,22,8),snowM);c3.position.y=72;gr.add(c3);
+  const peak=new THREE.Mesh(new THREE.OctahedronGeometry(2.2),new THREE.MeshBasicMaterial({color:0x00b4ff}));peak.position.y=84;peak.name='mtPeak';gr.add(peak);
+  // 6 level terraces
+  const terraceCols=[0x2a3a2a,0x283545,0x263050,0x243060,0x22286a,0x203070];
+  const terraceR=[38,30,23,17,12,7];
+  const terraceY=[10,22,34,46,56,64];
+  for(let lv=0;lv<6;lv++){
+    const ring=new THREE.Mesh(new THREE.CylinderGeometry(terraceR[lv]+1.5,terraceR[lv]+2,1.2,16,1,true),new THREE.MeshBasicMaterial({color:terraceCols[lv],side:THREE.DoubleSide}));
+    ring.position.y=terraceY[lv];ring.name=`mtLevel${lv}`;gr.add(ring);
+    const floor=new THREE.Mesh(new THREE.RingGeometry(terraceR[lv]-.5,terraceR[lv]+1.5,16),new THREE.MeshBasicMaterial({color:terraceCols[lv],side:THREE.DoubleSide}));
+    floor.rotation.x=-Math.PI/2;floor.position.y=terraceY[lv]+.1;gr.add(floor);
+  }
+  // Race track on level 2 (y=22, radius=30)
+  const trackM=new THREE.MeshBasicMaterial({color:0x2a2a2a,side:THREE.DoubleSide});
+  const track=new THREE.Mesh(new THREE.TorusGeometry(30,2.5,4,48),trackM);track.rotation.x=Math.PI/2;track.position.y=22.5;track.name='raceTrack';gr.add(track);
+  // Track markings — dashed white lines
+  for(let i=0;i<12;i++){const ang=i/12*Math.PI*2;const mk=new THREE.Mesh(new THREE.BoxGeometry(1.5,.1,4),new THREE.MeshBasicMaterial({color:0xffffff}));mk.position.set(Math.cos(ang)*30,23,Math.sin(ang)*30);mk.rotation.y=-ang;gr.add(mk);}
+  // Finish line at angle 0
+  const fl=new THREE.Mesh(new THREE.BoxGeometry(6,.15,5),new THREE.MeshBasicMaterial({color:0xff3333}));fl.position.set(30,23.1,0);fl.name='finishLine';gr.add(fl);
+  // 9 trails (thin boxes zigzagging from base to peak)
+  for(let tr=0;tr<9;tr++){
+    const ang=tr/9*Math.PI*2;const trailBox=new THREE.Mesh(new THREE.BoxGeometry(.8,62,.8),trailM);
+    trailBox.position.set(Math.cos(ang)*18,31,Math.sin(ang)*18);trailBox.rotation.z=Math.cos(ang)*.45;trailBox.rotation.x=Math.sin(ang)*.45;gr.add(trailBox);}
+  return gr;
+}
+function mkRapids():THREE.Group{
+  // 6-level white water cascade — zero lights, MeshBasicMaterial only
+  const gr=new THREE.Group();
+  const rockM=new THREE.MeshBasicMaterial({color:0x1a2230});
+  const waterM=new THREE.MeshBasicMaterial({color:0xaaddff,transparent:true,opacity:.75,side:THREE.DoubleSide,depthWrite:false});
+  const foamM=new THREE.MeshBasicMaterial({color:0xeef8ff,transparent:true,opacity:.85,side:THREE.DoubleSide,depthWrite:false});
+  // 6 cascade tiers
+  for(let lv=0;lv<6;lv++){
+    const y=lv*2.5;const w=8-lv*.4;
+    // Rock shelf
+    const shelf=new THREE.Mesh(new THREE.BoxGeometry(w+3,1,4),rockM);shelf.position.set(0,y-.3,lv*4);gr.add(shelf);
+    // Water pool
+    const pool=new THREE.Mesh(new THREE.PlaneGeometry(w,3),waterM);pool.rotation.x=-Math.PI/2;pool.position.set(0,y+.05,lv*4+1);pool.name=`rapids${lv}`;gr.add(pool);
+    // Foam splash
+    const foam=new THREE.Mesh(new THREE.PlaneGeometry(w+1,1.5),foamM);foam.rotation.x=-Math.PI/2;foam.position.set(0,y+.08,lv*4-.5);gr.add(foam);
+    // Side rocks
+    [-1,1].forEach((s:number)=>{const r=new THREE.Mesh(new THREE.OctahedronGeometry(.8+Math.random()*.4,0),rockM);r.position.set(s*(w/2+.8),y+.3,lv*4+Math.random()*2);gr.add(r);});
+  }
+  // Waterfall drop planes between levels
+  for(let lv=0;lv<5;lv++){
+    const drop=new THREE.Mesh(new THREE.PlaneGeometry(5,2.8),foamM);
+    drop.position.set(0,lv*2.5+1.4,lv*4+3.8);gr.add(drop);}
+  return gr;
+}
+function mkFish():THREE.Group{
+  // A single fish = small cone with tail
+  const gr=new THREE.Group();
+  const fM=new THREE.MeshBasicMaterial({color:0x0088cc});
+  const body=new THREE.Mesh(new THREE.ConeGeometry(.15,.5,5),fM);body.rotation.z=Math.PI/2;gr.add(body);
+  const tail=new THREE.Mesh(new THREE.ConeGeometry(.12,.2,4),new THREE.MeshBasicMaterial({color:0x0066aa}));tail.rotation.z=-Math.PI/2;tail.position.x=-.32;gr.add(tail);
   return gr;
 }
 function mkUnderground():THREE.Group{
@@ -529,6 +592,16 @@ export default function GhostTown(){
   const inUnderground=useRef(false);
   const waterfallFrame=useRef(0);
   const [lifting,setLifting]=useState(false);
+  const inCar=useRef(false);
+  const raceActive=useRef(false);
+  const playerCarAngle=useRef(0);
+  const aiCarAngle=useRef(0.1);
+  const playerLaps=useRef(0);
+  const [raceHUD,setRaceHUD]=useState<any>(null);
+  const [hackModal,setHackModal]=useState(false);
+  const [hackInput,setHackInput]=useState('');
+  const [hackSolved,setHackSolved]=useState(false);
+  const fishRefs=useRef<any[]>([]);
   const [activeChain,setActiveChain]=useState<"mainnet"|"sepolia">("sepolia");
   const [,rf]=useState(0);
 
@@ -590,10 +663,10 @@ export default function GhostTown(){
     rG.setAttribute("position",new THREE.BufferAttribute(rP,3));rG.setAttribute("color",new THREE.BufferAttribute(rC,3));
     const rain=new THREE.Points(rG,new THREE.PointsMaterial({size:mob?.08:.05,vertexColors:true,transparent:true,opacity:.45,blending:THREE.AdditiveBlending,depthWrite:false}));sc.add(rain);
     // Fireflies
-    const fN=mob?20:60,fG=new THREE.BufferGeometry(),fP=new Float32Array(fN*3),fC=new Float32Array(fN*3);
+    const fN=mob?60:180,fG=new THREE.BufferGeometry(),fP=new Float32Array(fN*3),fC=new Float32Array(fN*3);
     for(let i=0;i<fN;i++){fP[i*3]=(Math.random()-.5)*100;fP[i*3+1]=1+Math.random()*8;fP[i*3+2]=(Math.random()-.5)*100;const hue=[.13,.47,.55,.75,.85][Math.floor(Math.random()*5)];const c=new THREE.Color().setHSL(hue,.8,.6);fC[i*3]=c.r;fC[i*3+1]=c.g;fC[i*3+2]=c.b;}
     fG.setAttribute("position",new THREE.BufferAttribute(fP,3));fG.setAttribute("color",new THREE.BufferAttribute(fC,3));
-    const ff=new THREE.Points(fG,new THREE.PointsMaterial({size:.12,vertexColors:true,transparent:true,opacity:.6,blending:THREE.AdditiveBlending,depthWrite:false}));sc.add(ff);
+    const ff=new THREE.Points(fG,new THREE.PointsMaterial({size:.36,vertexColors:true,transparent:true,opacity:.7,blending:THREE.AdditiveBlending,depthWrite:false}));sc.add(ff);
     // NPCs
     const ags=NAMES.slice(0,16).map((name,i)=>{const zone=Z[Math.floor(Math.random()*Z.length)],xp=Math.floor(Math.random()*12000),tier=gT(xp),skin=SKINS[Math.floor(Math.random()*SKINS.length)];
       const av=mkAv(tier,skin),ox=zone.x+(Math.random()-.5)*12,oz=zone.z+(Math.random()-.5)*12;av.root.position.set(ox,0,oz);sc.add(av.root);
@@ -633,23 +706,38 @@ export default function GhostTown(){
     const ambL=sc.children.find((c:any)=>c.isAmbientLight) as THREE.AmbientLight;
     const dirL=mn;
     const starsObj=sc.children.find((c:any)=>c.isPoints&&c.geometry.attributes.position.count>200) as THREE.Points;
-    // ── Waterfall (west edge) ──
-    const wfall=mkWaterfall();wfall.position.set(-82,0,0);sc.add(wfall);
-    // ── Underground level ──
-    const ugGr=mkUnderground();ugGr.position.set(-87,-12,0);sc.add(ugGr);
-    // ── Savage Agent Cafe (underground) ──
-    const cafe=mkCafe();cafe.position.set(-87,-12,0);sc.add(cafe);
-    // ── Glowing stairs back to surface ──
-    const stairsGr=mkStairs();stairsGr.position.set(-79,-12,-2);sc.add(stairsGr);
-    // ── Cyber Mountain Sovereign (north) ──
-    const mountain=mkMountain();mountain.position.set(0,0,-82);sc.add(mountain);
+    // ── White Rapids cascade (in the ocean, east side) ──
+    const wfall=mkRapids();wfall.position.set(90,-.3,30);wfall.rotation.y=-Math.PI/2;sc.add(wfall);
+    // ── Fish schools (10 fish along rapids) ──
+    const fishArr:any[]=[];
+    for(let fi=0;fi<10;fi++){const f=mkFish();const ang=fi/10*Math.PI*2;f.position.set(90+Math.cos(ang)*3,-.3,30+fi*2);sc.add(f);fishArr.push({mesh:f,t:fi/10*Math.PI*2,lane:fi%3-.5});}
+    fishRefs.current=fishArr;
+    // ── Waterfall sign marker ──
+    const wfall2=mkWaterfall();wfall2.position.set(90,0,30);sc.add(wfall2);
+    // ── Underground level (below rapids) ──
+    const ugGr=mkUnderground();ugGr.position.set(90,-12,30);sc.add(ugGr);
+    // ── Savage Agent Cafe (underground, at base of rapids) ──
+    const cafe=mkCafe();cafe.position.set(90,-12,50);sc.add(cafe);
+    // ── Glowing stairs back to surface (6 ramps) ──
+    for(let si=0;si<6;si++){const sr=mkStairs();sr.position.set(90,-12+si*2,(si-3)*4+30);sc.add(sr);}
+    const stairsGr=new THREE.Group();sc.add(stairsGr);
+    // ── Cyber Mountain Sovereign (far north, 9x bigger) ──
+    const mountain=mkMountain();mountain.position.set(0,0,-130);sc.add(mountain);
+    // ── Race cars (2: player + AI, on mountain track at level 2) ──
+    const mkCar=(col:number)=>{const g=new THREE.Group();const body=new THREE.Mesh(new THREE.BoxGeometry(1.8,.7,3.5),new THREE.MeshBasicMaterial({color:col}));body.position.y=.4;g.add(body);const top=new THREE.Mesh(new THREE.BoxGeometry(1.4,.5,2),new THREE.MeshBasicMaterial({color:col}));top.position.set(0,.9,.1);g.add(top);([[.8,.1,1.4],[-.8,.1,1.4],[.8,.1,-1.4],[-.8,.1,-1.4]] as [number,number,number][]).forEach(([x,y,z])=>{const w=new THREE.Mesh(new THREE.CylinderGeometry(.35,.35,.3,8),new THREE.MeshBasicMaterial({color:0x111111}));w.rotation.z=Math.PI/2;w.position.set(x,y,z);g.add(w);});return g;};
+    const playerCar=mkCar(0x00ffc8);const aiCar=mkCar(0xf43f5e);
+    playerCar.position.set(0+30,22.5+(-130*0),-130);// on track at mountain pos
+    // actually position relative to scene: mountain is at (0,0,-130), track at y=22.5 radius 30
+    playerCar.position.set(30,22.5,-130);aiCar.position.set(28,22.5,-128);
+    playerCar.visible=false;aiCar.visible=false;
+    sc.add(playerCar);sc.add(aiCar);
     // ── Sea coins ──
     const seaCoins=(SEA_COIN_POS as [number,number][]).map(([cx,cz],ci:number)=>{
       const cm=mkSeaCoin([0xfbbf24,0x00ffc8,0xc084fc,0x60a5fa,0xf43f5e][ci%5]);
       cm.position.set(cx,.3,cz);sc.add(cm);
       return{mesh:cm,x:cx,z:cz,collected:false,respawnAt:0};
     });
-    SD.current={sc,cam,ren,blds,ags,eds,rain,rP,rN,ff,fP,fN,discoBall,sea,seaCtx,seaTex,seaOff:0,agentBoats,playerBoats,ambL,dirL,starsObj,seaCoins,wfall,mountain};
+    SD.current={sc,cam,ren,blds,ags,eds,rain,rP,rN,ff,fP,fN,discoBall,sea,seaCtx,seaTex,seaOff:0,agentBoats,playerBoats,ambL,dirL,starsObj,seaCoins,wfall,mountain,playerCar,aiCar,fishArr};
     aL("▶ 81 GHOST TOWN v6 SAMAUR-AI — the macro-hard city is LIVE","system");
     aL("▶ WASD/Arrows to move · V = 1st/3rd person · Shift = sprint","system");
     aL("▶ 11 main quests · 11 side quests · 11 hidden quests","system");
@@ -678,6 +766,18 @@ export default function GhostTown(){
         else{dragonRef.current.tx=tgtZ.x;dragonRef.current.tz=tgtZ.z;dragonRef.current.tgtZone=tgtZ;dragonRef.current.frame=30;}
         addToast("🐉 Dragon flies to next quest! Press R nearby to mount","#ff4500");aL("🐉 Dragon summoned — follow it, then press R to ride","system");
       }
+      // Race car enter/exit
+      if(k==='e'&&SD.current&&!inBoat.current&&!inCar.current){
+        const _mtOk=pd.current.hiddenQDone.includes('CLIMB CYBER MT SOVEREIGN');
+        if(_mtOk){const _px=playerPos.current.x,_pz=playerPos.current.z;
+          const _carX=Math.cos(playerCarAngle.current)*30,_carZ=Math.sin(playerCarAngle.current)*30-130;
+          if(Math.sqrt((_px-_carX)**2+(_pz-_carZ)**2)<6&&!raceActive.current){
+            if(SD.current.playerCar)SD.current.playerCar.visible=true;if(SD.current.aiCar)SD.current.aiCar.visible=true;
+            inCar.current=true;raceActive.current=true;playerLaps.current=0;setRaceHUD({lap:0,total:3});
+            addToast('🏁 RACE START! 3 laps — WASD to drive, E to exit car','#ff3333');aL('🏁 Mountain race started — beat the AI in 3 laps!','system');}
+        }
+      }
+      if(k==='e'&&inCar.current){inCar.current=false;raceActive.current=false;setRaceHUD(null);if(SD.current?.playerCar)SD.current.playerCar.visible=false;if(SD.current?.aiCar)SD.current.aiCar.visible=false;addToast('🏁 Exited race car','#64748b');}
       if(k==='e'&&SD.current&&boatEnterCooldown.current<=0){
         if(!inBoat.current){
           // Find nearest player boat
@@ -817,25 +917,25 @@ export default function GhostTown(){
         const _w0=SD.current.wfall.getObjectByName('wfall0');const _w1=SD.current.wfall.getObjectByName('wfall1');
         const _op=.45+Math.sin(t*.07)*.1;if(_w0)(_w0 as any).material.opacity=_op;if(_w1)(_w1 as any).material.opacity=_op*.55;
       }
-      // ── Waterfall entry — walk to x<-79 and fall in ──
-      if(!inBoat.current&&!inUnderground.current){
-        if(playerPos.current.x<-79&&Math.abs(playerPos.current.z)<8){
+      // ── Rapids entry — walk east past x=88, near z=30 ──
+      if(!inBoat.current&&!inUnderground.current&&!inCar.current){
+        if(playerPos.current.x>87&&Math.abs(playerPos.current.z-30)<10){
           waterfallFrame.current++;
           if(waterfallFrame.current===30)addToast('🌊 Edge of the fall — keep moving to DIVE!','#22aaff');
-          if(waterfallFrame.current>90){inUnderground.current=true;playerPos.current.set(-87,0,0);cD.current=12;
-            addToast('🌊 YOU RODE THE FALL — the Savage Agent Cafe awaits...','#00b4ff');aL('🌊 YOU rode the waterfall into the hidden underworld','system');
+          if(waterfallFrame.current>90){inUnderground.current=true;playerPos.current.set(90,0,50);cD.current=12;
+            addToast('🌊 YOU RODE THE RAPIDS — the Savage Agent Cafe awaits below...','#00b4ff');aL('🌊 YOU rode the white rapids down to the underground cafe','system');
             if(!pd.current.hiddenQDone.includes('RIDE THE FALL')){pd.current.hiddenQDone.push('RIDE THE FALL');pd.current.xp+=600;pd.current.tk+=140;pd.current.tier=gT(pd.current.xp);pd.current.belt=gB(pd.current.dojoXP);addToast('🏆 QUEST: RIDE THE FALL +600XP','#00b4ff');checkSuper();}
             waterfallFrame.current=0;}
         }else waterfallFrame.current=0;
       }
       // ── Underground: bounds, cafe quest, stairs back up ──
       if(inUnderground.current){
-        playerPos.current.x=clamp(playerPos.current.x,-130,-58);
-        playerPos.current.z=clamp(playerPos.current.z,-35,35);
-        if(!pd.current.hiddenQDone.includes('VISIT THE CAFE')){const _dcaf=Math.sqrt((playerPos.current.x+87)**2+playerPos.current.z**2);
+        playerPos.current.x=clamp(playerPos.current.x,60,125);
+        playerPos.current.z=clamp(playerPos.current.z,5,70);
+        if(!pd.current.hiddenQDone.includes('VISIT THE CAFE')){const _dcaf=Math.sqrt((playerPos.current.x-90)**2+(playerPos.current.z-50)**2);
           if(_dcaf<14){pd.current.hiddenQDone.push('VISIT THE CAFE');pd.current.xp+=400;pd.current.tk+=100;pd.current.tier=gT(pd.current.xp);pd.current.belt=gB(pd.current.dojoXP);addToast('☕ QUEST: VISIT THE CAFE +400XP','#e879f9');aL('☕ YOU found the SAVAGE AGENT CAFE — secret unlocked!','system');checkSuper();}}
-        if(playerPos.current.x>-80&&Math.abs(playerPos.current.z+2)<7){
-          if(playerY.current>-2){inUnderground.current=false;playerY.current=0;playerPos.current.set(-73,0,0);cD.current=18;addToast('🌿 Back on the surface!','#00ffb0');}
+        if(playerPos.current.x<63&&Math.abs(playerPos.current.z-30)<8){
+          if(playerY.current>-2){inUnderground.current=false;playerY.current=0;playerPos.current.set(60,0,30);cD.current=18;addToast('🌿 Back on the surface!','#00ffb0');}
         }
       }
       // ── Mountain summit quest ──
@@ -847,6 +947,30 @@ export default function GhostTown(){
           // Auto-summon dragon at summit
           if(SD.current&&!dragonRef.current){const _d=mkDragon();SD.current.sc.add(_d);_d.position.set(playerPos.current.x+3,playerY.current,playerPos.current.z+3);dragonRef.current={mesh:_d,tx:playerPos.current.x,tz:playerPos.current.z,frame:100,tgtZone:null,riding:false};}
         }}
+      // ── Fish animation (jump upstream along rapids) ──
+      if(SD.current.fishArr&&t%2===0){SD.current.fishArr.forEach((f:any)=>{f.t+=.025;f.mesh.position.y=-.3+Math.abs(Math.sin(f.t))*3.5;f.mesh.position.z=30+((f.t%(Math.PI*2))/Math.PI*20-10);f.mesh.rotation.z=Math.sin(f.t)*1.2;f.mesh.position.x=90+f.lane*1.5;});}
+      // ── Race logic ──
+      if(raceActive.current&&SD.current.playerCar&&SD.current.aiCar){
+        const TRACK_R=30,MTY=22.5,MTZ=-130;
+        aiCarAngle.current+=.008;// AI constant speed
+        const prevAngle=playerCarAngle.current;
+        if(inCar.current){// player drives on track
+          if(keys.current.w)playerCarAngle.current-=.015*(keys.current.shift?1.6:1);
+          if(keys.current.s)playerCarAngle.current+=.008;
+          if(keys.current.a)playerCarAngle.current+=.006;
+          if(keys.current.d)playerCarAngle.current-=.006;
+          // check lap (crossed 0 angle)
+          if(prevAngle>Math.PI*1.8&&playerCarAngle.current<.2){playerLaps.current++;setRaceHUD((r:any)=>({...r,lap:playerLaps.current}));
+            if(playerLaps.current>=3&&!pd.current.mainQDone.includes('MOUNTAIN RACE')){pd.current.mainQDone.push('MOUNTAIN RACE');pd.current.xp+=1200;pd.current.tk+=300;pd.current.tier=gT(pd.current.xp);pd.current.belt=gB(pd.current.dojoXP);addToast('🏁 RACE WON! +1200XP +300◈','#ff3333');aL('🏁 YOU won the MOUNTAIN RACE — 3 laps complete!','system');checkSuper();raceActive.current=false;setRaceHUD(null);}}
+          playerPos.current.x=Math.cos(playerCarAngle.current)*TRACK_R+0;
+          playerPos.current.z=Math.sin(playerCarAngle.current)*TRACK_R+MTZ;
+          playerY.current=MTY;
+        }
+        SD.current.playerCar.position.set(Math.cos(playerCarAngle.current)*TRACK_R,MTY,Math.sin(playerCarAngle.current)*TRACK_R+MTZ);
+        SD.current.playerCar.rotation.y=-playerCarAngle.current+Math.PI/2;
+        SD.current.aiCar.position.set(Math.cos(aiCarAngle.current)*TRACK_R,MTY,Math.sin(aiCarAngle.current)*TRACK_R+MTZ);
+        SD.current.aiCar.rotation.y=-aiCarAngle.current+Math.PI/2;
+      }
       // ── The Force — lifted agent floats above player ──
       if(liftedAgent.current){const _la=liftedAgent.current;
         _la.x=lerp(_la.x,playerPos.current.x+Math.sin(FC.current*.03)*2,.06);
@@ -1065,6 +1189,7 @@ export default function GhostTown(){
           {lifting&&<span style={{color:"#c084fc",animation:"runPulse .5s ease-in-out infinite alternate"}}>🌀 FORCE</span>}
           {ridingDragon&&<span style={{color:"#ff4500",animation:"runPulse .4s ease-in-out infinite alternate"}}>🐉 RIDING</span>}
           {inUnderground.current&&<span style={{color:"#ff2d78",fontSize:mob?5:6}}>⬇ CAVE</span>}
+          {inUnderground.current&&<button onClick={()=>setHackModal(true)} style={{background:"rgba(0,255,200,.1)",border:"1px solid #00ffe7",color:"#00ffe7",fontSize:mob?5:6,padding:"2px 6px",cursor:"pointer",fontFamily:"inherit",letterSpacing:1,borderRadius:2}}>🖥️ HACK</button>}
           {!inUnderground.current&&playerY.current>2&&<span style={{color:"#00b4ff",fontSize:mob?5:6}}>⬆ {Math.round(playerY.current)}m</span>}
           <span style={{color:sec==="NOMINAL"?"#22d3ee":"#f56565"}}>{sec==="NOMINAL"?"●":"⚠"}</span>
           {/* Chain indicator */}
@@ -1366,6 +1491,23 @@ export default function GhostTown(){
 
       <style>{`@keyframes confettiF0{0%{transform:translateY(-10px) rotate(0deg);opacity:1}100%{transform:translateY(100vh) rotate(720deg);opacity:0}}@keyframes confettiF1{0%{transform:translateY(-10px) rotate(0deg);opacity:1}100%{transform:translateY(100vh) rotate(-540deg);opacity:0}}@keyframes celebGlow{from{opacity:.6}to{opacity:1}}@keyframes runPulse{from{opacity:.7}to{opacity:1}}@keyframes joinPulse{0%,100%{box-shadow:0 0 6px #00ff8020}50%{box-shadow:0 0 14px #00ffb050,0 0 28px #00ff6020}}@keyframes toastIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}::-webkit-scrollbar{width:3px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:#12122a;border-radius:2px}*{box-sizing:border-box}`}</style>
 
+      {raceHUD&&<div style={{position:"absolute",top:"50%",left:"50%",transform:"translate(-50%,-50%)",zIndex:35,background:"rgba(0,0,0,.7)",border:"2px solid #ff3333",borderRadius:8,padding:"12px 24px",textAlign:"center",fontFamily:"inherit",pointerEvents:"none"}}>
+        <div style={{color:"#ff3333",fontSize:14,letterSpacing:4,fontWeight:900}}>🏁 MOUNTAIN RACE</div>
+        <div style={{color:"#fbbf24",fontSize:10,marginTop:4}}>LAP {raceHUD.lap+1} / {raceHUD.total} · WASD to drive · E to exit</div>
+      </div>}
+      {hackModal&&!hackSolved&&<div style={{position:"absolute",zIndex:40,inset:0,background:"rgba(0,10,20,.92)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",backdropFilter:"blur(10px)"}} onClick={()=>setHackModal(false)}>
+        <div style={{maxWidth:400,width:"90%",background:"#060f16",border:"1px solid #00ffe7",borderRadius:8,padding:24,fontFamily:"inherit"}} onClick={(e:any)=>e.stopPropagation()}>
+          <div style={{color:"#00ffe7",fontSize:12,letterSpacing:4,marginBottom:8}}>🖥️ TERMINAL HACK</div>
+          <div style={{color:"#22d3ee",fontSize:8,marginBottom:12,lineHeight:1.8}}>
+            CIPHER: <span style={{color:"#fbbf24"}}>TIVBA GBJAF FVYRAG UVQR</span><br/>
+            Decode the ROT13 cipher above ↑<br/>
+            <span style={{color:"#4a5568",fontSize:7}}>(ROT13: shift each letter 13 places. A→N, B→O...)</span>
+          </div>
+          <input value={hackInput} onChange={(e:any)=>setHackInput(e.target.value)} onKeyDown={(e:any)=>{if(e.key==='Enter'){const ans=hackInput.trim().toUpperCase();if(ans.includes('GHOST')&&ans.includes('TOWN')){setHackSolved(true);setHackModal(false);pd.current.xp+=500;pd.current.tk+=120;pd.current.tier=gT(pd.current.xp);pd.current.belt=gB(pd.current.dojoXP);addToast('🖥️ HACKED! +500XP +120◈','#00ffe7');aL('🖥️ YOU cracked the terminal cipher — HACK QUEST complete!','system');checkSuper();const _p2=pd.current;if(!_p2.hiddenQDone.includes('TERMINAL HACK'))_p2.hiddenQDone.push('TERMINAL HACK');}else addToast('Wrong. Try again.','#f56565');}}}
+            style={{width:"100%",background:"#0a1a1a",border:"1px solid #00ffe7",color:"#00ffe7",padding:"8px 12px",fontFamily:"inherit",fontSize:9,outline:"none",letterSpacing:2,boxSizing:"border-box"}} placeholder="TYPE ANSWER..." />
+          <div style={{color:"#2a4a4a",fontSize:6,marginTop:8}}>Press ENTER to submit · Click outside to close</div>
+        </div>
+      </div>}
       {/* ART MODAL FULLSCREEN */}
       {artModal&&<div style={{position:"absolute",zIndex:40,inset:0,background:"rgba(2,2,6,0.97)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",backdropFilter:"blur(20px)"}} onClick={()=>setArtModal(null)}>
         <div style={{maxWidth:500,width:"92%",background:"#06060f",border:`1px solid ${artModal.chain==="mainnet"?"#f59e0b40":"#c084fc40"}`,borderRadius:8,overflow:"hidden"}} onClick={(e:any)=>e.stopPropagation()}>

@@ -234,6 +234,17 @@ const SUPER_SKILLS=[
   {id:"force",n:"THE FORCE",desc:"Press L near an agent to lift and move them",icon:"🌀",reqXP:0,reqBelt:"RED"},
 ];
 const SEA_COIN_POS=[[110,15],[135,-25],[95,-85],[-115,35],[-130,-15],[65,125],[-75,115],[25,-135],[145,65],[-105,-95],[5,145],[155,-55],[-145,45],[85,-125],[-55,135]];
+const MUSIC_TRACKS=[
+  {n:'CALM',   bpm:58, wv:'sine'    as OscillatorType,seq:[0,4,7,11,7,4,0,4],      base:130.81,gain:.11,color:'#22d3ee'},
+  {n:'ROCK',   bpm:122,wv:'sawtooth'as OscillatorType,seq:[0,0,7,0,10,0,5,0],     base:65.41, gain:.07,color:'#f43f5e'},
+  {n:'INDIAN', bpm:76, wv:'sine'    as OscillatorType,seq:[0,2,5,7,9,7,5,2],      base:146.83,gain:.09,color:'#fbbf24'},
+  {n:'WORLD',  bpm:88, wv:'triangle'as OscillatorType,seq:[0,5,7,12,7,5,0,5],     base:130.81,gain:.09,color:'#38b2ac'},
+  {n:'RNB',    bpm:84, wv:'sine'    as OscillatorType,seq:[0,3,7,10,3,7,10,3],    base:98.00, gain:.09,color:'#c084fc'},
+  {n:'BLUES',  bpm:78, wv:'sawtooth'as OscillatorType,seq:[0,3,5,6,7,10,7,5],     base:98.00, gain:.08,color:'#4299e1'},
+  {n:'FOLK',   bpm:100,wv:'triangle'as OscillatorType,seq:[0,2,4,7,4,2,7,4],      base:196.00,gain:.09,color:'#10b981'},
+  {n:'METAL',  bpm:162,wv:'sawtooth'as OscillatorType,seq:[0,0,5,0,8,5,3,0],      base:65.41, gain:.06,color:'#991b1b'},
+  {n:'TRIBAL', bpm:106,wv:'square'  as OscillatorType,seq:[0,0,7,0,5,0,3,7],      base:55.00, gain:.07,color:'#ff6b35'},
+];
 const NAMES=["GHOST-7A","WRAITH-3F","SHADE-9B","PHANTOM-2D","SPECTER-5E","NULL-8C","VOID-1A","CIPHER-4G","ECHO-6H","DRIFT-0X","HAZE-7K","BLUR-2M","STATIC-9N","GLITCH-3P","FLUX-5Q","APEX-1R","OMEGA-4S","SIGMA-8T","DELTA-6U","ZERO-0V"];
 const ET=[{t:"ALLIANCE",c:"#00ffc8",h:0x00ffc8},{t:"RIVALRY",c:"#ff3366",h:0xff3366},{t:"MENTORSHIP",c:"#fbbf24",h:0xfbbf24}];
 const RC:{[k:string]:string}={common:"#6b7280",uncommon:"#38b2ac",rare:"#4299e1",epic:"#9f7aea",legendary:"#f59e0b"};
@@ -417,11 +428,11 @@ function mkSeaCoin(col=0xfbbf24):THREE.Group{
   return gr;
 }
 function mkWaterfall():THREE.Group{
-  // 1 cliff + 2 water planes — zero lights
+  // Canyon entrance cliff — water drops FROM y=0 DOWN to y=-18
   const gr=new THREE.Group();
-  const cliff=new THREE.Mesh(new THREE.BoxGeometry(18,22,7),new THREE.MeshBasicMaterial({color:0x1a2230}));cliff.position.set(0,5,0);gr.add(cliff);
-  const w0=new THREE.Mesh(new THREE.PlaneGeometry(7,22),new THREE.MeshBasicMaterial({color:0x3399ff,transparent:true,opacity:.55,side:THREE.DoubleSide,depthWrite:false}));w0.position.set(0,-1,3.6);w0.name='wfall0';gr.add(w0);
-  const w1=new THREE.Mesh(new THREE.PlaneGeometry(5,22),new THREE.MeshBasicMaterial({color:0x88ccff,transparent:true,opacity:.3,side:THREE.DoubleSide,depthWrite:false}));w1.position.set(.3,-1,3.4);w1.name='wfall1';gr.add(w1);
+  const cliff=new THREE.Mesh(new THREE.BoxGeometry(18,18,6),new THREE.MeshBasicMaterial({color:0x1a2230}));cliff.position.set(0,-9,-2);gr.add(cliff);
+  const w0=new THREE.Mesh(new THREE.PlaneGeometry(10,18),new THREE.MeshBasicMaterial({color:0x3399ff,transparent:true,opacity:.55,side:THREE.DoubleSide,depthWrite:false}));w0.position.set(0,-9,1);w0.name='wfall0';gr.add(w0);
+  const w1=new THREE.Mesh(new THREE.PlaneGeometry(7,18),new THREE.MeshBasicMaterial({color:0x88ccff,transparent:true,opacity:.3,side:THREE.DoubleSide,depthWrite:false}));w1.position.set(.3,-9,.8);w1.name='wfall1';gr.add(w1);
   return gr;
 }
 function mkCafe():THREE.Group{
@@ -437,67 +448,80 @@ function mkCafe():THREE.Group{
   return gr;
 }
 function mkStairs():THREE.Group{
-  // Single glowing ramp — zero lights
+  // One glowing step platform — stacked in scene init to form staircase
   const gr=new THREE.Group();
-  const ramp=new THREE.Mesh(new THREE.BoxGeometry(4,1,14),new THREE.MeshBasicMaterial({color:0x00ffb0}));
-  ramp.position.set(0,-6.5,7);ramp.rotation.x=Math.atan2(12,14);gr.add(ramp);
+  const step=new THREE.Mesh(new THREE.BoxGeometry(6,.5,3.5),new THREE.MeshBasicMaterial({color:0x00ffb0}));gr.add(step);
   return gr;
 }
 function mkMountain():THREE.Group{
   const gr=new THREE.Group();
   const stoneM=new THREE.MeshBasicMaterial({color:0x1e2d3a});
+  const stone2M=new THREE.MeshBasicMaterial({color:0x253040});
   const snowM=new THREE.MeshBasicMaterial({color:0xc8d8ff});
-  const trailM=new THREE.MeshBasicMaterial({color:0x3a4a2a});
-  // Main body: 3 stacked cones
-  const c1=new THREE.Mesh(new THREE.ConeGeometry(45,60,12),stoneM);c1.position.y=30;gr.add(c1);
-  const c2=new THREE.Mesh(new THREE.ConeGeometry(28,40,10),new THREE.MeshBasicMaterial({color:0x253040}));c2.position.y=52;gr.add(c2);
-  const c3=new THREE.Mesh(new THREE.ConeGeometry(10,22,8),snowM);c3.position.y=72;gr.add(c3);
-  const peak=new THREE.Mesh(new THREE.OctahedronGeometry(2.2),new THREE.MeshBasicMaterial({color:0x00b4ff}));peak.position.y=84;peak.name='mtPeak';gr.add(peak);
+  const trailM=new THREE.MeshBasicMaterial({color:0x4a5a3a});
+  // Main body: ONE elongated mountain — not stacked christmas-tree cones
+  const c1=new THREE.Mesh(new THREE.ConeGeometry(50,110,14),stoneM);c1.position.y=55;gr.add(c1);
+  const c2=new THREE.Mesh(new THREE.ConeGeometry(18,38,10),stone2M);c2.position.y=92;gr.add(c2);
+  const snowCap=new THREE.Mesh(new THREE.ConeGeometry(7,22,8),snowM);snowCap.position.y=113;gr.add(snowCap);
+  const peak=new THREE.Mesh(new THREE.OctahedronGeometry(2.2),new THREE.MeshBasicMaterial({color:0x00b4ff}));peak.position.y=125;peak.name='mtPeak';gr.add(peak);
   // 6 level terraces
   const terraceCols=[0x2a3a2a,0x283545,0x263050,0x243060,0x22286a,0x203070];
-  const terraceR=[38,30,23,17,12,7];
-  const terraceY=[10,22,34,46,56,64];
+  const terraceR=[44,34,26,19,13,8];
+  const terraceY=[16,30,46,62,78,92];
   for(let lv=0;lv<6;lv++){
     const ring=new THREE.Mesh(new THREE.CylinderGeometry(terraceR[lv]+1.5,terraceR[lv]+2,1.2,16,1,true),new THREE.MeshBasicMaterial({color:terraceCols[lv],side:THREE.DoubleSide}));
     ring.position.y=terraceY[lv];ring.name=`mtLevel${lv}`;gr.add(ring);
     const floor=new THREE.Mesh(new THREE.RingGeometry(terraceR[lv]-.5,terraceR[lv]+1.5,16),new THREE.MeshBasicMaterial({color:terraceCols[lv],side:THREE.DoubleSide}));
     floor.rotation.x=-Math.PI/2;floor.position.y=terraceY[lv]+.1;gr.add(floor);
   }
-  // Race track on level 2 (y=22, radius=30)
+  // Race track on level 2 (y=30, radius=30)
   const trackM=new THREE.MeshBasicMaterial({color:0x2a2a2a,side:THREE.DoubleSide});
-  const track=new THREE.Mesh(new THREE.TorusGeometry(30,2.5,4,48),trackM);track.rotation.x=Math.PI/2;track.position.y=22.5;track.name='raceTrack';gr.add(track);
-  // Track markings — dashed white lines
-  for(let i=0;i<12;i++){const ang=i/12*Math.PI*2;const mk=new THREE.Mesh(new THREE.BoxGeometry(1.5,.1,4),new THREE.MeshBasicMaterial({color:0xffffff}));mk.position.set(Math.cos(ang)*30,23,Math.sin(ang)*30);mk.rotation.y=-ang;gr.add(mk);}
-  // Finish line at angle 0
-  const fl=new THREE.Mesh(new THREE.BoxGeometry(6,.15,5),new THREE.MeshBasicMaterial({color:0xff3333}));fl.position.set(30,23.1,0);fl.name='finishLine';gr.add(fl);
-  // 9 trails (thin boxes zigzagging from base to peak)
+  const track=new THREE.Mesh(new THREE.TorusGeometry(30,2.5,4,48),trackM);track.rotation.x=Math.PI/2;track.position.y=30.5;track.name='raceTrack';gr.add(track);
+  for(let i=0;i<12;i++){const ang=i/12*Math.PI*2;const mk=new THREE.Mesh(new THREE.BoxGeometry(1.5,.1,4),new THREE.MeshBasicMaterial({color:0xffffff}));mk.position.set(Math.cos(ang)*30,31,Math.sin(ang)*30);mk.rotation.y=-ang;gr.add(mk);}
+  const fl=new THREE.Mesh(new THREE.BoxGeometry(6,.15,5),new THREE.MeshBasicMaterial({color:0xff3333}));fl.position.set(30,31.1,0);fl.name='finishLine';gr.add(fl);
+  // 9 SOLID switchback trails — wide platforms winding up the mountain
   for(let tr=0;tr<9;tr++){
-    const ang=tr/9*Math.PI*2;const trailBox=new THREE.Mesh(new THREE.BoxGeometry(.8,62,.8),trailM);
-    trailBox.position.set(Math.cos(ang)*18,31,Math.sin(ang)*18);trailBox.rotation.z=Math.cos(ang)*.45;trailBox.rotation.x=Math.sin(ang)*.45;gr.add(trailBox);}
+    const baseAng=tr/9*Math.PI*2;
+    for(let seg=0;seg<10;seg++){
+      const frac=(seg+.5)/10;
+      const ang=baseAng+frac*Math.PI*1.6;// spiral around
+      const r=lerp(46,9,frac);
+      const y=frac*108;
+      const platform=new THREE.Mesh(new THREE.BoxGeometry(5,.5,8),trailM);
+      platform.position.set(Math.cos(ang)*r,y,Math.sin(ang)*r);
+      platform.rotation.y=-ang-Math.PI/2;
+      gr.add(platform);
+    }
+  }
   return gr;
 }
 function mkRapids():THREE.Group{
-  // 6-level white water cascade — zero lights, MeshBasicMaterial only
+  // 6-level cascade descending FROM y=0 DOWN to y=-18 — below main axis
   const gr=new THREE.Group();
   const rockM=new THREE.MeshBasicMaterial({color:0x1a2230});
   const waterM=new THREE.MeshBasicMaterial({color:0xaaddff,transparent:true,opacity:.75,side:THREE.DoubleSide,depthWrite:false});
   const foamM=new THREE.MeshBasicMaterial({color:0xeef8ff,transparent:true,opacity:.85,side:THREE.DoubleSide,depthWrite:false});
-  // 6 cascade tiers
+  // Canyon walls (frame the descent)
   for(let lv=0;lv<6;lv++){
-    const y=lv*2.5;const w=8-lv*.4;
-    // Rock shelf
-    const shelf=new THREE.Mesh(new THREE.BoxGeometry(w+3,1,4),rockM);shelf.position.set(0,y-.3,lv*4);gr.add(shelf);
-    // Water pool
-    const pool=new THREE.Mesh(new THREE.PlaneGeometry(w,3),waterM);pool.rotation.x=-Math.PI/2;pool.position.set(0,y+.05,lv*4+1);pool.name=`rapids${lv}`;gr.add(pool);
-    // Foam splash
-    const foam=new THREE.Mesh(new THREE.PlaneGeometry(w+1,1.5),foamM);foam.rotation.x=-Math.PI/2;foam.position.set(0,y+.08,lv*4-.5);gr.add(foam);
-    // Side rocks
-    [-1,1].forEach((s:number)=>{const r=new THREE.Mesh(new THREE.OctahedronGeometry(.8+Math.random()*.4,0),rockM);r.position.set(s*(w/2+.8),y+.3,lv*4+Math.random()*2);gr.add(r);});
+    const y=-lv*3;
+    [-1,1].forEach((s:number)=>{
+      const wall=new THREE.Mesh(new THREE.BoxGeometry(2.5,4,5.5),rockM);
+      wall.position.set(s*7,y-2,lv*5);gr.add(wall);
+    });
   }
-  // Waterfall drop planes between levels
+  // 6 descending tiers
+  for(let lv=0;lv<6;lv++){
+    const y=-lv*3;const w=8-lv*.3;
+    const shelf=new THREE.Mesh(new THREE.BoxGeometry(w+3,1,5),rockM);shelf.position.set(0,y-.5,lv*5);gr.add(shelf);
+    const pool=new THREE.Mesh(new THREE.PlaneGeometry(w,4),waterM);pool.rotation.x=-Math.PI/2;pool.position.set(0,y+.05,lv*5+1);pool.name=`rapids${lv}`;gr.add(pool);
+    const foam=new THREE.Mesh(new THREE.PlaneGeometry(w+1,1.5),foamM);foam.rotation.x=-Math.PI/2;foam.position.set(0,y+.08,lv*5-.5);gr.add(foam);
+    [-1,1].forEach((s:number)=>{const r=new THREE.Mesh(new THREE.OctahedronGeometry(.8+.3,0),rockM);r.position.set(s*(w/2+.8),y+.3,lv*5+1.5);gr.add(r);});
+  }
+  // Vertical drop planes between levels (water falling DOWN between shelves)
   for(let lv=0;lv<5;lv++){
-    const drop=new THREE.Mesh(new THREE.PlaneGeometry(5,2.8),foamM);
-    drop.position.set(0,lv*2.5+1.4,lv*4+3.8);gr.add(drop);}
+    const drop=new THREE.Mesh(new THREE.PlaneGeometry(5,3.2),foamM);
+    drop.position.set(0,-lv*3-1.6,lv*5+4.5);gr.add(drop);
+  }
   return gr;
 }
 function mkFish():THREE.Group{
@@ -557,6 +581,10 @@ export default function GhostTown(){
   const [sec,setSec]=useState("NOMINAL");
   const [banList,setBan]=useState<any[]>([]);
   const [audioOn,setAudioOn]=useState(false);
+  const [activeTrack,setActiveTrack]=useState(-1);
+  const musicCtxRef=useRef<AudioContext|null>(null);
+  const musicIvRef=useRef<any>(null);
+  const musicSeqIdx=useRef(0);
   const [playerZone,setPlayerZone]=useState<any>(null);
   const [breathMode,setBreathMode]=useState<any>(null);
   const [achievements,setAchievements]=useState<any[]>([]);
@@ -629,6 +657,32 @@ export default function GhostTown(){
   const aL=useCallback((m:string,t="info")=>setLog(p=>[{m,t,id:Math.random()},...p].slice(0,80)),[]);
   const addToast=useCallback((msg:string,color="#00ffc8")=>{const id=Math.random();setToasts(p=>[...p,{id,msg,color}]);setTimeout(()=>setToasts(p=>p.filter((t:any)=>t.id!==id)),4000);},[]);
   const addAch=useCallback((name:string,desc:string)=>{setAchievements(p=>{if(p.find((a:any)=>a.name===name))return p;return[...p,{name,desc}];});addToast(`🏆 ${name}`,"#fbbf24");},[addToast]);
+
+  const stopMusic=useCallback(()=>{if(musicIvRef.current){clearInterval(musicIvRef.current);musicIvRef.current=null;}setActiveTrack(-1);},[]);
+  const startMusic=useCallback((idx:number)=>{
+    if(musicIvRef.current){clearInterval(musicIvRef.current);musicIvRef.current=null;}
+    if(idx<0){setActiveTrack(-1);return;}
+    if(!musicCtxRef.current){try{musicCtxRef.current=new AudioContext();}catch(e){return;}}
+    const ctx=musicCtxRef.current;
+    if(ctx.state==='suspended')ctx.resume();
+    const tr=MUSIC_TRACKS[idx];
+    const semToHz=(base:number,semi:number)=>base*Math.pow(2,semi/12);
+    musicSeqIdx.current=0;
+    const beatMs=60000/tr.bpm;
+    musicIvRef.current=setInterval(()=>{
+      const semi=tr.seq[musicSeqIdx.current%tr.seq.length];
+      musicSeqIdx.current++;
+      const osc=ctx.createOscillator();const g=ctx.createGain();
+      osc.connect(g);g.connect(ctx.destination);
+      osc.type=tr.wv;osc.frequency.value=semToHz(tr.base,semi);
+      const now=ctx.currentTime;
+      g.gain.setValueAtTime(0,now);
+      g.gain.linearRampToValueAtTime(tr.gain,now+0.015);
+      g.gain.exponentialRampToValueAtTime(0.0001,now+beatMs*.75/1000);
+      osc.start(now);osc.stop(now+beatMs*.8/1000);
+    },beatMs);
+    setActiveTrack(idx);
+  },[]);
 
   const checkSuper=useCallback(()=>{const p=pd.current;SUPER_SKILLS.forEach(ss=>{if(p.superSkills.includes(ss.id))return;const belt=gB(p.dojoXP);const bIdx=BELTS.findIndex((b:any)=>b.n===belt.n);const reqIdx=BELTS.findIndex((b:any)=>b.n===ss.reqBelt);if(p.xp>=ss.reqXP&&bIdx>=reqIdx){p.superSkills.push(ss.id);addToast(`${ss.icon} SUPER SKILL UNLOCKED: ${ss.n}!`,"#f43f5e");aL(`⭐ YOU unlocked super skill: ${ss.n} — ${ss.desc}`,"system");}});},[addToast,aL]);
 
@@ -706,29 +760,28 @@ export default function GhostTown(){
     const ambL=sc.children.find((c:any)=>c.isAmbientLight) as THREE.AmbientLight;
     const dirL=mn;
     const starsObj=sc.children.find((c:any)=>c.isPoints&&c.geometry.attributes.position.count>200) as THREE.Points;
-    // ── White Rapids cascade (in the ocean, east side) ──
-    const wfall=mkRapids();wfall.position.set(90,-.3,30);wfall.rotation.y=-Math.PI/2;sc.add(wfall);
-    // ── Fish schools (10 fish along rapids) ──
+    // ── Ocean Rapids cascade (east side, drops BELOW main axis y=0 to y=-18) ──
+    const wfall=mkRapids();wfall.position.set(125,0,0);sc.add(wfall);
+    // ── Canyon cliff entrance marker ──
+    const wfall2=mkWaterfall();wfall2.position.set(125,0,-4);sc.add(wfall2);
+    // ── Fish schools (10 fish jumping upstream along the rapids) ──
     const fishArr:any[]=[];
-    for(let fi=0;fi<10;fi++){const f=mkFish();const ang=fi/10*Math.PI*2;f.position.set(90+Math.cos(ang)*3,-.3,30+fi*2);sc.add(f);fishArr.push({mesh:f,t:fi/10*Math.PI*2,lane:fi%3-.5});}
+    for(let fi=0;fi<10;fi++){const f=mkFish();f.position.set(125+((fi%3)-1)*1.2,-12,fi/10*25);sc.add(f);fishArr.push({mesh:f,t:fi/10*Math.PI*2,lane:(fi%3)-1});}
     fishRefs.current=fishArr;
-    // ── Waterfall sign marker ──
-    const wfall2=mkWaterfall();wfall2.position.set(90,0,30);sc.add(wfall2);
-    // ── Underground level (below rapids) ──
-    const ugGr=mkUnderground();ugGr.position.set(90,-12,30);sc.add(ugGr);
-    // ── Savage Agent Cafe (underground, at base of rapids) ──
-    const cafe=mkCafe();cafe.position.set(90,-12,50);sc.add(cafe);
-    // ── Glowing stairs back to surface (6 ramps) ──
-    for(let si=0;si<6;si++){const sr=mkStairs();sr.position.set(90,-12+si*2,(si-3)*4+30);sc.add(sr);}
+    // ── Underground level (below rapids, at y=-18) ──
+    const ugGr=mkUnderground();ugGr.position.set(125,-18,12);sc.add(ugGr);
+    // ── Savage Agent Cafe (at base of rapids, underground) ──
+    const cafe=mkCafe();cafe.position.set(125,-18,18);sc.add(cafe);
+    // ── Glowing stairs: 7 steps from y=-18 back up to y=0 ──
+    for(let si=0;si<7;si++){const sr=mkStairs();sr.position.set(125,-18+si*3,si*4+24);sc.add(sr);}
     const stairsGr=new THREE.Group();sc.add(stairsGr);
     // ── Cyber Mountain Sovereign (far north, 9x bigger) ──
     const mountain=mkMountain();mountain.position.set(0,0,-130);sc.add(mountain);
     // ── Race cars (2: player + AI, on mountain track at level 2) ──
     const mkCar=(col:number)=>{const g=new THREE.Group();const body=new THREE.Mesh(new THREE.BoxGeometry(1.8,.7,3.5),new THREE.MeshBasicMaterial({color:col}));body.position.y=.4;g.add(body);const top=new THREE.Mesh(new THREE.BoxGeometry(1.4,.5,2),new THREE.MeshBasicMaterial({color:col}));top.position.set(0,.9,.1);g.add(top);([[.8,.1,1.4],[-.8,.1,1.4],[.8,.1,-1.4],[-.8,.1,-1.4]] as [number,number,number][]).forEach(([x,y,z])=>{const w=new THREE.Mesh(new THREE.CylinderGeometry(.35,.35,.3,8),new THREE.MeshBasicMaterial({color:0x111111}));w.rotation.z=Math.PI/2;w.position.set(x,y,z);g.add(w);});return g;};
     const playerCar=mkCar(0x00ffc8);const aiCar=mkCar(0xf43f5e);
-    playerCar.position.set(0+30,22.5+(-130*0),-130);// on track at mountain pos
-    // actually position relative to scene: mountain is at (0,0,-130), track at y=22.5 radius 30
-    playerCar.position.set(30,22.5,-130);aiCar.position.set(28,22.5,-128);
+    // mountain is at (0,0,-130), race track at y=30.5 radius 30
+    playerCar.position.set(30,30.5,-130);aiCar.position.set(28,30.5,-128);
     playerCar.visible=false;aiCar.visible=false;
     sc.add(playerCar);sc.add(aiCar);
     // ── Sea coins ──
@@ -850,9 +903,9 @@ export default function GhostTown(){
       if(k.a||jx<-.3){_mv.sub(_right);moving=true;}
       if(k.d||jx>.3){_mv.add(_right);moving=true;}
       if(_mv.lengthSq()>0){_mv.normalize().multiplyScalar(spd);playerPos.current.add(_mv);playerPos.current.x=clamp(playerPos.current.x,-95,95);playerPos.current.z=clamp(playerPos.current.z,-95,95);playerAngle.current=Math.atan2(_mv.x,_mv.z);}
-      if(flyingRef.current){if(k.space)playerY.current=Math.min(25,playerY.current+.12);else playerY.current=Math.max(inUnderground.current?-12:0,playerY.current-.04);}
-      else if(inUnderground.current){playerY.current=lerp(playerY.current,-12,.12);}
-      else{const _dxm=playerPos.current.x,_dzm=playerPos.current.z+82,_dm=Math.sqrt(_dxm*_dxm+_dzm*_dzm);const _tY=_dm<15?Math.max(0,(1-_dm/15)*19):0;playerY.current=lerp(playerY.current,_tY,.08);}
+      if(flyingRef.current){if(k.space)playerY.current=Math.min(25,playerY.current+.12);else playerY.current=Math.max(inUnderground.current?-18:0,playerY.current-.04);}
+      else if(inUnderground.current){playerY.current=lerp(playerY.current,-18,.12);}
+      else{const _dxm=playerPos.current.x,_dzm=playerPos.current.z+130,_dm=Math.sqrt(_dxm*_dxm+_dzm*_dzm);const _tY=_dm<15?Math.max(0,(1-_dm/15)*20):0;playerY.current=lerp(playerY.current,_tY,.08);}
       if(playerAv.current){
         _tgt.set(playerPos.current.x,playerY.current,playerPos.current.z);
         playerAv.current.root.position.lerp(_tgt,.2);
@@ -917,29 +970,28 @@ export default function GhostTown(){
         const _w0=SD.current.wfall.getObjectByName('wfall0');const _w1=SD.current.wfall.getObjectByName('wfall1');
         const _op=.45+Math.sin(t*.07)*.1;if(_w0)(_w0 as any).material.opacity=_op;if(_w1)(_w1 as any).material.opacity=_op*.55;
       }
-      // ── Rapids entry — walk east past x=88, near z=30 ──
+      // ── Rapids entry — walk east past x=120 into the ocean canyon ──
       if(!inBoat.current&&!inUnderground.current&&!inCar.current){
-        if(playerPos.current.x>87&&Math.abs(playerPos.current.z-30)<10){
+        if(playerPos.current.x>118&&Math.abs(playerPos.current.z)<20){
           waterfallFrame.current++;
-          if(waterfallFrame.current===30)addToast('🌊 Edge of the fall — keep moving to DIVE!','#22aaff');
-          if(waterfallFrame.current>90){inUnderground.current=true;playerPos.current.set(90,0,50);cD.current=12;
+          if(waterfallFrame.current===30)addToast('🌊 Edge of the canyon — keep moving to DIVE!','#22aaff');
+          if(waterfallFrame.current>90){inUnderground.current=true;playerPos.current.set(125,-18,15);cD.current=12;
             addToast('🌊 YOU RODE THE RAPIDS — the Savage Agent Cafe awaits below...','#00b4ff');aL('🌊 YOU rode the white rapids down to the underground cafe','system');
             if(!pd.current.hiddenQDone.includes('RIDE THE FALL')){pd.current.hiddenQDone.push('RIDE THE FALL');pd.current.xp+=600;pd.current.tk+=140;pd.current.tier=gT(pd.current.xp);pd.current.belt=gB(pd.current.dojoXP);addToast('🏆 QUEST: RIDE THE FALL +600XP','#00b4ff');checkSuper();}
             waterfallFrame.current=0;}
         }else waterfallFrame.current=0;
       }
-      // ── Underground: bounds, cafe quest, stairs back up ──
+      // ── Underground: bounds, cafe quest, stairs back up to surface ──
       if(inUnderground.current){
-        playerPos.current.x=clamp(playerPos.current.x,60,125);
-        playerPos.current.z=clamp(playerPos.current.z,5,70);
-        if(!pd.current.hiddenQDone.includes('VISIT THE CAFE')){const _dcaf=Math.sqrt((playerPos.current.x-90)**2+(playerPos.current.z-50)**2);
+        playerPos.current.x=clamp(playerPos.current.x,108,148);
+        playerPos.current.z=clamp(playerPos.current.z,-8,52);
+        if(!pd.current.hiddenQDone.includes('VISIT THE CAFE')){const _dcaf=Math.sqrt((playerPos.current.x-125)**2+(playerPos.current.z-18)**2);
           if(_dcaf<14){pd.current.hiddenQDone.push('VISIT THE CAFE');pd.current.xp+=400;pd.current.tk+=100;pd.current.tier=gT(pd.current.xp);pd.current.belt=gB(pd.current.dojoXP);addToast('☕ QUEST: VISIT THE CAFE +400XP','#e879f9');aL('☕ YOU found the SAVAGE AGENT CAFE — secret unlocked!','system');checkSuper();}}
-        if(playerPos.current.x<63&&Math.abs(playerPos.current.z-30)<8){
-          if(playerY.current>-2){inUnderground.current=false;playerY.current=0;playerPos.current.set(60,0,30);cD.current=18;addToast('🌿 Back on the surface!','#00ffb0');}
-        }
+        // Exit via stairs at far z end — stairs go from y=-18 up to y=0
+        if(playerPos.current.z>46&&playerY.current>-3){inUnderground.current=false;playerY.current=0;playerPos.current.set(125,0,52);cD.current=18;addToast('🌿 Back on the surface!','#00ffb0');}
       }
       // ── Mountain summit quest ──
-      if(!inUnderground.current&&!inBoat.current){const _dmt=Math.sqrt(playerPos.current.x**2+(playerPos.current.z+82)**2);
+      if(!inUnderground.current&&!inBoat.current){const _dmt=Math.sqrt(playerPos.current.x**2+(playerPos.current.z+130)**2);
         if(_dmt<4&&playerY.current>14&&!pd.current.hiddenQDone.includes('CLIMB CYBER MT SOVEREIGN')){
           pd.current.hiddenQDone.push('CLIMB CYBER MT SOVEREIGN');pd.current.xp+=800;pd.current.tk+=180;pd.current.tier=gT(pd.current.xp);pd.current.belt=gB(pd.current.dojoXP);
           addToast('🏔️ SUMMIT! CYBER MT SOVEREIGN CONQUERED +800XP — 🐉 DRAGON RIDING UNLOCKED! Press R near dragon','#00b4ff');
@@ -948,10 +1000,10 @@ export default function GhostTown(){
           if(SD.current&&!dragonRef.current){const _d=mkDragon();SD.current.sc.add(_d);_d.position.set(playerPos.current.x+3,playerY.current,playerPos.current.z+3);dragonRef.current={mesh:_d,tx:playerPos.current.x,tz:playerPos.current.z,frame:100,tgtZone:null,riding:false};}
         }}
       // ── Fish animation (jump upstream along rapids) ──
-      if(SD.current.fishArr&&t%2===0){SD.current.fishArr.forEach((f:any)=>{f.t+=.025;f.mesh.position.y=-.3+Math.abs(Math.sin(f.t))*3.5;f.mesh.position.z=30+((f.t%(Math.PI*2))/Math.PI*20-10);f.mesh.rotation.z=Math.sin(f.t)*1.2;f.mesh.position.x=90+f.lane*1.5;});}
+      if(SD.current.fishArr&&t%2===0){SD.current.fishArr.forEach((f:any)=>{f.t+=.025;f.mesh.position.y=-18+Math.abs(Math.sin(f.t))*20;f.mesh.position.z=(f.t%(Math.PI*2))/Math.PI*25;f.mesh.rotation.z=Math.sin(f.t)*1.2;f.mesh.position.x=125+f.lane*1.2;});}
       // ── Race logic ──
       if(raceActive.current&&SD.current.playerCar&&SD.current.aiCar){
-        const TRACK_R=30,MTY=22.5,MTZ=-130;
+        const TRACK_R=30,MTY=30.5,MTZ=-130;
         aiCarAngle.current+=.008;// AI constant speed
         const prevAngle=playerCarAngle.current;
         if(inCar.current){// player drives on track
@@ -1219,6 +1271,15 @@ export default function GhostTown(){
               }
             }} style={{background:isDay?"rgba(255,200,50,0.12)":"rgba(100,100,180,0.1)",border:`1px solid ${isDay?"rgba(255,200,50,0.4)":"rgba(100,100,200,0.3)"}`,borderRadius:3,color:isDay?"#fbbf24":"#c084fc",fontSize:mob?5:6,padding:"2px 7px",cursor:"pointer",fontFamily:"inherit",letterSpacing:1}}>
             {isDay?"☀️ DAY":"🌙 NIGHT"}</button>
+          {/* Music track selector */}
+          <div style={{display:'flex',alignItems:'center',gap:2}}>
+            <button onClick={()=>{if(activeTrack<0)startMusic(0);else stopMusic();}}
+              style={{background:activeTrack>=0?`rgba(${activeTrack===0?'34,211,238':activeTrack===1?'244,63,94':activeTrack===2?'251,191,36':activeTrack===3?'56,178,172':activeTrack===4?'192,132,252':activeTrack===5?'66,153,225':activeTrack===6?'16,185,129':activeTrack===7?'153,27,27':'255,107,53'},0.12)`:'rgba(0,0,0,0.1)',border:`1px solid ${activeTrack>=0?MUSIC_TRACKS[activeTrack].color+'44':'rgba(255,255,255,0.1)'}`,borderRadius:3,color:activeTrack>=0?MUSIC_TRACKS[activeTrack].color:'#3a3a52',fontSize:mob?5:6,padding:'2px 5px',cursor:'pointer',fontFamily:'inherit',letterSpacing:1}}>
+              {activeTrack>=0?`♫ ${MUSIC_TRACKS[activeTrack].n}`:'♫ OFF'}
+            </button>
+            {activeTrack>=0&&<button onClick={()=>startMusic((activeTrack+1)%9)}
+              style={{background:'rgba(0,0,0,0.15)',border:'1px solid rgba(255,255,255,0.1)',borderRadius:3,color:'#4a4a6a',fontSize:mob?4:5,padding:'2px 4px',cursor:'pointer',fontFamily:'inherit'}}>▶</button>}
+          </div>
           <button style={{background:"rgba(0,255,231,0.08)",border:"1px solid rgba(0,255,231,0.25)",borderRadius:3,color:"#00ffe7",fontSize:mob?5:6,padding:"2px 7px",cursor:"pointer",fontFamily:"inherit",letterSpacing:2}}
             onClick={()=>setBankOpen(true)}>🏦 [B]ANK</button>
         </div>

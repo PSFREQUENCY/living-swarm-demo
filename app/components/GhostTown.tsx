@@ -495,6 +495,72 @@ function mkDiscoBall():THREE.Group{
   return g;
 }
 
+// ═══ CYBER VEHICLE — 3 modes: Car / Submarine / Flying Saucer ═══
+function mkCyberVehicle():THREE.Group{
+  const g=new THREE.Group();
+  const cM=new THREE.MeshStandardMaterial({color:0x001133,emissive:0x0066ff,emissiveIntensity:.55,roughness:.12,metalness:.96});
+  const gM=new THREE.MeshBasicMaterial({color:0x00eeff,transparent:true,opacity:.88});
+  const gDM=new THREE.MeshBasicMaterial({color:0x00eeff,transparent:true,opacity:.28});
+
+  // ── CAR MODE ──
+  const carGr=new THREE.Group();carGr.name='carMode';g.add(carGr);
+  const body=new THREE.Mesh(new THREE.BoxGeometry(2.8,.55,5.5),cM);body.position.y=.48;carGr.add(body);
+  const cabin=new THREE.Mesh(new THREE.BoxGeometry(2.2,.52,2.8),new THREE.MeshStandardMaterial({color:0x000820,emissive:0x0033cc,emissiveIntensity:.35,roughness:.08,metalness:.92,transparent:true,opacity:.72}));cabin.position.set(0,.97,.2);carGr.add(cabin);
+  const spoil=new THREE.Mesh(new THREE.BoxGeometry(2.6,.08,.55),gM);spoil.position.set(0,1.06,-2.45);carGr.add(spoil);
+  [-1,1].forEach((s:number)=>{const p=new THREE.Mesh(new THREE.BoxGeometry(.08,.42,.08),cM);p.position.set(s*.9,.82,-2.4);carGr.add(p);});
+  const uGlow=new THREE.Mesh(new THREE.BoxGeometry(3.2,.07,6),gDM);uGlow.position.y=.1;carGr.add(uGlow);
+  ([[1.42,.28,1.7],[1.42,.28,-1.7],[-1.42,.28,1.7],[-1.42,.28,-1.7]] as [number,number,number][]).forEach(([x,y,z])=>{
+    const rim=new THREE.Mesh(new THREE.CylinderGeometry(.56,.56,.3,12),new THREE.MeshStandardMaterial({color:0x111122,emissive:0x0066ff,emissiveIntensity:.7,roughness:.25,metalness:.85}));
+    rim.rotation.z=Math.PI/2;rim.position.set(x,y,z);carGr.add(rim);
+    const tire=new THREE.Mesh(new THREE.TorusGeometry(.56,.15,6,14),new THREE.MeshStandardMaterial({color:0x080808,roughness:.9,metalness:.05}));tire.rotation.y=Math.PI/2;tire.position.set(x,y,z);carGr.add(tire);
+  });
+  [-1,1].forEach((s:number)=>{const hl=new THREE.Mesh(new THREE.BoxGeometry(.48,.2,.06),gM);hl.position.set(s*.82,.52,2.8);carGr.add(hl);const ll=new THREE.PointLight(0x00eeff,2,18);ll.position.set(s*.82,.52,3.2);carGr.add(ll);});
+  const tail=new THREE.Mesh(new THREE.BoxGeometry(2.7,.13,.06),new THREE.MeshBasicMaterial({color:0xff2200,transparent:true,opacity:.92}));tail.position.set(0,.52,-2.8);carGr.add(tail);
+  const exhaL=new THREE.Mesh(new THREE.CylinderGeometry(.18,.22,.55,7),cM);exhaL.rotation.x=Math.PI/2;exhaL.position.set(-.55,.35,-2.9);exhaL.name='exhaL';carGr.add(exhaL);
+  const exhaR=exhaL.clone();exhaR.position.x=.55;exhaR.name='exhaR';carGr.add(exhaR);
+  const cLight=new THREE.PointLight(0x0066ff,2.5,20);cLight.position.set(0,.7,0);carGr.add(cLight);
+
+  // ── SUBMARINE MODE ──
+  const subGr=new THREE.Group();subGr.name='subMode';subGr.visible=false;g.add(subGr);
+  const sM2=new THREE.MeshStandardMaterial({color:0x001a1a,emissive:0x00ffcc,emissiveIntensity:.28,roughness:.2,metalness:.92});
+  const subBody=new THREE.Mesh(new THREE.CylinderGeometry(1.05,1.05,5.5,10),sM2);subBody.rotation.z=Math.PI/2;subBody.position.y=.55;subGr.add(subBody);
+  const subNose=new THREE.Mesh(new THREE.ConeGeometry(1.05,1.8,10),sM2);subNose.rotation.z=-Math.PI/2;subNose.position.set(3.45,.55,0);subGr.add(subNose);
+  const subTail=new THREE.Mesh(new THREE.ConeGeometry(1.05,1.2,10),sM2);subTail.rotation.z=Math.PI/2;subTail.position.set(-3.45,.55,0);subGr.add(subTail);
+  const tower=new THREE.Mesh(new THREE.BoxGeometry(.6,1,.85),sM2);tower.position.set(0,1.75,.1);subGr.add(tower);
+  const scope=new THREE.Mesh(new THREE.CylinderGeometry(.07,.07,1.3,5),new THREE.MeshBasicMaterial({color:0x00ffcc}));scope.position.set(0,2.8,.2);subGr.add(scope);
+  [[0,.55,2.1],[0,.55,-2.1]].forEach(([x,y,z]:number[])=>{const fin=new THREE.Mesh(new THREE.BoxGeometry(1.9,.07,.95),new THREE.MeshBasicMaterial({color:0x00aa88,transparent:true,opacity:.7,side:THREE.DoubleSide}));fin.position.set(x,y,z);subGr.add(fin);});
+  const propHub=new THREE.Group();propHub.position.set(-3.85,.55,0);propHub.name='propHub';subGr.add(propHub);
+  const pHubM=new THREE.Mesh(new THREE.SphereGeometry(.22,5,4),new THREE.MeshBasicMaterial({color:0x00ffcc}));propHub.add(pHubM);
+  for(let b=0;b<4;b++){const bl=new THREE.Mesh(new THREE.BoxGeometry(.1,.65,.07),new THREE.MeshBasicMaterial({color:0x00ffcc,transparent:true,opacity:.8}));bl.position.y=.38;bl.rotation.z=b*Math.PI/2;propHub.add(bl);}
+  const torpL=new THREE.Mesh(new THREE.CylinderGeometry(.18,.18,1.2,6),new THREE.MeshBasicMaterial({color:0x00ffcc}));torpL.rotation.z=Math.PI/2;torpL.position.set(1.5,.55,2.5);subGr.add(torpL);
+  const torpR=torpL.clone();torpR.position.x=-1.5;subGr.add(torpR);
+  [-1,1].forEach((s:number)=>{const pl=new THREE.PointLight(0x00ffcc,.9,12);pl.position.set(s*.6,.55,.6);subGr.add(pl);});
+
+  // ── FLYING SAUCER MODE ──
+  const sacGr=new THREE.Group();sacGr.name='saucerMode';sacGr.visible=false;g.add(sacGr);
+  const sacBodyM=new THREE.MeshStandardMaterial({color:0x8899bb,emissive:0x4499ff,emissiveIntensity:.38,roughness:.08,metalness:.97});
+  const disc=new THREE.Mesh(new THREE.CylinderGeometry(3.6,.55,.52,24),sacBodyM);disc.position.y=.38;sacGr.add(disc);
+  const dome=new THREE.Mesh(new THREE.SphereGeometry(1.55,12,8,0,Math.PI*2,0,Math.PI/2),new THREE.MeshStandardMaterial({color:0x000820,emissive:0x4499ff,emissiveIntensity:.5,roughness:.04,metalness:.92,transparent:true,opacity:.72}));dome.position.y=.72;sacGr.add(dome);
+  const ring=new THREE.Mesh(new THREE.TorusGeometry(2.9,.2,6,32),new THREE.MeshBasicMaterial({color:0x00ffff,transparent:true,opacity:.82}));ring.rotation.x=Math.PI/2;ring.position.y=.38;ring.name='saucerRing';sacGr.add(ring);
+  for(let li=0;li<10;li++){const ang=li/10*Math.PI*2,r=2.2;const bl=new THREE.Mesh(new THREE.SphereGeometry(.2,5,4),new THREE.MeshBasicMaterial({color:new THREE.Color().setHSL(li/10,.9,.7)}));bl.position.set(Math.cos(ang)*r,.05,Math.sin(ang)*r);sacGr.add(bl);}
+  const sacMainL=new THREE.PointLight(0x4499ff,3.5,30);sacMainL.position.y=1;sacGr.add(sacMainL);
+  const sacBottomL=new THREE.PointLight(0x00ffff,2.5,22);sacBottomL.position.y=-1.5;sacGr.add(sacBottomL);
+
+  g.scale.setScalar(1.15);
+  return g;
+}
+
+function mkLaserTrail():THREE.Points{
+  const count=150;
+  const geo=new THREE.BufferGeometry();
+  const pos=new Float32Array(count*3);const cols=new Float32Array(count*3);
+  geo.setAttribute('position',new THREE.BufferAttribute(pos,3));
+  geo.setAttribute('color',new THREE.BufferAttribute(cols,3));
+  const mat=new THREE.PointsMaterial({size:.55,vertexColors:true,transparent:true,opacity:.88,blending:THREE.AdditiveBlending,depthWrite:false});
+  const pts=new THREE.Points(geo,mat);pts.name='laserTrail';pts.frustumCulled=false;
+  return pts;
+}
+
 function mkBoat(col=0x0ea5e9):THREE.Group{
   const g=new THREE.Group();
   const hM=new THREE.MeshStandardMaterial({color:0x6b3f1a,roughness:.75,metalness:.1});
@@ -827,6 +893,18 @@ export default function GhostTown(){
   const unlockedSuitsRef=useRef<number[]>([]);
   const discoBallsRef=useRef<any[]>([]);
   const [activeSuitName,setActiveSuitName]=useState<string|null>(null);
+  // ── CYBER VEHICLE ──
+  const cyberVehicleRef=useRef<any>(null);
+  const cyberVehicleSpawned=useRef(false);
+  const inCyberVehicle=useRef(false);
+  const vehicleMode=useRef(0);// 0=car,1=sub,2=saucer
+  const vehicleSpeed=useRef(0);// 0=regular(0.9),1=fast(2.7),2=rocket(5.4)
+  const rocketTrailFrames=useRef(0);// countdown 1800=30s; 0=inactive
+  const rocketTrailCooldown=useRef(0);// regen cooldown
+  const rocketTrailBuf=useRef<{x:number,y:number,z:number}[]>([]);
+  const laserTrailRef=useRef<any>(null);
+  const [ridingVehicle,setRidingVehicle]=useState(false);
+  const [vehicleLabel,setVehicleLabel]=useState<string|null>(null);
   const [activeChain,setActiveChain]=useState<"mainnet"|"sepolia">("sepolia");
   const [,rf]=useState(0);
 
@@ -1299,6 +1377,50 @@ export default function GhostTown(){
           addToast('🟢 ROCKET PILOT SUIT + TRON SUIT unlocked! Press X to cycle suits','#00ff88');
           aL('🚀 ROCKET PACK equipped — 2 suits unlocked! Press X to cycle them!','system');
         }
+      }
+      // ── M: Cyber Vehicle mount/dismount ──
+      if(k==='m'&&SD.current){
+        if(inCyberVehicle.current){
+          inCyberVehicle.current=false;setRidingVehicle(false);
+          playerY.current=0;cD.current=18;
+          addToast('🚗 Exited Cyber Vehicle','#00eeff');
+        } else if(cyberVehicleRef.current){
+          const cv=cyberVehicleRef.current;
+          const _cx=cv.mesh.position.x-playerPos.current.x,_cz=cv.mesh.position.z-playerPos.current.z;
+          if(Math.sqrt(_cx*_cx+_cz*_cz)<10){
+            inCyberVehicle.current=true;setRidingVehicle(true);cD.current=24;
+            const _modes=['🚗 CAR','🌊 SUBMARINE','🛸 SAUCER'];
+            const _speeds=['REGULAR','FAST','ROCKET'];
+            addToast(`${_modes[vehicleMode.current]} MODE · ${_speeds[vehicleSpeed.current]} SPEED · Z=transform · Q=speed`,'#00eeff');
+            aL('🚗 CYBER VEHICLE — Z=transform · Q=speed · M=exit · SPACE=altitude(sub/saucer)','system');
+          } else addToast('🚗 Get closer to the Cyber Vehicle (within 10 units)','#4a5568');
+        } else addToast('🚗 Cyber Vehicle unlocks at 100,000 XP','#4a5568');
+      }
+      // ── Z: Transform Cyber Vehicle ──
+      if(k==='z'&&inCyberVehicle.current&&cyberVehicleRef.current){
+        vehicleMode.current=(vehicleMode.current+1)%3;
+        const _m=vehicleMode.current;const _mesh=cyberVehicleRef.current.mesh;
+        _mesh.getObjectByName('carMode').visible=_m===0;
+        _mesh.getObjectByName('subMode').visible=_m===1;
+        _mesh.getObjectByName('saucerMode').visible=_m===2;
+        const _labels=['🚗 CAR MODE — drive on land','🌊 SUBMARINE MODE — dive into the sea','🛸 SAUCER MODE — fly anywhere'];
+        setVehicleLabel(_labels[_m]);setTimeout(()=>setVehicleLabel(null),3500);
+        addToast(_labels[_m],'#00eeff');
+        aL(`🚗 Cyber Vehicle transformed: ${['CAR','SUBMARINE','SAUCER'][_m]}`,'system');
+        // Saucer gets altitude boost; sub dives
+        if(_m===2)playerY.current=Math.max(playerY.current,8);
+        if(_m===1&&Math.abs(playerPos.current.x)>80)playerY.current=-2;// dive in water
+      }
+      // ── Q: Cycle Vehicle Speed ──
+      if(k==='q'&&inCyberVehicle.current){
+        if(vehicleSpeed.current===2){addToast('Already at max speed — ROCKET 🚀','#ff4500');return;}
+        if(vehicleSpeed.current===1&&rocketTrailCooldown.current>0){
+          addToast(`🚀 Rocket regenerating... ${Math.ceil(rocketTrailCooldown.current/60)}s`,'#4a5568');return;}
+        vehicleSpeed.current=(vehicleSpeed.current+1)%3;
+        const _sLabels=['REGULAR (3×)','FAST (9×)','🚀 ROCKET (18×) — LASER TRAIL ACTIVE'];
+        setVehicleLabel(_sLabels[vehicleSpeed.current]);setTimeout(()=>setVehicleLabel(null),3500);
+        addToast(_sLabels[vehicleSpeed.current],'#ff4500');
+        if(vehicleSpeed.current===2){rocketTrailFrames.current=1800;addToast('🔥 LASER TRAIL FIRING — 30 seconds!','#ff4500');}
       }
       // ── X: Cycle tron suits ──
       if(k==='x'){
@@ -1781,6 +1903,92 @@ export default function GhostTown(){
           return true;
         });
       }
+      // ── Cyber Vehicle — spawn at 100k XP, drive/swim/fly ──
+      if(!cyberVehicleSpawned.current&&pd.current.xp>=100000&&SD.current){
+        cyberVehicleSpawned.current=true;
+        const cvMesh=mkCyberVehicle();cvMesh.position.set(playerPos.current.x+8,0,playerPos.current.z);sc.add(cvMesh);
+        const trail=mkLaserTrail();sc.add(trail);laserTrailRef.current=trail;
+        cyberVehicleRef.current={mesh:cvMesh,tx:cvMesh.position.x,tz:cvMesh.position.z,frame:0};
+        addToast('🚗 CYBER VEHICLE unlocked at 100,000 XP! Press M to enter','#00eeff');
+        aL('🚗 CYBER VEHICLE spawned — M to board · Z=transform · Q=speed','system');
+      }
+      if(cyberVehicleRef.current){
+        const cv=cyberVehicleRef.current;const cvm=cv.mesh;cv.frame++;
+        const _vm=vehicleMode.current,_vs=vehicleSpeed.current;
+        // Speed values
+        const _spds=[0.9,2.7,5.4];const _spd=inCyberVehicle.current?_spds[_vs]:.0;
+        if(!inCyberVehicle.current&&playerAv.current&&camModeRef.current==="3rd"&&!onDragon.current&&!onHorse.current&&!inBoat.current){
+          playerAv.current.root.visible=true;
+        }
+        if(inCyberVehicle.current){
+          const _fwd={x:-Math.sin(cA.current),z:-Math.cos(cA.current)};
+          if(k.w){playerPos.current.x+=_fwd.x*_spd;playerPos.current.z+=_fwd.z*_spd;playerPos.current.x=clamp(playerPos.current.x,-150,150);playerPos.current.z=clamp(playerPos.current.z,-165,150);}
+          if(k.s){playerPos.current.x-=_fwd.x*_spd*.45;playerPos.current.z-=_fwd.z*_spd*.45;}
+          if(k.a)cA.current+=.04;if(k.d)cA.current-=.04;
+          // Altitude: saucer/rocket = space key; sub = space goes up, no-space sinks in water
+          if(_vm===2||_vm===1){
+            if(k.space)playerY.current=Math.min(35,playerY.current+.14);
+            else if(_vm===2)playerY.current=Math.max(0,playerY.current-.04);
+            else playerY.current=Math.max(-8,playerY.current-.03);// sub sinks slowly
+          } else {// car — follow terrain height
+            const _dxm=Math.abs(playerPos.current.x),_dzm=Math.abs(playerPos.current.z+130);
+            const _rD=Math.max(_dxm/55,_dzm/35);let _tY=0;
+            if(_rD<0.86)_tY=2;if(_rD<0.72)_tY=4;if(_rD<0.58)_tY=6;if(_rD<0.45)_tY=8;if(_rD<0.31)_tY=10;if(_rD<0.20)_tY=12;if(_rD<0.14)_tY=14;
+            playerY.current=lerp(playerY.current,_tY,.3);
+          }
+          // Sync vehicle mesh to player
+          cvm.position.set(playerPos.current.x,playerY.current,playerPos.current.z);
+          cvm.rotation.y=cA.current+Math.PI;
+          if(playerAv.current)playerAv.current.root.visible=false;
+          // Rocket speed = trail active + speed shift + thrust tilt
+          if(_vs===2){
+            cvm.rotation.x=k.w?-.18:k.s?.1:lerp(cvm.rotation.x,0,.1);
+            if(_vm===2)cvm.rotation.z=k.a?.18:k.d?-.18:lerp(cvm.rotation.z,0,.1);
+          }
+          // Saucer ring spin
+          const _ring=cvm.getObjectByName('saucerRing');if(_ring)_ring.rotation.y+=.04+(_vs*.02);
+          // Sub propeller spin
+          const _prop=cvm.getObjectByName('propHub');if(_prop)_prop.rotation.x+=.18+_vs*.12;
+        } else {
+          // Parked: subtle hover bob
+          cvm.position.y=Math.sin(cv.frame*.025)*.15;
+          const _ring=cvm.getObjectByName('saucerRing');if(_ring)_ring.rotation.y+=.02;
+        }
+        // ── Rocket trail ──
+        if(rocketTrailFrames.current>0){
+          rocketTrailFrames.current--;
+          if(rocketTrailFrames.current===0){vehicleSpeed.current=Math.min(1,vehicleSpeed.current);rocketTrailCooldown.current=300;addToast('🚀 Rocket exhausted — regenerating in 5s','#ff4500');}
+          // Push current position to trail buffer
+          const _buf=rocketTrailBuf.current;
+          _buf.unshift({x:cvm.position.x,y:cvm.position.y,z:cvm.position.z});
+          if(_buf.length>150)_buf.pop();
+          // Update trail Points geometry
+          if(laserTrailRef.current){
+            const _geo=laserTrailRef.current.geometry;const _pos=_geo.attributes.position;const _col=_geo.attributes.color;
+            const _fade=rocketTrailFrames.current/1800;// 1→0 as trail expires
+            for(let pi=0;pi<150;pi++){
+              const _pt=_buf[pi];
+              if(_pt){_pos.array[pi*3]=_pt.x;_pos.array[pi*3+1]=_pt.y;_pos.array[pi*3+2]=_pt.z;}
+              else{_pos.array[pi*3]=cvm.position.x;_pos.array[pi*3+1]=cvm.position.y;_pos.array[pi*3+2]=cvm.position.z;}
+              const _ag=1-pi/150;const _decay=_fade;
+              const _hue=(_vm===2?.55:_vm===1?.48:.12)+pi*.003;// saucer=blue, sub=teal, car=orange-red
+              const _tc=new THREE.Color().setHSL(_hue,.9,.55+_ag*.3);
+              _col.array[pi*3]=_tc.r*_ag*_decay;_col.array[pi*3+1]=_tc.g*_ag*_decay;_col.array[pi*3+2]=_tc.b*_ag*_decay;
+            }
+            (_pos as any).needsUpdate=true;(_col as any).needsUpdate=true;
+            laserTrailRef.current.material.opacity=.75*_fade;
+          }
+        } else if(laserTrailRef.current&&laserTrailRef.current.material.opacity>.01){
+          // Fade out trail after rocket expires
+          laserTrailRef.current.material.opacity=lerp(laserTrailRef.current.material.opacity,0,.04);
+          rocketTrailBuf.current=[];
+        }
+        if(rocketTrailCooldown.current>0){rocketTrailCooldown.current--;
+          if(rocketTrailCooldown.current===0)addToast('🚀 Rocket REGENERATED — press Q for rocket speed','#00ff88');}
+        // Vehicle speed exhaust glow (car exhaust pipes when rocket speed)
+        const _exL=cvm.getObjectByName('exhaL');const _exR=cvm.getObjectByName('exhaR');
+        if(_exL&&_exR){const _em=(_exL as any).material;if(_em){_em.color.setHex(_vs===2?0xff4400:_vs===1?0xff8800:0x223344);_em.emissive?.setHex(_vs===2?0xff4400:_vs===1?0xff8800:0x0);}}
+      }
       // ── Rocket pack: hover at portal, proximity hint ──
       if(rocketPackRef.current&&rocketPackRef.current.visible){
         rocketPackRef.current.position.y=1.8+Math.sin(t*.04)*.35;
@@ -1941,6 +2149,9 @@ export default function GhostTown(){
           {ridingHorse&&<span style={{color:"#8b5e3c",animation:"runPulse .5s ease-in-out infinite alternate"}}>🐴 HORSE</span>}
           {dragonSwordEquipped&&<span style={{color:"#fbbf24",animation:"runPulse .3s ease-in-out infinite alternate"}}>⚔️ SWORD</span>}
           {rocketPackEquipped&&<span style={{color:"#06b6d4",animation:"runPulse .4s ease-in-out infinite alternate"}}>🚀 ROCKET</span>}
+          {ridingVehicle&&<span style={{color:"#00eeff",animation:"runPulse .35s ease-in-out infinite alternate"}}>{['🚗','🌊','🛸'][vehicleMode.current]}{['·3×','·9×','·🔥18×'][vehicleSpeed.current]}</span>}
+          {ridingVehicle&&rocketTrailFrames.current>0&&<span style={{color:"#ff4500",fontSize:mob?5:6}}>TRAIL {Math.ceil(rocketTrailFrames.current/60)}s</span>}
+          {ridingVehicle&&rocketTrailCooldown.current>0&&<span style={{color:"#888",fontSize:mob?5:6}}>🔋{Math.ceil(rocketTrailCooldown.current/60)}s</span>}
           {bigMan&&<span style={{color:"#aaff44",fontSize:mob?7:9,animation:"runPulse .25s ease-in-out infinite alternate"}}>🍎 BIG MAN {Math.ceil(bigManFrames.current/60)}s</span>}
           {inUnderground.current&&<span style={{color:"#ff2d78",fontSize:mob?5:6}}>⬇ CAVE</span>}
           {inUnderground.current&&<button onClick={()=>setHackModal(true)} style={{background:"rgba(0,255,200,.1)",border:"1px solid #00ffe7",color:"#00ffe7",fontSize:mob?5:6,padding:"2px 6px",cursor:"pointer",fontFamily:"inherit",letterSpacing:1,borderRadius:2}}>🖥️ HACK</button>}
@@ -2300,6 +2511,11 @@ export default function GhostTown(){
         ))}
       </div>}
 
+      {/* VEHICLE TRANSFORM LABEL */}
+      {vehicleLabel&&<div style={{position:"absolute",zIndex:48,top:"15%",left:"50%",transform:"translateX(-50%)",pointerEvents:"none",background:"linear-gradient(135deg,#00001a,#000820)",border:"1px solid #00eeff60",borderRadius:6,padding:"10px 24px",textAlign:"center",backdropFilter:"blur(8px)",boxShadow:"0 0 30px #00eeff30,0 0 60px #00eeff10"}}>
+        <div style={{fontSize:7,color:"#00eeff60",letterSpacing:3,marginBottom:2}}>⚡ CYBER VEHICLE</div>
+        <div style={{fontSize:14,color:"#00eeff",fontWeight:900,letterSpacing:4}}>{vehicleLabel}</div>
+      </div>}
       {/* SUIT NAME DISPLAY */}
       {activeSuitName&&<div style={{position:"absolute",zIndex:48,top:"22%",left:"50%",transform:"translateX(-50%)",pointerEvents:"none",background:"linear-gradient(135deg,#03030e,#080818)",border:`1px solid ${unlockedSuitsRef.current.length>0?(SUITS[unlockedSuitsRef.current[activeSuitRef.current%unlockedSuitsRef.current.length]] as any).ec+'60':'#00ffe760'}`,borderRadius:6,padding:"10px 22px",textAlign:"center",backdropFilter:"blur(8px)"}}>
         <div style={{fontSize:7,color:"#3a3a52",letterSpacing:3,marginBottom:2}}>✦ SUIT ACTIVATED</div>

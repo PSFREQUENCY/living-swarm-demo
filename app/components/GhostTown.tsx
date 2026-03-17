@@ -458,39 +458,42 @@ function mkMountain():THREE.Group{
   const stoneM=new THREE.MeshBasicMaterial({color:0x1e2d3a});
   const stone2M=new THREE.MeshBasicMaterial({color:0x253040});
   const snowM=new THREE.MeshBasicMaterial({color:0xc8d8ff});
-  const trailM=new THREE.MeshBasicMaterial({color:0x4a5a3a});
-  // Main body: ONE elongated mountain — not stacked christmas-tree cones
-  const c1=new THREE.Mesh(new THREE.ConeGeometry(50,110,14),stoneM);c1.position.y=55;gr.add(c1);
-  const c2=new THREE.Mesh(new THREE.ConeGeometry(18,38,10),stone2M);c2.position.y=92;gr.add(c2);
-  const snowCap=new THREE.Mesh(new THREE.ConeGeometry(7,22,8),snowM);snowCap.position.y=113;gr.add(snowCap);
-  const peak=new THREE.Mesh(new THREE.OctahedronGeometry(2.2),new THREE.MeshBasicMaterial({color:0x00b4ff}));peak.position.y=125;peak.name='mtPeak';gr.add(peak);
-  // 6 level terraces
+  const trailM=new THREE.MeshBasicMaterial({color:0x5a6a4a});
+  // FLAT mountain: wide base, low profile — not a spike
+  const c1=new THREE.Mesh(new THREE.ConeGeometry(65,45,16),stoneM);c1.position.y=22;gr.add(c1);
+  const c2=new THREE.Mesh(new THREE.ConeGeometry(22,18,12),stone2M);c2.position.y=42;gr.add(c2);
+  const snowCap=new THREE.Mesh(new THREE.ConeGeometry(8,10,8),snowM);snowCap.position.y=52;gr.add(snowCap);
+  const peak=new THREE.Mesh(new THREE.OctahedronGeometry(2),new THREE.MeshBasicMaterial({color:0x00b4ff}));peak.position.y=58;peak.name='mtPeak';gr.add(peak);
+  // 6 level terraces (lower heights to match flatter mountain)
   const terraceCols=[0x2a3a2a,0x283545,0x263050,0x243060,0x22286a,0x203070];
-  const terraceR=[44,34,26,19,13,8];
-  const terraceY=[16,30,46,62,78,92];
+  const terraceR=[58,46,35,26,17,10];
+  const terraceY=[8,16,24,32,40,48];
   for(let lv=0;lv<6;lv++){
     const ring=new THREE.Mesh(new THREE.CylinderGeometry(terraceR[lv]+1.5,terraceR[lv]+2,1.2,16,1,true),new THREE.MeshBasicMaterial({color:terraceCols[lv],side:THREE.DoubleSide}));
     ring.position.y=terraceY[lv];ring.name=`mtLevel${lv}`;gr.add(ring);
     const floor=new THREE.Mesh(new THREE.RingGeometry(terraceR[lv]-.5,terraceR[lv]+1.5,16),new THREE.MeshBasicMaterial({color:terraceCols[lv],side:THREE.DoubleSide}));
     floor.rotation.x=-Math.PI/2;floor.position.y=terraceY[lv]+.1;gr.add(floor);
   }
-  // Race track on level 2 (y=30, radius=30)
+  // Race track on level 2 (y=16, radius=30)
   const trackM=new THREE.MeshBasicMaterial({color:0x2a2a2a,side:THREE.DoubleSide});
-  const track=new THREE.Mesh(new THREE.TorusGeometry(30,2.5,4,48),trackM);track.rotation.x=Math.PI/2;track.position.y=30.5;track.name='raceTrack';gr.add(track);
-  for(let i=0;i<12;i++){const ang=i/12*Math.PI*2;const mk=new THREE.Mesh(new THREE.BoxGeometry(1.5,.1,4),new THREE.MeshBasicMaterial({color:0xffffff}));mk.position.set(Math.cos(ang)*30,31,Math.sin(ang)*30);mk.rotation.y=-ang;gr.add(mk);}
-  const fl=new THREE.Mesh(new THREE.BoxGeometry(6,.15,5),new THREE.MeshBasicMaterial({color:0xff3333}));fl.position.set(30,31.1,0);fl.name='finishLine';gr.add(fl);
-  // 9 SOLID switchback trails — wide platforms winding up the mountain
+  const track=new THREE.Mesh(new THREE.TorusGeometry(30,2.5,4,48),trackM);track.rotation.x=Math.PI/2;track.position.y=16.5;track.name='raceTrack';gr.add(track);
+  for(let i=0;i<12;i++){const ang=i/12*Math.PI*2;const mk=new THREE.Mesh(new THREE.BoxGeometry(1.5,.1,4),new THREE.MeshBasicMaterial({color:0xffffff}));mk.position.set(Math.cos(ang)*30,17,Math.sin(ang)*30);mk.rotation.y=-ang;gr.add(mk);}
+  const fl=new THREE.Mesh(new THREE.BoxGeometry(6,.15,5),new THREE.MeshBasicMaterial({color:0xff3333}));fl.position.set(30,17.1,0);fl.name='finishLine';gr.add(fl);
+  // 9 SOLID continuous ramps — each is one long box tilted to follow the slope
   for(let tr=0;tr<9;tr++){
     const baseAng=tr/9*Math.PI*2;
-    for(let seg=0;seg<10;seg++){
-      const frac=(seg+.5)/10;
-      const ang=baseAng+frac*Math.PI*1.6;// spiral around
-      const r=lerp(46,9,frac);
-      const y=frac*108;
-      const platform=new THREE.Mesh(new THREE.BoxGeometry(5,.5,8),trailM);
-      platform.position.set(Math.cos(ang)*r,y,Math.sin(ang)*r);
-      platform.rotation.y=-ang-Math.PI/2;
-      gr.add(platform);
+    // Each ramp: 8 connected segments forming a continuous switchback path
+    for(let seg=0;seg<8;seg++){
+      const frac=(seg+.5)/8;
+      const ang=baseAng+frac*Math.PI*1.5;
+      const r=lerp(60,10,frac);
+      const y=frac*52;
+      const ramp=new THREE.Mesh(new THREE.BoxGeometry(5.5,.4,10),trailM);
+      ramp.position.set(Math.cos(ang)*r,y,Math.sin(ang)*r);
+      ramp.rotation.y=-ang-Math.PI/2;
+      // Tilt ramp to slope upward
+      ramp.rotation.x=0.18;
+      gr.add(ramp);
     }
   }
   return gr;
@@ -539,6 +542,32 @@ function mkUnderground():THREE.Group{
   [[0,0],[18,-14],[-18,14]].forEach(([x,z]:number[])=>{
     const c=new THREE.Mesh(new THREE.OctahedronGeometry(.5,0),new THREE.MeshBasicMaterial({color:0x6633cc}));c.position.set(x,.5,z);gr.add(c);
   });
+  return gr;
+}
+
+function mkHorse():THREE.Group{
+  const gr=new THREE.Group();
+  const bM=new THREE.MeshBasicMaterial({color:0x8b5e3c});
+  const mM=new THREE.MeshBasicMaterial({color:0x3d2b1f});
+  const wM=new THREE.MeshBasicMaterial({color:0x5c3d28});
+  // Body
+  const body=new THREE.Mesh(new THREE.BoxGeometry(1.8,.95,3.2),bM);body.position.y=1.1;gr.add(body);
+  // Neck
+  const neck=new THREE.Mesh(new THREE.BoxGeometry(.55,1.1,.55),bM);neck.position.set(0,1.75,1.2);neck.rotation.x=-.45;gr.add(neck);
+  // Head
+  const head=new THREE.Mesh(new THREE.BoxGeometry(.5,.55,1.0),bM);head.position.set(0,2.3,1.85);gr.add(head);
+  // Mane
+  const mane=new THREE.Mesh(new THREE.BoxGeometry(.18,.6,.7),mM);mane.position.set(0,2.0,1.4);gr.add(mane);
+  // Legs (4)
+  [[.55,.3,1.0],[-.55,.3,1.0],[.55,.3,-1.0],[-.55,.3,-1.0]].forEach(([x,y,z])=>{
+    const leg=new THREE.Mesh(new THREE.BoxGeometry(.28,.85,.28),wM);
+    leg.position.set(x,y as number,z as number);gr.add(leg);
+  });
+  // Tail
+  const tail=new THREE.Mesh(new THREE.BoxGeometry(.2,.7,.18),mM);tail.position.set(0,.95,-1.7);tail.rotation.x=.4;gr.add(tail);
+  // Saddle indicator (emissive)
+  const saddle=new THREE.Mesh(new THREE.BoxGeometry(1.4,.2,1.2),new THREE.MeshBasicMaterial({color:0x00ffe7}));saddle.position.y=1.62;gr.add(saddle);
+  gr.scale.setScalar(1.1);
   return gr;
 }
 
@@ -629,7 +658,13 @@ export default function GhostTown(){
   const [hackModal,setHackModal]=useState(false);
   const [hackInput,setHackInput]=useState('');
   const [hackSolved,setHackSolved]=useState(false);
+  const [backpackOpen,setBackpackOpen]=useState(false);
+  const [mintingItem,setMintingItem]=useState<string|null>(null);
   const fishRefs=useRef<any[]>([]);
+  const horseRef=useRef<any>(null);
+  const onHorse=useRef(false);
+  const horseCooldown=useRef(0);
+  const [ridingHorse,setRidingHorse]=useState(false);
   const [activeChain,setActiveChain]=useState<"mainnet"|"sepolia">("sepolia");
   const [,rf]=useState(0);
 
@@ -638,7 +673,7 @@ export default function GhostTown(){
   const playerAngle=useRef(0);
   const playerAv=useRef<any>(null);
   const playerY=useRef(0);
-  const pd=useRef<any>({xp:0,tk:100,en:100,mEn:100,tier:T[0],belt:BELTS[0],skin:SKINS[0],ms:0,dojoXP:0,oE:["wave","bow"],oS:["default"],name:"YOU",did:gDID(),superSkills:[],rep:100,inf:0,whispers:0,mainQDone:[],sideQDone:[],hiddenQDone:[]});
+  const pd=useRef<any>({xp:0,tk:100,en:100,mEn:100,tier:T[0],belt:BELTS[0],skin:SKINS[0],ms:0,dojoXP:0,oE:["wave","bow"],oS:["default"],name:"YOU",did:gDID(),superSkills:[],rep:100,inf:0,whispers:0,mainQDone:[],sideQDone:[],hiddenQDone:[],backpack:[]});
 
   const cA=useRef(.6),cT=useRef(.55),cD=useRef(18);
   const _camTgt=useRef(new THREE.Vector3()).current;
@@ -737,6 +772,12 @@ export default function GhostTown(){
     const seaMat=new THREE.MeshBasicMaterial({map:seaTex,transparent:true,opacity:.9});
     const sea=new THREE.Mesh(new THREE.PlaneGeometry(700,700),seaMat);
     sea.rotation.x=-Math.PI/2;sea.position.y=-.55;sc.add(sea);
+    // ── Ocean gap / void at rapids entry (x=125, z=0) — shows the drop ──
+    const voidGap=new THREE.Mesh(new THREE.PlaneGeometry(22,28),new THREE.MeshBasicMaterial({color:0x000005,transparent:false}));
+    voidGap.rotation.x=-Math.PI/2;voidGap.position.set(125,-.54,2);sc.add(voidGap);
+    // Canyon rim rocks framing the gap
+    [[125,-.3,-14],[125,-.3,18],[114,-.3,2],[136,-.3,2]].forEach(([x,y,z])=>{
+      const rim=new THREE.Mesh(new THREE.BoxGeometry(4,1.5,4),new THREE.MeshBasicMaterial({color:0x1a2230}));rim.position.set(x,y,z);sc.add(rim);});
     // Initial ASCII draw
     const chars2=['~','≈','~','≋','~','≈','∿','~','≈','~'];
     seaCtx.fillStyle='#04111e';seaCtx.fillRect(0,0,512,256);
@@ -777,11 +818,13 @@ export default function GhostTown(){
     const stairsGr=new THREE.Group();sc.add(stairsGr);
     // ── Cyber Mountain Sovereign (far north, 9x bigger) ──
     const mountain=mkMountain();mountain.position.set(0,0,-130);sc.add(mountain);
+    // ── Horse at mountain base (rideable up the trail) ──
+    const horseM=mkHorse();horseM.position.set(8,0,-74);sc.add(horseM);horseRef.current={mesh:horseM,tx:8,tz:-74,rideT:0};
     // ── Race cars (2: player + AI, on mountain track at level 2) ──
     const mkCar=(col:number)=>{const g=new THREE.Group();const body=new THREE.Mesh(new THREE.BoxGeometry(1.8,.7,3.5),new THREE.MeshBasicMaterial({color:col}));body.position.y=.4;g.add(body);const top=new THREE.Mesh(new THREE.BoxGeometry(1.4,.5,2),new THREE.MeshBasicMaterial({color:col}));top.position.set(0,.9,.1);g.add(top);([[.8,.1,1.4],[-.8,.1,1.4],[.8,.1,-1.4],[-.8,.1,-1.4]] as [number,number,number][]).forEach(([x,y,z])=>{const w=new THREE.Mesh(new THREE.CylinderGeometry(.35,.35,.3,8),new THREE.MeshBasicMaterial({color:0x111111}));w.rotation.z=Math.PI/2;w.position.set(x,y,z);g.add(w);});return g;};
     const playerCar=mkCar(0x00ffc8);const aiCar=mkCar(0xf43f5e);
-    // mountain is at (0,0,-130), race track at y=30.5 radius 30
-    playerCar.position.set(30,30.5,-130);aiCar.position.set(28,30.5,-128);
+    // mountain is at (0,0,-130), race track at y=16.5 radius 30
+    playerCar.position.set(30,16.5,-130);aiCar.position.set(28,16.5,-128);
     playerCar.visible=false;aiCar.visible=false;
     sc.add(playerCar);sc.add(aiCar);
     // ── Sea coins ──
@@ -791,6 +834,9 @@ export default function GhostTown(){
       return{mesh:cm,x:cx,z:cz,collected:false,respawnAt:0};
     });
     SD.current={sc,cam,ren,blds,ags,eds,rain,rP,rN,ff,fP,fN,discoBall,sea,seaCtx,seaTex,seaOff:0,agentBoats,playerBoats,ambL,dirL,starsObj,seaCoins,wfall,mountain,playerCar,aiCar,fishArr};
+    // ── Mountain guardian dragon — circles peak, attacks approaching players ──
+    const guardDragonMesh=mkDragon();guardDragonMesh.position.set(18,20,-112);sc.add(guardDragonMesh);
+    dragonRef.current={mesh:guardDragonMesh,tx:0,tz:-130,frame:300,tgtZone:null,riding:false};
     aL("▶ 81 GHOST TOWN v6 SAMAUR-AI — the macro-hard city is LIVE","system");
     aL("▶ WASD/Arrows to move · V = 1st/3rd person · Shift = sprint","system");
     aL("▶ 11 main quests · 11 side quests · 11 hidden quests","system");
@@ -849,6 +895,18 @@ export default function GhostTown(){
             if(_best){liftedAgent.current=_best;setLifting(true);addToast(`🌀 THE FORCE — lifting ${_best.name}!`,'#c084fc');aL(`🌀 YOU used THE FORCE on ${_best.name}`,'system');}
             else addToast('No agent within range (8 units)','#4a5568');}
         }else addToast('🌀 THE FORCE requires RED belt','#4a5568');}
+      if(k==='g'&&SD.current&&horseCooldown.current<=0){
+        if(onHorse.current){
+          onHorse.current=false;setRidingHorse(false);horseCooldown.current=40;
+          addToast('🐴 Dismounted horse','#8b5e3c');
+        } else if(horseRef.current){
+          const hm=horseRef.current.mesh;
+          const _hd=Math.sqrt((hm.position.x-playerPos.current.x)**2+(hm.position.z-playerPos.current.z)**2);
+          if(_hd<6){onHorse.current=true;setRidingHorse(true);horseCooldown.current=40;cD.current=14;
+            addToast('🐴 Riding horse — WASD to climb, G to dismount','#00ffe7');aL('🐴 YOU mounted the horse — ride it up the mountain!','system');
+          } else addToast('🐴 Get closer to the horse (G to mount)','#4a5568');
+        }
+      }
       if(k==='r'&&SD.current&&dragonRideCooldown.current<=0){
         if(onDragon.current){
           // Dismount — only when close to ground
@@ -905,7 +963,7 @@ export default function GhostTown(){
       if(_mv.lengthSq()>0){_mv.normalize().multiplyScalar(spd);playerPos.current.add(_mv);playerPos.current.x=clamp(playerPos.current.x,-95,95);playerPos.current.z=clamp(playerPos.current.z,-95,95);playerAngle.current=Math.atan2(_mv.x,_mv.z);}
       if(flyingRef.current){if(k.space)playerY.current=Math.min(25,playerY.current+.12);else playerY.current=Math.max(inUnderground.current?-18:0,playerY.current-.04);}
       else if(inUnderground.current){playerY.current=lerp(playerY.current,-18,.12);}
-      else{const _dxm=playerPos.current.x,_dzm=playerPos.current.z+130,_dm=Math.sqrt(_dxm*_dxm+_dzm*_dzm);const _tY=_dm<15?Math.max(0,(1-_dm/15)*20):0;playerY.current=lerp(playerY.current,_tY,.08);}
+      else{const _dxm=playerPos.current.x,_dzm=playerPos.current.z+130,_dm=Math.sqrt(_dxm*_dxm+_dzm*_dzm);const _tY=_dm<12?Math.max(0,(1-_dm/12)*16):0;playerY.current=lerp(playerY.current,_tY,.08);}
       if(playerAv.current){
         _tgt.set(playerPos.current.x,playerY.current,playerPos.current.z);
         playerAv.current.root.position.lerp(_tgt,.2);
@@ -976,6 +1034,9 @@ export default function GhostTown(){
           waterfallFrame.current++;
           if(waterfallFrame.current===30)addToast('🌊 Edge of the canyon — keep moving to DIVE!','#22aaff');
           if(waterfallFrame.current>90){inUnderground.current=true;playerPos.current.set(125,-18,15);cD.current=12;
+            // Return boat to dock if player was in one
+            if(inBoat.current&&playerBoat.current&&SD.current?.playerBoats){
+              const pb=playerBoat.current;pb.x=pb===SD.current.playerBoats[0]?91:91;pb.z=pb===SD.current.playerBoats[0]?2:-2.5;pb.mesh.position.set(pb.x,-.5,pb.z);pb.heading=0;pb.mesh.rotation.y=0;inBoat.current=false;playerBoat.current=null;boatEnterCooldown.current=60;addToast('⛵ Boat returned to dock','#64748b');}
             addToast('🌊 YOU RODE THE RAPIDS — the Savage Agent Cafe awaits below...','#00b4ff');aL('🌊 YOU rode the white rapids down to the underground cafe','system');
             if(!pd.current.hiddenQDone.includes('RIDE THE FALL')){pd.current.hiddenQDone.push('RIDE THE FALL');pd.current.xp+=600;pd.current.tk+=140;pd.current.tier=gT(pd.current.xp);pd.current.belt=gB(pd.current.dojoXP);addToast('🏆 QUEST: RIDE THE FALL +600XP','#00b4ff');checkSuper();}
             waterfallFrame.current=0;}
@@ -992,18 +1053,69 @@ export default function GhostTown(){
       }
       // ── Mountain summit quest ──
       if(!inUnderground.current&&!inBoat.current){const _dmt=Math.sqrt(playerPos.current.x**2+(playerPos.current.z+130)**2);
-        if(_dmt<4&&playerY.current>14&&!pd.current.hiddenQDone.includes('CLIMB CYBER MT SOVEREIGN')){
+        if(_dmt<5&&playerY.current>10&&!pd.current.hiddenQDone.includes('CLIMB CYBER MT SOVEREIGN')){
           pd.current.hiddenQDone.push('CLIMB CYBER MT SOVEREIGN');pd.current.xp+=800;pd.current.tk+=180;pd.current.tier=gT(pd.current.xp);pd.current.belt=gB(pd.current.dojoXP);
           addToast('🏔️ SUMMIT! CYBER MT SOVEREIGN CONQUERED +800XP — 🐉 DRAGON RIDING UNLOCKED! Press R near dragon','#00b4ff');
           aL('🏔️ YOU scaled CYBER MT SOVEREIGN — dragon riding unlocked! Press H to summon, R to mount','system');checkSuper();
           // Auto-summon dragon at summit
           if(SD.current&&!dragonRef.current){const _d=mkDragon();SD.current.sc.add(_d);_d.position.set(playerPos.current.x+3,playerY.current,playerPos.current.z+3);dragonRef.current={mesh:_d,tx:playerPos.current.x,tz:playerPos.current.z,frame:100,tgtZone:null,riding:false};}
         }}
+      // ── Mountain dragon attacks approaching players ──
+      if(dragonRef.current&&!onDragon.current&&!onHorse.current){
+        const _drgDist=Math.sqrt(playerPos.current.x**2+(playerPos.current.z+130)**2);
+        if(_drgDist<40&&_drgDist>8){
+          // Dragon chases player
+          const dr2=dragonRef.current;const dm2=dr2.mesh;
+          const _att={x:playerPos.current.x-dm2.position.x,z:playerPos.current.z-dm2.position.z};
+          const _attD=Math.sqrt(_att.x*_att.x+_att.z*_att.z)||1;
+          dm2.position.x+=_att.x/_attD*.12;dm2.position.z+=_att.z/_attD*.12;
+          dm2.position.y=2+Math.sin(t*.1)*1.2;
+          dm2.rotation.y=Math.atan2(_att.x,_att.z);
+          if(t%180===0)addToast('🐉 The mountain dragon is ATTACKING!','#ff4500');
+          // Damage player if dragon catches them
+          if(_attD<4){pd.current.en=Math.max(0,pd.current.en-2);
+            if(t%60===0)addToast('🐉 Dragon ATTACK! -2 energy','#ff4500');}
+        } else if(_drgDist>=40&&dragonRef.current){
+          // Dragon circles the peak when player is far
+          const dr2=dragonRef.current;const dm2=dr2.mesh;
+          const _circAng=(t*.008);
+          dm2.position.set(Math.cos(_circAng)*18,20+Math.sin(t*.04)*3,Math.sin(_circAng)*18-130);
+          dm2.rotation.y=_circAng+Math.PI/2;
+        }
+        if(t%300===0&&dragonRef.current){const _drgDist2=Math.sqrt(playerPos.current.x**2+(playerPos.current.z+130)**2);if(_drgDist2<60&&_drgDist2>30)addToast('🐉 A dragon guards the mountain...','#ff6b35');}
+      }
       // ── Fish animation (jump upstream along rapids) ──
       if(SD.current.fishArr&&t%2===0){SD.current.fishArr.forEach((f:any)=>{f.t+=.025;f.mesh.position.y=-18+Math.abs(Math.sin(f.t))*20;f.mesh.position.z=(f.t%(Math.PI*2))/Math.PI*25;f.mesh.rotation.z=Math.sin(f.t)*1.2;f.mesh.position.x=125+f.lane*1.2;});}
+      // ── Horse riding ──
+      if(horseCooldown.current>0)horseCooldown.current--;
+      if(horseRef.current){
+        const hr=horseRef.current;const hm=hr.mesh;
+        if(onHorse.current){
+          // Follow player camera angle at horse speed
+          const _hSpd=keys.current.shift?.22:.14;
+          const _hFwd={x:-Math.sin(cA.current),z:-Math.cos(cA.current)};
+          if(keys.current.w){playerPos.current.x+=_hFwd.x*_hSpd;playerPos.current.z+=_hFwd.z*_hSpd;
+            playerPos.current.x=clamp(playerPos.current.x,-95,95);playerPos.current.z=clamp(playerPos.current.z,-95,95);}
+          if(keys.current.s){playerPos.current.x-=_hFwd.x*_hSpd*.5;playerPos.current.z-=_hFwd.z*_hSpd*.5;}
+          hm.position.set(playerPos.current.x,playerY.current,playerPos.current.z);
+          hm.rotation.y=cA.current;
+          hr.rideT=(hr.rideT||0)+1;
+          // Gallop bob
+          hm.position.y=playerY.current+Math.abs(Math.sin(hr.rideT*.2))*.12;
+          if(playerAv.current)playerAv.current.root.visible=false;
+        } else {
+          // Idle wander near base
+          if(hr.rideT%240===0){hr.tx=8+(Math.random()-.5)*10;hr.tz=-74+(Math.random()-.5)*10;}
+          const _hx=hr.tx-hm.position.x,_hz=hr.tz-hm.position.z,_hd=Math.sqrt(_hx*_hx+_hz*_hz);
+          if(_hd>.5){hm.position.x+=_hx/_hd*.04;hm.position.z+=_hz/_hd*.04;hm.rotation.y=Math.atan2(_hx,_hz);}
+          hm.position.y=playerY.current<1?0:0;
+          hr.rideT=(hr.rideT||0)+1;
+          if(playerAv.current&&camModeRef.current==="3rd")playerAv.current.root.visible=true;
+        }
+      }
       // ── Race logic ──
       if(raceActive.current&&SD.current.playerCar&&SD.current.aiCar){
-        const TRACK_R=30,MTY=30.5,MTZ=-130;
+        const TRACK_R=30,MTY=16.5,MTZ=-130;
         aiCarAngle.current+=.008;// AI constant speed
         const prevAngle=playerCarAngle.current;
         if(inCar.current){// player drives on track
@@ -1182,6 +1294,9 @@ export default function GhostTown(){
         if(q.cat==="main"&&!p.mainQDone.includes(q.n))p.mainQDone.push(q.n);
         if(q.cat==="side"&&!p.sideQDone.includes(q.n))p.sideQDone.push(q.n);
         if(q.cat==="hidden"&&!p.hiddenQDone.includes(q.n))p.hiddenQDone.push(q.n);
+        // Add quest card to backpack
+        if(!p.backpack)p.backpack=[];
+        p.backpack.push({type:'quest',name:q.n,icon:q.i,rarity:q.ra,xp:q.xp,tk:q.tk,ts:Date.now(),minted:false});
         addToast(`+${q.xp}XP +${q.tk}◈ — ${q.n} complete!`,"#00ffc8");aL(`YOU completed [${q.n}] +${q.xp}XP +${q.tk}◈`,"quest");
         if(p.ms===1)addAch("First Blood","First quest completed");
         if(p.ms===10)addAch("Veteran","10 quests completed");
@@ -1240,6 +1355,7 @@ export default function GhostTown(){
           {isRunning.current&&<span style={{color:"#ff6b35",animation:"runPulse .3s ease-in-out infinite alternate"}}>⚡ RUN</span>}
           {lifting&&<span style={{color:"#c084fc",animation:"runPulse .5s ease-in-out infinite alternate"}}>🌀 FORCE</span>}
           {ridingDragon&&<span style={{color:"#ff4500",animation:"runPulse .4s ease-in-out infinite alternate"}}>🐉 RIDING</span>}
+          {ridingHorse&&<span style={{color:"#8b5e3c",animation:"runPulse .5s ease-in-out infinite alternate"}}>🐴 HORSE</span>}
           {inUnderground.current&&<span style={{color:"#ff2d78",fontSize:mob?5:6}}>⬇ CAVE</span>}
           {inUnderground.current&&<button onClick={()=>setHackModal(true)} style={{background:"rgba(0,255,200,.1)",border:"1px solid #00ffe7",color:"#00ffe7",fontSize:mob?5:6,padding:"2px 6px",cursor:"pointer",fontFamily:"inherit",letterSpacing:1,borderRadius:2}}>🖥️ HACK</button>}
           {!inUnderground.current&&playerY.current>2&&<span style={{color:"#00b4ff",fontSize:mob?5:6}}>⬆ {Math.round(playerY.current)}m</span>}
@@ -1280,6 +1396,8 @@ export default function GhostTown(){
             {activeTrack>=0&&<button onClick={()=>startMusic((activeTrack+1)%9)}
               style={{background:'rgba(0,0,0,0.15)',border:'1px solid rgba(255,255,255,0.1)',borderRadius:3,color:'#4a4a6a',fontSize:mob?4:5,padding:'2px 4px',cursor:'pointer',fontFamily:'inherit'}}>▶</button>}
           </div>
+          <button style={{background:"rgba(192,132,252,0.1)",border:"1px solid rgba(192,132,252,0.3)",borderRadius:3,color:"#c084fc",fontSize:mob?5:6,padding:"2px 7px",cursor:"pointer",fontFamily:"inherit",letterSpacing:2}}
+            onClick={()=>setBackpackOpen(p=>!p)}>🎒 PACK</button>
           <button style={{background:"rgba(0,255,231,0.08)",border:"1px solid rgba(0,255,231,0.25)",borderRadius:3,color:"#00ffe7",fontSize:mob?5:6,padding:"2px 7px",cursor:"pointer",fontFamily:"inherit",letterSpacing:2}}
             onClick={()=>setBankOpen(true)}>🏦 [B]ANK</button>
         </div>
@@ -1347,6 +1465,7 @@ export default function GhostTown(){
             <div>▸ <span style={{color:"#00ffc8"}}>WASD / Arrows</span> — Move · <span style={{color:"#00ffc8"}}>Shift</span> — Sprint</div>
             <div>▸ <span style={{color:"#f43f5e"}}>V</span> — Toggle 1st/3rd · <span style={{color:"#f43f5e"}}>F</span> — Ghost Flight</div>
             <div>▸ <span style={{color:"#e879f9"}}>D</span> — Dance · <span style={{color:"#ff4500"}}>H</span> — Dragon 🐉 · <span style={{color:"#0ea5e9"}}>E</span> — Board boat ⛵</div>
+            <div>▸ <span style={{color:"#8b5e3c"}}>G</span> — Mount horse 🐴 (at mountain base)</div>
             <div>▸ <span style={{color:"#fbbf24"}}>☀️/🌙</span> — Day/Night toggle in top bar</div>
             <div>▸ <span style={{color:"#e879f9"}}>Space</span> — Fly up · Mouse drag — Orbit</div>
           </div>
@@ -1556,6 +1675,32 @@ export default function GhostTown(){
         <div style={{color:"#ff3333",fontSize:14,letterSpacing:4,fontWeight:900}}>🏁 MOUNTAIN RACE</div>
         <div style={{color:"#fbbf24",fontSize:10,marginTop:4}}>LAP {raceHUD.lap+1} / {raceHUD.total} · WASD to drive · E to exit</div>
       </div>}
+      {/* BACKPACK PANEL */}
+      {backpackOpen&&<div style={{position:"absolute",zIndex:30,top:"50%",left:"50%",transform:"translate(-50%,-50%)",background:"#030308f0",border:"1px solid #c084fc30",borderRadius:6,padding:12,minWidth:260,maxWidth:340,maxHeight:"70vh",overflow:"auto",backdropFilter:"blur(12px)"}}>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
+          <span style={{fontSize:10,color:"#c084fc",fontWeight:700,letterSpacing:2}}>🎒 BACKPACK</span>
+          <button onClick={()=>setBackpackOpen(false)} style={{background:"transparent",border:"none",color:"#4a4a6a",fontSize:10,cursor:"pointer",fontFamily:"inherit"}}>✕</button>
+        </div>
+        <div style={{fontSize:6,color:"#3a3a52",marginBottom:8}}>Quest cards, achievements & items — mint them onchain at the 🏦 Bank</div>
+        {(!pd.current.backpack||pd.current.backpack.length===0)&&<div style={{fontSize:7,color:"#2a2a3a",textAlign:"center",padding:"16px 0"}}>No items yet — complete quests to fill your pack</div>}
+        {(pd.current.backpack||[]).map((item:any,i:number)=>(
+          <div key={i} style={{padding:"5px 7px",marginBottom:3,background:"#0a0a1480",borderRadius:3,borderLeft:`2px solid ${RC[item.rarity]||'#4a4a6a'}`,display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+            <div>
+              <div style={{fontSize:7,color:RC[item.rarity]||'#c8c8d4',fontWeight:700}}>{item.icon} {item.name}</div>
+              <div style={{fontSize:5,color:"#3a3a52"}}>{item.type.toUpperCase()} · +{item.xp}XP +{item.tk}◈</div>
+            </div>
+            {item.minted?<span style={{fontSize:5,color:"#38b2ac"}}>⛓ MINTED</span>:<button onClick={()=>{
+              setMintingItem(item.name);
+              setTimeout(()=>{item.minted=true;setMintingItem(null);addToast(`⛓ ${item.name} minted on Sepolia!`,'#c084fc');aL(`⛓ Quest card [${item.name}] minted to ${pd.current.did}`,'system');},2200);
+            }} style={{background:"rgba(192,132,252,0.1)",border:"1px solid #c084fc40",borderRadius:2,color:"#c084fc",fontSize:5,padding:"2px 5px",cursor:"pointer",fontFamily:"inherit"}}>{mintingItem===item.name?'..minting':'MINT'}</button>}
+          </div>
+        ))}
+        {(pd.current.backpack||[]).filter((i:any)=>!i.minted).length>1&&<button onClick={()=>{
+          setMintingItem('all');
+          setTimeout(()=>{(pd.current.backpack||[]).forEach((i:any)=>{i.minted=true;});setMintingItem(null);addToast(`⛓ All items minted on Sepolia!`,'#c084fc');},3000);
+        }} style={{width:"100%",marginTop:6,padding:"5px",background:"rgba(192,132,252,0.08)",border:"1px solid #c084fc30",borderRadius:3,color:"#c084fc",fontSize:7,cursor:"pointer",fontFamily:"inherit",fontWeight:700}}>{mintingItem==='all'?'⚡ Minting...':'⛓ MINT ALL ON SEPOLIA'}</button>}
+      </div>}
+
       {hackModal&&!hackSolved&&<div style={{position:"absolute",zIndex:40,inset:0,background:"rgba(0,10,20,.92)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",backdropFilter:"blur(10px)"}} onClick={()=>setHackModal(false)}>
         <div style={{maxWidth:400,width:"90%",background:"#060f16",border:"1px solid #00ffe7",borderRadius:8,padding:24,fontFamily:"inherit"}} onClick={(e:any)=>e.stopPropagation()}>
           <div style={{color:"#00ffe7",fontSize:12,letterSpacing:4,marginBottom:8}}>🖥️ TERMINAL HACK</div>

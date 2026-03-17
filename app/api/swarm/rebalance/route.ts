@@ -121,7 +121,7 @@ async function runScout(
   const tokens = TOKENS[chainId];
   if (!tokens) throw new Error(`Unsupported chainId: ${chainId}`);
 
-  const rpc = process.env.SEPOLIA_RPC_URL;
+  const rpc = process.env.SEPOLIA_RPC_URL || 'https://eth-sepolia.g.alchemy.com/v2/O9mAi2CXfFulnRl0XLZF5';
   if (!rpc) throw new Error('SEPOLIA_RPC_URL not configured');
 
   const provider = new ethers.JsonRpcProvider(rpc);

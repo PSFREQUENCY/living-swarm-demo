@@ -2,7 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(req: NextRequest) {
-  const rpcUrl = process.env.SEPOLIA_RPC_URL;
+  const rpcUrl = process.env.SEPOLIA_RPC_URL || 'https://eth-sepolia.g.alchemy.com/v2/O9mAi2CXfFulnRl0XLZF5';
   if (!rpcUrl) {
     return NextResponse.json({ error: 'RPC not configured' }, { status: 500 });
   }

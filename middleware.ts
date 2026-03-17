@@ -12,6 +12,7 @@ const PUBLIC_SWARM_PATHS = new Set([
   '/api/swarm/status',
   '/api/swarm/log',
   '/api/swarm/capabilities',
+  '/api/swarm/rebalance',
 ]);
 
 function timingSafeEqual(a: string, b: string): boolean {

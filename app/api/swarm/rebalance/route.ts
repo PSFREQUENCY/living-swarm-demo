@@ -56,8 +56,9 @@ interface ScoutSignal {
   drift: number;              // signed, e.g. +0.12 means ETH is 12% over
   drift_pct: string;
   action_needed: boolean;
-  sell_token: 'ETH' | 'USDC' | null;
-  buy_token:  'ETH' | 'USDC' | null;
+  sell_token: string | null;
+  buy_token:  string | null;
+  weth_balance?: string;
   trade_amount_raw: string;   // in wei / base units
   trade_amount_human: string;
   gas_estimate_gwei?: string;
@@ -125,18 +126,21 @@ async function runScout(
 
   const provider = new ethers.JsonRpcProvider(rpc);
 
-  // Fetch ETH + USDC balances in parallel
+  // Fetch ETH + WETH + USDC balances in parallel
   const ERC20_ABI = ['function balanceOf(address) view returns (uint256)', 'function decimals() view returns (uint8)'];
   const usdcContract = new ethers.Contract(tokens.USDC, ERC20_ABI, provider);
+  const wethContract = new ethers.Contract(tokens.WETH, ERC20_ABI, provider);
 
-  const [ethBalWei, usdcBalRaw, usdcDecimals, gasPrice] = await Promise.all([
+  const [ethBalWei, usdcBalRaw, wethBalRaw, usdcDecimals, gasPrice] = await Promise.all([
     provider.getBalance(wallet),
     usdcContract.balanceOf(wallet),
+    wethContract.balanceOf(wallet).catch(() => 0n),
     usdcContract.decimals().catch(() => 6),
     provider.getFeeData().then(f => f.gasPrice ?? 0n),
   ]);
 
-  const ethBal = parseFloat(ethers.formatEther(ethBalWei));
+  const ethBal  = parseFloat(ethers.formatEther(ethBalWei));
+  const wethBal = parseFloat(ethers.formatEther(wethBalRaw));
   const usdcBal = parseFloat(ethers.formatUnits(usdcBalRaw, usdcDecimals));
 
   // Get live ETH price via Uniswap quote (1 ETH → USDC)
@@ -165,30 +169,31 @@ async function runScout(
   } catch { /* price fetch failed — use fallback */ }
 
   // If price fetch failed, use a reasonable fallback so portfolio math still works
-  if (ethPriceUSD === 0) ethPriceUSD = chainId === 1 ? 3500 : 3500;
+  if (ethPriceUSD === 0) ethPriceUSD = 3500;
 
-  const ethValueUSD  = ethBal * ethPriceUSD;
+  // ETH + WETH are the same asset value-wise
+  const ethTotalBal  = ethBal + wethBal;
+  const ethValueUSD  = ethTotalBal * ethPriceUSD;
   const usdcValueUSD = usdcBal;
   const totalValue   = ethValueUSD + usdcValueUSD;
 
   const ethAlloc  = totalValue > 0 ? ethValueUSD / totalValue : 0;
   const usdcAlloc = totalValue > 0 ? usdcValueUSD / totalValue : 0;
-  const drift     = ethAlloc - targetETH; // positive = ETH heavy, negative = USDC heavy
+  const drift     = ethAlloc - targetETH;
   const absDrift  = Math.abs(drift);
 
   const actionNeeded = absDrift >= driftThreshold && totalValue > 0;
 
-  let sellToken: 'ETH' | 'USDC' | null = null;
-  let buyToken:  'ETH' | 'USDC' | null = null;
+  let sellToken: string | null = null;
+  let buyToken:  string | null = null;
   let tradeAmountRaw = '0';
   let tradeAmountHuman = '0';
 
   if (actionNeeded) {
     if (drift > 0) {
-      // ETH heavy → sell ETH, buy USDC
-      sellToken = 'ETH';
+      // ETH heavy → sell ETH (prefer native ETH; fall back to WETH if low)
+      sellToken = ethBal >= 0.001 ? 'ETH' : 'WETH';
       buyToken  = 'USDC';
-      // Amount to sell: bring ETH alloc down to target
       const excessUSD  = drift * totalValue;
       const ethToSell  = Math.min(excessUSD / ethPriceUSD, maxTradeSizeETH);
       tradeAmountHuman = ethToSell.toFixed(6);
@@ -208,6 +213,7 @@ async function runScout(
     wallet,
     chainId,
     eth_balance: ethBal.toFixed(6),
+    weth_balance: wethBal.toFixed(6),
     usdc_balance: usdcBal.toFixed(2),
     eth_price_usd: Math.round(ethPriceUSD * 100) / 100,
     eth_value_usd: Math.round(ethValueUSD * 100) / 100,
@@ -587,6 +593,7 @@ export async function POST(req: NextRequest) {
       targets: { eth: targetETH, usdc: 1 - targetETH },
       portfolio: {
         eth_balance: scout.eth_balance,
+        weth_balance: scout.weth_balance,
         usdc_balance: scout.usdc_balance,
         eth_price_usd: scout.eth_price_usd,
         total_value_usd: scout.total_value_usd,

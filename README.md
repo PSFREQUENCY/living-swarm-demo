@@ -18,7 +18,7 @@
 
 > **"The first macro-hard AI-run city. Where agents pay, trust, cooperate, and keep secrets — onchain."**
 
-**[▶ PLAY NOW](https://psfrequency.github.io/living-swarm-demo/game)** · **[Vercel](https://living-swarm-demo.vercel.app)** · **[Royal Museum](https://living-swarm-demo.vercel.app/royal-logs/)** · **[Swap Terminal](https://living-swarm-demo.vercel.app/swap/)**
+**[▶ PLAY NOW](https://psfrequency.github.io/living-swarm-demo/game)** · **[Vercel](https://living-swarm-demo.vercel.app)** · **[Royal Museum](https://living-swarm-demo.vercel.app/royal-logs/)** · **[SwarmSwap](https://living-swarm-demo.vercel.app/swap/)** · **[SwarmFI](https://living-swarm-demo.vercel.app/swap/?tab=fi)**
 
 **Wallet**: `0xdd30d20683EB3a84d1f9c69E513D653b581F6484` · **Built**: March 13–22, 2026
 
@@ -38,6 +38,34 @@
 | **6** | **Safety & Guardrails + Compute Budget** | Sentinel-03 scores all output 0–100. Arbiter blocks score ≥ 76. Each agent has token budget with hard abort at < 5% remaining. No tx without Sentinel sign-off. |
 
 **Bonus**: ERC-8004 trust signals — Sentinel-03 rates Engineer-02 and Herald-01 after each run. Multi-agent swarm with specialized roles. ERC-8183 capability manifests.
+
+---
+
+## ◈ SWARMFI — 3-AGENT AUTONOMOUS PORTFOLIO REBALANCING
+
+> *independent operators, not scripts*
+
+Three ERC-8004 agents running a complete discover → plan → execute → verify loop against the Uniswap Trading API — with real TxIDs on Sepolia:
+
+| Agent | ERC-8004 | Role | What It Does |
+|---|---|---|---|
+| **Scout** | Herald-01 #1 | DISCOVERY | Fetches ETH + WETH + USDC balances via RPC · gets live ETH price via Uniswap quote · detects drift from target allocation · emits rebalance signal |
+| **Strategist** | Engineer-02 #2 | PLANNING | Calls Uniswap `/v1/quote` · evaluates routing (Classic/Dutch/Priority) · handles Permit2 EIP-712 flow · rejects if price impact > 2% |
+| **Guardian** | Sentinel-03 #3 | VALIDATION | 8 safety checks: router whitelist · calldata hex validity · slippage bounds · balance sufficiency · output nonzero · amount within budget · strategist approval · ArbitersLedger attestation |
+
+**Live execution:**
+```
+Scout: ETH=62% (target 50%) drift=+12% → sell 0.05 ETH → buy USDC
+Strategist: CLASSIC routing · output=187.42 USDC · gas=$0.12 · impact=0.02%
+Guardian: ✓ ROUTER_WHITELIST ✓ CALLDATA_HEX ✓ SLIPPAGE_BOUNDS ✓ BALANCE_SUFFICIENT
+         → APPROVED — risk=0/100 · band=PASS
+→ Permit2 EIP-712 signed → broadcast → real TxID on Sepolia
+→ ArbitersLedger.sol attestation (fire-and-forget)
+```
+
+**Heartbeat**: Toggle TRADE/SLEEP mode. In TRADE mode, the swarm auto-triggers every 6 hours — checking for drift and executing if Guardian approves. Connect wallet → set portfolio target → press TRADE. Agents deploy the plan.
+
+**9000 sentient particles**: Three agent clusters rendered via WebGL canvas — Scout (violet/cyan orbital), Strategist (gold convergent), Guardian (sage ring formation). Particles respond to agent state in real time.
 
 ---
 

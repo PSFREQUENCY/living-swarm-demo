@@ -268,7 +268,7 @@ footer{border-top:1px solid var(--border);padding:2rem 6vw;display:flex;justify-
   <div style="position:absolute;bottom:60px;right:24px;z-index:5;font-family:'Share Tech Mono',monospace;font-size:8px;letter-spacing:2px;color:rgba(0,255,231,0.1);text-align:right;line-height:2;">MOVE MOUSE TO<br>DISTURB THE SWARM</div>
 </section>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://unpkg.com/three@0.128.0/build/three.min.js"></script>
 <script>
 // ═══ REACTIVE WEBGL SWARM — 8000 particles ═══════════════════
 (function(){
@@ -527,26 +527,81 @@ setInterval(fetchPrice,30000);setInterval(fetchUniRate,60000);
 </div>
 <div class="sdiv">&#x2593;&#x2593;&#x2593;</div>
 
-<div class="uni-s">
-  <div class="rl-ey">&#x2B21; UNISWAP TRADING API // PERMIT2 // UNISWAPX // ARBITER-GATED</div>
-  <div class="uni-hrow">
-    <div class="gx gx-cyan">SWARMSWAP</div>
-    <div class="rl-meta">real quotes &middot; <span>live routing</span> &middot; UniswapX &middot; <span>Permit2 EIP-712</span></div>
+<style>
+.defi-tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:20px}
+.defi-tab{background:rgba(10,10,26,.6);border:1px solid #1a1a2a;border-radius:12px;padding:16px;cursor:pointer;text-align:left;font-family:inherit;transition:all .2s}
+.defi-tab:hover{border-color:#333}
+.defi-tab.active-swap{border-color:rgba(0,245,255,.45);background:rgba(0,245,255,.04)}
+.defi-tab.active-fi{border-color:rgba(57,255,143,.45);background:rgba(57,255,143,.04)}
+.defi-tab-title{font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(16px,3vw,26px);margin-bottom:4px}
+.dt-cyan{background:linear-gradient(135deg,#fff,var(--neon),#c084fc);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.dt-sage{background:linear-gradient(135deg,#fff,#39ff8f,var(--neon));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.defi-tab-sub{font-size:8px;color:#333;letter-spacing:.15em;line-height:1.7}
+.defi-tab.active-swap .defi-tab-sub,.defi-tab.active-fi .defi-tab-sub{color:#555}
+</style>
+<div class="uni-s" id="defi-section">
+  <div class="rl-ey" id="defi-eyebrow">&#x2B21; UNISWAP TRADING API // PERMIT2 // UNISWAPX // ARBITER-GATED</div>
+  <!-- Tab buttons -->
+  <div class="defi-tabs">
+    <button class="defi-tab active-swap" id="home-tab-swap" onclick="homeTab('swap')">
+      <div class="defi-tab-title dt-cyan">SWARMSWAP</div>
+      <div class="defi-tab-sub">UNISWAP QUOTE · PERMIT2 · ARBITER-GATED</div>
+    </button>
+    <button class="defi-tab" id="home-tab-fi" onclick="homeTab('fi')">
+      <div class="defi-tab-title dt-sage">SWARMFI</div>
+      <div class="defi-tab-sub">3-AGENT AUTONOMOUS REBALANCING · ERC-8004</div>
+    </button>
   </div>
-  <div class="uni-cards">
-    <div class="uni-card"><div class="uni-ct">&#x25C8; BEST_PRICE ROUTING</div><div class="uni-cd">Classic AMM, UniswapX, Dutch V2/V3, Priority. Optimizer picks best route live.</div></div>
-    <div class="uni-card"><div class="uni-ct">&#x26BF; PERMIT2 SIGNING</div><div class="uni-cd">Full EIP-712 off-chain Permit2. No gas for auth. Universal Router v2.0.</div></div>
-    <div class="uni-card"><div class="uni-ct">&#x2696; ARBITER-GATED</div><div class="uni-cd">Every swap scored 0&ndash;100. Above 75 blocked. Zero-trust DeFi in the swarm.</div></div>
-  </div>
-  <div class="uni-frow">
-    <div class="uni-stats">
-      <div><div class="uni-sv">V1</div><div class="uni-sl">TRADING API</div></div>
-      <div><div class="uni-sv">10+</div><div class="uni-sl">ROUTE TYPES</div></div>
-      <div><div class="uni-sv">V2</div><div class="uni-sl">UNIV ROUTER</div></div>
+  <!-- SWARMSWAP content -->
+  <div id="home-panel-swap">
+    <div class="uni-hrow">
+      <div class="gx gx-cyan">SWARMSWAP</div>
+      <div class="rl-meta">real quotes &middot; <span>live routing</span> &middot; UniswapX &middot; <span>Permit2 EIP-712</span></div>
     </div>
-    <a href="/swap/" class="ebtn ecyan">&#x25B6; OPEN SWARMSWAP &#x2192;</a>
+    <div class="uni-cards">
+      <div class="uni-card"><div class="uni-ct">&#x25C8; BEST_PRICE ROUTING</div><div class="uni-cd">Classic AMM, UniswapX, Dutch V2/V3, Priority. Optimizer picks best route live.</div></div>
+      <div class="uni-card"><div class="uni-ct">&#x26BF; PERMIT2 SIGNING</div><div class="uni-cd">Full EIP-712 off-chain Permit2. No gas for auth. Universal Router v2.0.</div></div>
+      <div class="uni-card"><div class="uni-ct">&#x2696; ARBITER-GATED</div><div class="uni-cd">Every swap scored 0&ndash;100. Above 75 blocked. Zero-trust DeFi in the swarm.</div></div>
+    </div>
+    <div class="uni-frow">
+      <div class="uni-stats">
+        <div><div class="uni-sv">V1</div><div class="uni-sl">TRADING API</div></div>
+        <div><div class="uni-sv">10+</div><div class="uni-sl">ROUTE TYPES</div></div>
+        <div><div class="uni-sv">V2</div><div class="uni-sl">UNIV ROUTER</div></div>
+      </div>
+      <a href="/swap/?tab=swap" class="ebtn ecyan">&#x25B6; OPEN SWARMSWAP &#x2192;</a>
+    </div>
+  </div>
+  <!-- SWARMFI content -->
+  <div id="home-panel-fi" style="display:none">
+    <div class="uni-hrow">
+      <div class="gx" style="background:linear-gradient(135deg,rgba(57,255,143,.15),rgba(0,245,255,.08));border-color:rgba(57,255,143,.4);color:#39ff8f">SWARMFI</div>
+      <div class="rl-meta">scout &middot; <span>strategist</span> &middot; guardian &middot; <span>autonomous loop</span></div>
+    </div>
+    <div class="uni-cards">
+      <div class="uni-card" style="border-color:rgba(57,255,143,.12)"><div class="uni-ct" style="color:#39ff8f">&#x25CE; SCOUT — HERALD-01</div><div class="uni-cd">Monitors wallet balances live via Sepolia RPC. Detects drift from target allocation. Emits rebalance signal when ETH/USDC shifts beyond threshold.</div></div>
+      <div class="uni-card" style="border-color:rgba(57,255,143,.12)"><div class="uni-ct" style="color:#39ff8f">&#x2B21; STRATEGIST — ENGINEER-02</div><div class="uni-cd">Calls Uniswap /quote API. Evaluates routing (Classic/Dutch/Priority). Handles Permit2 flow. Decides optimal execution path per market conditions.</div></div>
+      <div class="uni-card" style="border-color:rgba(57,255,143,.12)"><div class="uni-ct" style="color:#39ff8f">&#x26E8; GUARDIAN — SENTINEL-03</div><div class="uni-cd">8-point safety check. Router whitelist · calldata hex validation · slippage bounds · balance sufficiency · amount budget. Hard BLOCK on fail.</div></div>
+    </div>
+    <div class="uni-frow">
+      <div class="uni-stats">
+        <div><div class="uni-sv" style="color:#39ff8f">3</div><div class="uni-sl">AGENTS</div></div>
+        <div><div class="uni-sv" style="color:#39ff8f">8</div><div class="uni-sl">SAFETY CHECKS</div></div>
+        <div><div class="uni-sv" style="color:#39ff8f">6H</div><div class="uni-sl">HEARTBEAT</div></div>
+      </div>
+      <a href="/swap/?tab=fi" class="ebtn" style="background:linear-gradient(135deg,rgba(57,255,143,.14),rgba(0,245,255,.07));border-color:rgba(57,255,143,.4);color:#39ff8f">&#x25B6; OPEN SWARMFI &#x2192;</a>
+    </div>
   </div>
 </div>
+<script>
+function homeTab(t){
+  document.getElementById('home-panel-swap').style.display=t==='swap'?'':'none';
+  document.getElementById('home-panel-fi').style.display=t==='fi'?'':'none';
+  document.getElementById('home-tab-swap').className='defi-tab'+(t==='swap'?' active-swap':'');
+  document.getElementById('home-tab-fi').className='defi-tab'+(t==='fi'?' active-fi':'');
+  document.getElementById('defi-eyebrow').textContent=t==='swap'?'⬡ UNISWAP TRADING API // PERMIT2 // UNISWAPX // ARBITER-GATED':'⬡ 3-AGENT AUTONOMOUS REBALANCING // SCOUT → STRATEGIST → GUARDIAN';
+}
+</script>
 <div class="sdiv">&#x2593;&#x2593;&#x2593;</div>
 
 <div class="uni-s" style="border-color:rgba(155,89,255,.18)">

@@ -673,6 +673,22 @@ setInterval(fetchPrice,30000);setInterval(fetchUniRate,60000);
     </div>
   </div>
 
+  <!-- News + Memory panels -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1px;background:rgba(0,255,229,.05);margin-bottom:2px">
+    <div style="background:#000205;padding:.85rem 1rem;border-top:1px solid rgba(0,255,229,.05)">
+      <div style="font-size:.48rem;letter-spacing:.28em;color:rgba(0,255,229,.3);margin-bottom:.5rem">// HERALD DISCOVERED — HACKERNEWS AI/WEB3</div>
+      <div id="sw-news-list" style="font-family:'VT323',monospace;line-height:1.65">
+        <div style="color:rgba(255,255,255,.15);font-size:.72rem;font-style:italic">Run swarm to discover today's AI news...</div>
+      </div>
+    </div>
+    <div style="background:#000205;padding:.85rem 1rem;border-top:1px solid rgba(0,255,229,.05)">
+      <div style="font-size:.48rem;letter-spacing:.28em;color:rgba(0,255,229,.3);margin-bottom:.5rem">// SWARM MEMORY — <span id="sw-mem-count">0</span> LEARNINGS ACCUMULATED</div>
+      <div id="sw-mem-list" style="font-family:'VT323',monospace;line-height:1.65">
+        <div style="color:rgba(255,255,255,.15);font-size:.72rem;font-style:italic">Memory grows with each run.</div>
+      </div>
+    </div>
+  </div>
+
   <!-- ERC-8183 capability manifest display -->
   <div class="sw-8183">
     <div class="sw-8183-title">// ERC-8183 CAPABILITY MANIFEST &mdash; MACHINE READABLE</div>
@@ -694,6 +710,16 @@ setInterval(fetchPrice,30000);setInterval(fetchUniRate,60000);
     <span class="sw-run-status" id="sw-run-status"></span>
   </div>
 
+  <!-- Heartbeat control -->
+  <div id="sw-hb" style="display:flex;align-items:center;gap:1rem;padding:.6rem 0;border-top:1px solid rgba(0,255,229,.06);margin-top:.8rem;flex-wrap:wrap">
+    <div style="font-size:.5rem;letter-spacing:.25em;color:rgba(0,255,229,.25)">◼ HEARTBEAT</div>
+    <button id="sw-work-btn" onclick="window.toggleWork&&window.toggleWork()" style="font-family:'Share Tech Mono',monospace;font-size:.55rem;letter-spacing:.15em;padding:.3rem .8rem;background:rgba(170,255,0,.06);border:1px solid rgba(170,255,0,.3);border-radius:2px;color:#aaff00;cursor:pointer;transition:all .2s">◉ WORK</button>
+    <div style="font-size:.55rem;letter-spacing:.1em;color:rgba(0,255,229,.25)">NEXT: <span id="sw-countdown" style="color:#00ffe7;font-family:'VT323',monospace;font-size:.9rem">--:--:--</span></div>
+    <div style="font-size:.5rem;color:rgba(255,255,255,.15);letter-spacing:.08em">SESSION: <span id="sw-run-count" style="color:rgba(0,255,229,.4)">0</span> RUNS</div>
+    <div style="font-size:.5rem;color:rgba(255,255,255,.15);letter-spacing:.08em">MEMORY: <span id="sw-learn-count" style="color:rgba(170,255,0,.5)">0</span> LEARNINGS</div>
+    <div style="font-size:.5rem;color:rgba(255,255,255,.1);letter-spacing:.08em">6H AUTONOMOUS CYCLE</div>
+  </div>
+
   <div class="sw-meta">
     ERC-8004 REGISTRY: <a href="https://sepolia.etherscan.io/address/0x8004A818BFB912233c491871b3d84c89A494BD9e" target="_blank">0x8004A818...BD9e</a> &nbsp;&middot;&nbsp;
     ARBITER: <a href="https://sepolia.etherscan.io/address/0x4A6d6f8B23bf3ECD8EebeA73dcB582db6380Fc94" target="_blank">ArbitersLedger.sol</a> &nbsp;&middot;&nbsp;
@@ -706,8 +732,58 @@ setInterval(fetchPrice,30000);setInterval(fetchUniRate,60000);
 (function(){
   var PHASE_COLORS={'discover':'#00ffe7','plan':'#00c8ff','execute':'#ff00aa','validate':'#aaff00','submit':'#fbbf24','abort':'#ff4444'};
   var AGENT_CLASS={'herald-01':'sw-tag-herald','engineer-02':'sw-tag-engineer','sentinel-03':'sw-tag-sentinel'};
+  var HB_MS=6*60*60*1000;
+  var sessionRuns=0;
 
+  // ── Memory helpers ──────────────────────────────────────────────
+  function loadMem(){try{var m=localStorage.getItem('swarm_memory');return m?JSON.parse(m):null;}catch(e){return null;}}
+  function saveMem(m){try{localStorage.setItem('swarm_memory',JSON.stringify(m));}catch(e){}}
+  function getWork(){return localStorage.getItem('swarm_work')==='true';}
+  function setWork(on){localStorage.setItem('swarm_work',on?'true':'false');if(on&&!localStorage.getItem('swarm_next_run'))schedNext();updWorkBtn();}
+  function schedNext(){localStorage.setItem('swarm_next_run',String(Date.now()+HB_MS));}
+
+  // ── UI helpers ──────────────────────────────────────────────────
   function fmtTs(ts){var d=new Date(ts);return d.toISOString().replace('T',' ').slice(11,19);}
+
+  function updWorkBtn(){
+    var btn=document.getElementById('sw-work-btn');
+    if(!btn)return;
+    var on=getWork();
+    btn.textContent=on?'◉ REST':'◉ WORK';
+    btn.style.background=on?'rgba(255,0,170,.08)':'rgba(170,255,0,.06)';
+    btn.style.borderColor=on?'rgba(255,0,170,.4)':'rgba(170,255,0,.3)';
+    btn.style.color=on?'#ff69b4':'#aaff00';
+  }
+
+  function updLearnCount(mem){
+    var lc=document.getElementById('sw-learn-count');
+    var mc=document.getElementById('sw-mem-count');
+    var n=mem?mem.total_learnings:0;
+    if(lc)lc.textContent=String(n);
+    if(mc)mc.textContent=String(n);
+  }
+
+  function renderNews(items){
+    var el=document.getElementById('sw-news-list');
+    if(!el)return;
+    if(!items||!items.length){el.innerHTML='<div style="color:rgba(255,255,255,.15);font-size:.72rem;font-style:italic">No AI/web3 stories matched today.</div>';return;}
+    el.innerHTML=items.map(function(n){
+      return'<div style="margin:.18rem 0"><a href="'+n.url+'" target="_blank" style="color:rgba(0,255,229,.7);font-size:.75rem;text-decoration:none;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+n.title+'">▸ '+n.title+'</a><span style="color:rgba(255,255,255,.18);font-size:.6rem;margin-left:.3rem">score:'+n.score+'</span></div>';
+    }).join('');
+  }
+
+  function renderMem(mem){
+    var el=document.getElementById('sw-mem-list');
+    if(!el)return;
+    if(!mem||!mem.learnings||!mem.learnings.length){el.innerHTML='<div style="color:rgba(255,255,255,.15);font-size:.72rem;font-style:italic">Memory grows with each run.</div>';return;}
+    var last=mem.learnings.slice(-5).reverse();
+    el.innerHTML=last.map(function(l){
+      var conf=Math.round((l.confidence||0)*100);
+      var tags=l.tags&&l.tags.length?'<span style="color:rgba(170,255,0,.35);font-size:.58rem">['+l.tags.slice(0,2).join(',')+']</span> ':'';
+      return'<div style="margin:.18rem 0;font-size:.72rem;color:rgba(200,232,228,.5)">'+tags+'<span style="color:rgba(0,255,229,.6)">'+l.insight+'</span> <span style="color:rgba(255,255,255,.2);font-size:.6rem">'+conf+'%</span></div>';
+    }).join('');
+    updLearnCount(mem);
+  }
 
   function renderFeed(entries){
     var body=document.getElementById('sw-feed-body');
@@ -751,13 +827,40 @@ setInterval(fetchPrice,30000);setInterval(fetchUniRate,60000);
       });
   }
 
+  // ── Heartbeat countdown ─────────────────────────────────────────
+  setInterval(function(){
+    var cd=document.getElementById('sw-countdown');
+    if(!cd)return;
+    var nextStr=localStorage.getItem('swarm_next_run');
+    if(!nextStr||!getWork()){cd.textContent='--:--:--';return;}
+    var diff=parseInt(nextStr)-Date.now();
+    if(diff<=0){
+      cd.textContent='00:00:00';
+      if(getWork()){schedNext();window.triggerSwarmRun&&window.triggerSwarmRun();}
+      return;
+    }
+    var h=Math.floor(diff/3600000),m=Math.floor((diff%3600000)/60000),s=Math.floor((diff%60000)/1000);
+    cd.textContent=(h<10?'0':'')+h+':'+(m<10?'0':'')+m+':'+(s<10?'0':'')+s;
+  },1000);
+
+  // ── Toggle work/rest ────────────────────────────────────────────
+  window.toggleWork=function(){
+    var on=!getWork();
+    setWork(on);
+    if(!on)localStorage.removeItem('swarm_next_run');
+  };
+
+  // ── Memory-aware swarm run ──────────────────────────────────────
   window.triggerSwarmRun=function(){
     var btn=document.getElementById('sw-run-btn');
     var status=document.getElementById('sw-run-status');
+    var rc=document.getElementById('sw-run-count');
     if(!btn||!status)return;
     btn.disabled=true;btn.textContent='⟳ EXECUTING...';
     status.className='sw-run-status sw-run-ing';status.textContent='Running autonomous loop — Herald → Engineer → Sentinel...';status.style.display='inline-flex';
-    fetch('/api/swarm/execute',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({})})
+
+    var currentMem=loadMem();
+    fetch('/api/swarm/execute',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({memory:currentMem})})
       .then(function(r){return r.json();})
       .then(function(data){
         btn.disabled=false;btn.textContent='▶ RUN SWARM — LIVE EXECUTION';
@@ -766,19 +869,36 @@ setInterval(fetchPrice,30000);setInterval(fetchUniRate,60000);
           updateBudgets(data.agents);
           var meta=document.getElementById('sw-log-meta');
           if(meta&&data.swarm_id)meta.textContent='RUN: '+data.swarm_id+' · COMPLETE';
+          sessionRuns++;
+          if(rc)rc.textContent=String(sessionRuns);
+          // Render news panel
+          if(data.news_discovered)renderNews(data.news_discovered);
+          // Save + render memory
+          if(data.updated_memory){saveMem(data.updated_memory);renderMem(data.updated_memory);}
+          // Status line
+          var fo=data.final_output||{};
+          var statusParts=['✓ RUN COMPLETE'];
+          statusParts.push(data.total_tokens_used+' tokens');
+          statusParts.push('ETH $'+(fo.eth_price?fo.eth_price.toFixed(2):'—'));
+          if(fo.new_learnings!=null)statusParts.push('+'+fo.new_learnings+' new learnings');
+          if(fo.total_learnings!=null)statusParts.push(fo.total_learnings+' total');
+          if(fo.evolution_note)statusParts.push(fo.evolution_note.slice(0,60));
           status.className='sw-run-status sw-run-ok';
-          status.textContent='✓ RUN COMPLETE — '+data.total_tokens_used+' tokens · '+data.total_api_calls+' steps · ETH $'+(data.final_output&&data.final_output.eth_price?data.final_output.eth_price.toFixed(2):'—');
+          status.textContent=statusParts.join(' · ');
         } else if(data.error){
           status.className='sw-run-status sw-run-err';status.textContent='Error: '+data.error.slice(0,80);
         }
       })
-      .catch(function(e){
+      .catch(function(){
         btn.disabled=false;btn.textContent='▶ RUN SWARM — LIVE EXECUTION';
         status.className='sw-run-status sw-run-err';status.textContent='Network error. Check console.';
       });
   };
 
-  // Load static log on page load
+  // Init — render memory if it exists already
+  var mem=loadMem();
+  if(mem)renderMem(mem);
+  updWorkBtn();
   loadLog();
 })();
 </script>

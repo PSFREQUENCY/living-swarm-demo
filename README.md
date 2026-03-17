@@ -41,6 +41,37 @@
 
 ---
 
+## ◈ SWARM EVOLUTION — MEMORY + NEWS DISCOVERY
+
+> *an agent that learns nothing is just a script.*
+> *an agent that learns is something else.*
+
+Every swarm run now does three things no static agent can do:
+
+**1. Scans today's reality.** Herald-01 pulls HackerNews top 30 stories and filters for AI/web3/DeFi signals in real time — not cached, not curated. Whatever the field is talking about today is what the swarm analyzes today.
+
+**2. Extracts new knowledge.** Engineer-02 synthesizes the live news, the ETH market price, and the swarm's accumulated history into a unified intelligence report. Venice AI (zero-retention private inference) extracts `new_learnings` — specific, confidence-scored insights the swarm did not hold before.
+
+**3. Remembers across time.** Sentinel-03 validates each candidate learning before it is approved. Approved learnings are stored in `SwarmMemory` (localStorage) and sent back with the next run's request — so the Venice prompt grows richer each cycle. Run 1 has no prior context. Run 50 has 50 cycles of filtered signal. The swarm is not the same swarm it was yesterday.
+
+```
+RUN 1:  "No prior learnings — baseline established."
+RUN 7:  "7 learnings from 6 runs. ETH momentum signal identified."
+RUN 30: "30 learnings. Agent reasoning contextualizes new news against 29 prior insights."
+```
+
+**6-hour autonomous heartbeat.** A WORK/REST toggle in the UI starts a `setInterval` countdown. When the timer expires, the swarm fires automatically — no human required. Toggle REST to pause. Toggle WORK to resume. The cycle is yours to start and stop.
+
+This is what it looks like when an agent accumulates knowledge across time, with real-world data, private inference, and no central server holding its memory.
+
+**API surface (v2)**:
+```
+POST /api/swarm/execute   — body: { memory?: SwarmMemory }
+                            returns: { news_discovered, new_learnings, updated_memory, ... }
+```
+
+---
+
 ## ◈ THE FOUR THEMES — SOLVED
 
 ---

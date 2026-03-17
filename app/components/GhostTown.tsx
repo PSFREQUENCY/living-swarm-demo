@@ -19,6 +19,7 @@ const T=[
   {n:"SOVEREIGN",c:"#f56565",h:0xf56565,g:1.7,xp:10000,i:"♛",r:5},
   {n:"EXILED",c:"#991b1b",h:0x991b1b,g:.1,xp:-1e6,i:"✕",r:-1},
 ];
+const TORTOISE_WAYPOINTS=[{x:-35,z:-70},{x:-78,z:-25},{x:-78,z:32},{x:0,z:72},{x:75,z:32},{x:75,z:-25},{x:-35,z:-70}];
 const BELTS=[
   {n:"WHITE",c:"#e2e8f0",xp:0},{n:"YELLOW",c:"#fbbf24",xp:200},
   {n:"GREEN",c:"#38b2ac",xp:800},{n:"BLUE",c:"#4299e1",xp:2000},
@@ -91,6 +92,7 @@ const HQ=[
   {n:"ANCIENT RELIC: DRAGON SWORD",cat:"hidden",xp:10000,tk:500,en:0,i:"⚔️",ra:"legendary",d:"[CLASSIFIED] Ride the dragon. Breathe fire while airborne. The first of three ancient relics will reveal itself.",st:1,hint:"Ride the dragon. Press I to breathe fire while flying high."},
   {n:"TREE FELLER",cat:"hidden",xp:600,tk:120,en:0,i:"🌲",ra:"epic",d:"[CLASSIFIED] Chop down a tree with the Dragon Sword. Something falls.",st:1,hint:"Equip the sword. Find a tree. Press C."},
   {n:"BIG MAN",cat:"hidden",xp:1200,tk:250,en:0,i:"🍎",ra:"legendary",d:"[CLASSIFIED] Eat the fruit that falls when a tree is felled. Grow 9x for 30 seconds.",st:1,hint:"Pick up the fruit before it disappears..."},
+  {n:"TURTLE ISLAND",cat:"hidden",xp:100000,tk:5000,en:0,i:"🐢",ra:"legendary",d:"[CLASSIFIED] Find the ancient tortoise near the mountain. Ride it for a full tour of the town. You will be changed.",st:1,hint:"Near the mountain. Press T to mount. Stay on for the full circuit."},
 ];
 
 // All quests combined for display
@@ -425,6 +427,46 @@ function mkFruit():THREE.Mesh{
   const cols=[0xff4400,0xffcc00,0xff88aa,0xaaff44];
   return new THREE.Mesh(new THREE.SphereGeometry(.55,6,5),new THREE.MeshBasicMaterial({color:cols[Math.floor(Math.random()*cols.length)]}));
 }
+function mkTortoise():THREE.Group{
+  const g=new THREE.Group();
+  const shellM=new THREE.MeshStandardMaterial({color:0x2d4a1e,emissive:0x88ff44,emissiveIntensity:.18,roughness:.7,metalness:.2});
+  const bodyM=new THREE.MeshStandardMaterial({color:0x3d5525,roughness:.8,metalness:.1});
+  const headM=new THREE.MeshStandardMaterial({color:0x4a6a2a,roughness:.7,metalness:.1});
+  // Shell dome (squashed sphere)
+  const shell=new THREE.Mesh(new THREE.SphereGeometry(2.6,9,7,0,Math.PI*2,0,Math.PI*.58),shellM);
+  shell.rotation.x=Math.PI;shell.position.y=2.1;shell.scale.y=.72;g.add(shell);
+  // Shell bottom plate
+  const plate=new THREE.Mesh(new THREE.CylinderGeometry(2.5,2.5,.18,9),bodyM);plate.position.y=1.15;g.add(plate);
+  // Shell hexagonal pattern bumps
+  for(let i=0;i<7;i++){
+    const ang=i/7*Math.PI*2,r=i===0?0:1.5;
+    const bump=new THREE.Mesh(new THREE.SphereGeometry(.55,5,4),new THREE.MeshStandardMaterial({color:i===0?0x3a6025:0x2a4a18,emissive:0x44aa22,emissiveIntensity:.12,roughness:.6}));
+    bump.position.set(Math.cos(ang)*r,3.1+Math.random()*.15,Math.sin(ang)*r*.85);g.add(bump);
+  }
+  // Body mass
+  const body=new THREE.Mesh(new THREE.CylinderGeometry(1.9,2.1,1.4,8),bodyM);body.position.y=.7;g.add(body);
+  // Neck
+  const neck=new THREE.Mesh(new THREE.CylinderGeometry(.5,.7,1.4,6),headM);neck.position.set(0,.9,2.4);neck.rotation.x=-.4;g.add(neck);
+  // Head
+  const head=new THREE.Mesh(new THREE.SphereGeometry(.8,7,6),headM);head.position.set(0,1.5,3.2);head.scale.z=1.2;g.add(head);
+  // Eyes
+  [-1,1].forEach((s:number)=>{
+    const e=new THREE.Mesh(new THREE.SphereGeometry(.14,5,4),new THREE.MeshBasicMaterial({color:0xffdd00}));e.position.set(s*.38,1.9,3.72);g.add(e);
+    const el=new THREE.PointLight(0xffdd00,.3,3);el.position.copy(e.position);g.add(el);
+  });
+  // 4 legs
+  ([[-2.1,.35,1.3],[-2.1,.35,-1.1],[2.1,.35,1.3],[2.1,.35,-1.1]] as number[][]).forEach(([lx,ly,lz])=>{
+    const leg=new THREE.Mesh(new THREE.CylinderGeometry(.42,.5,1.3,5),bodyM);
+    leg.position.set(lx,ly,lz);leg.rotation.z=lx<0?-.45:.45;leg.rotation.x=lz>0?.18:-.18;g.add(leg);
+    const foot=new THREE.Mesh(new THREE.SphereGeometry(.55,5,4),headM);foot.position.set(lx*1.38,.08,lz);g.add(foot);
+  });
+  // Tail
+  const tail=new THREE.Mesh(new THREE.ConeGeometry(.28,.7,5),bodyM);tail.position.set(0,.8,-2.4);tail.rotation.x=.4;g.add(tail);
+  // Ancient wisdom aura
+  const gl=new THREE.PointLight(0x88ff44,.7,10);gl.position.y=2;g.add(gl);
+  g.scale.setScalar(2.8);
+  return g;
+}
 
 function mkDiscoBall():THREE.Group{
   const g=new THREE.Group();
@@ -756,6 +798,11 @@ export default function GhostTown(){
   const [rocketPackEquipped,setRocketPackEquipped]=useState(false);
   const rocketPackRef=useRef<any>(null);
   const tronAcquired=useRef(false);
+  const ninjaMode=useRef(false);
+  const tortoiseRef=useRef<any>(null);
+  const onTortoise=useRef(false);
+  const tortoiseCooldown=useRef(0);
+  const tortoiseWpIdx=useRef(0);
   const playerJetpackMesh=useRef<any>(null);
   const playerSwordMesh=useRef<any>(null);
   const treesRef=useRef<any[]>([]);
@@ -965,7 +1012,10 @@ export default function GhostTown(){
     rpGr.position.set(40,1.8,2);sc.add(rpGr);rocketPackRef.current=rpGr;
     // ── Trees around the town ──
     const TREE_POS:number[][]=[[-65,-70],[-50,20],[-60,55],[15,-75],[-25,75],[62,-50],[72,30],[-72,25],[55,70],[-35,-85],[30,85],[-85,35],[25,-60],[-55,-20],[70,-70],[-15,55],[45,-85],[-78,-45],[58,-20],[28,72],[-62,-50],[48,50],[-42,65],[65,-25]];
-    TREE_POS.forEach(([tx,tz],ti)=>{const tree=mkTree(ti%4);tree.position.set(tx,0,tz);sc.add(tree);treesRef.current.push({mesh:tree,x:tx,z:tz,chopped:false});});
+    TREE_POS.forEach(([tx,tz],ti)=>{const tree=mkTree(ti%4);tree.position.set(tx,0,tz);sc.add(tree);treesRef.current.push({mesh:tree,x:tx,z:tz,chopped:false,respawnAt:0});});
+    // ── Ancient Tortoise — near mountain base, tours the town ──
+    const tortoiseMesh=mkTortoise();tortoiseMesh.position.set(TORTOISE_WAYPOINTS[0].x,0,TORTOISE_WAYPOINTS[0].z);sc.add(tortoiseMesh);
+    tortoiseRef.current={mesh:tortoiseMesh,wpIdx:0,frame:0,speed:.038};
     // ── Player jetpack accessory mesh (shown on player back when equipped) ──
     const jpAcc=new THREE.Group();
     const jpBody=new THREE.Mesh(new THREE.BoxGeometry(.38,.42,.2),new THREE.MeshBasicMaterial({color:0x00ff88}));jpAcc.add(jpBody);
@@ -1010,6 +1060,20 @@ export default function GhostTown(){
         if(!dragonRef.current){const d=mkDragon();SD.current.sc.add(d);d.position.set(playerPos.current.x,0,playerPos.current.z);dragonRef.current={mesh:d,tx:tgtZ.x,tz:tgtZ.z,frame:0,tgtZone:tgtZ,riding:false};}
         else{dragonRef.current.tx=tgtZ.x;dragonRef.current.tz=tgtZ.z;dragonRef.current.tgtZone=tgtZ;dragonRef.current.frame=30;}
         addToast("🐉 Dragon flies to next quest! Press R nearby to mount","#ff4500");aL("🐉 Dragon summoned — follow it, then press R to ride","system");
+      }
+      // ── T: Tortoise mount/dismount ──
+      if(k==='t'&&SD.current&&tortoiseRef.current&&tortoiseCooldown.current<=0){
+        if(onTortoise.current){
+          onTortoise.current=false;tortoiseCooldown.current=60;
+          addToast('🐢 Dismounted the ancient tortoise','#88ff44');
+        } else {
+          const tm=tortoiseRef.current.mesh;
+          const _td=Math.sqrt((tm.position.x-playerPos.current.x)**2+(tm.position.z-playerPos.current.z)**2);
+          if(_td<12){onTortoise.current=true;tortoiseCooldown.current=60;tortoiseWpIdx.current=0;
+            addToast('🐢 RIDING THE ANCIENT TORTOISE — stay on for the full circuit!','#88ff44');
+            aL('🐢 TURTLE ISLAND: stay on the tortoise for the full town circuit to earn 100,000 XP','system');
+          } else addToast('🐢 Get closer to the ancient tortoise (within 12 units)','#4a5568');
+        }
       }
       // Race car enter/exit
       if(k==='e'&&SD.current&&!inBoat.current&&!inCar.current){
@@ -1119,7 +1183,7 @@ export default function GhostTown(){
         else{
           const _near=treesRef.current.find(tr=>!tr.chopped&&Math.sqrt((tr.x-playerPos.current.x)**2+(tr.z-playerPos.current.z)**2)<7);
           if(_near){
-            _near.chopped=true;_near.mesh.visible=false;
+            _near.chopped=true;_near.mesh.visible=false;_near.respawnAt=FC.current+1800;// respawn in 30s at 60fps
             const POEMS=["roots remember\nwhat branches forget\nthe sky made space","rings count the years\nsilence counts the rest\ni stood here once","every fall is a gift\nto the earth below\nthe tree knows this","cut once grow twice\nthe forest understands\nwhat cities forgot","i was seed before\ni was sky after\nbetween was the living","the oldest trees\nhave no beginning\nonly the next ring"];
             const _poem=POEMS[Math.floor(Math.random()*POEMS.length)];
             setPoemCard(_poem);setTimeout(()=>setPoemCard(null),5500);
@@ -1128,6 +1192,13 @@ export default function GhostTown(){
             pd.current.xp+=50;pd.current.tier=gT(pd.current.xp);
             // Spawn fruit at tree base
             if(SD.current){for(let fi=0;fi<3;fi++){const fr=mkFruit();fr.position.set(_near.x+(Math.random()-.5)*4,0.6,_near.z+(Math.random()-.5)*4);SD.current.sc.add(fr);fruitsRef.current.push({mesh:fr,x:fr.position.x,z:fr.position.z,spawnT:FC.current});}}
+            // Wood / Sap / Leaves to backpack
+            if(!pd.current.backpack)pd.current.backpack=[];
+            pd.current.backpack.push({type:'item',name:'ANCIENT WOOD',icon:'🪵',rarity:'common',desc:'Dense timber from a ghost town tree.',ts:Date.now(),minted:false});
+            pd.current.backpack.push({type:'item',name:'FOREST SAP',icon:'🍯',rarity:'uncommon',desc:'Golden sap from the trunk. Still warm.',ts:Date.now(),minted:false});
+            pd.current.backpack.push({type:'item',name:'GHOST LEAVES',icon:'🍃',rarity:'common',desc:'Leaves that remember the branch.',ts:Date.now(),minted:false});
+            setBackpackFlash(true);setTimeout(()=>setBackpackFlash(false),1500);
+            addToast('🪵 Wood · Sap · Leaves added to backpack','#8b6914');
             addToast('🍎 Fruit fell — eat it before it disappears! (walk near it)','#aaff44');
             // Tree Feller quest
             if(!pd.current.hiddenQDone.includes('TREE FELLER')){pd.current.hiddenQDone.push('TREE FELLER');pd.current.xp+=600;pd.current.tk+=120;pd.current.tier=gT(pd.current.xp);pd.current.belt=gB(pd.current.dojoXP);addToast('🌲 TREE FELLER quest +600XP!','#38b2ac');checkSuper();}
@@ -1182,7 +1253,7 @@ export default function GhostTown(){
     let run=true;const sa=SA.current;
     const loop=()=>{
       if(!run)return;AID.current=requestAnimationFrame(loop);const t=++FC.current;qTm.current++;sTm.current++;
-      const k=keys.current;let moving=false;const spd=isRunning.current?.32:k.shift?.18:.1;
+      const k=keys.current;let moving=false;const spd=k.shift?.9:.3;
       _fwd.set(-Math.sin(cA.current),0,-Math.cos(cA.current)).normalize();
       _right.set(_fwd.z,0,-_fwd.x);
       _mv.set(0,0,0);
@@ -1383,6 +1454,42 @@ export default function GhostTown(){
           hm.position.y=playerY.current<1?0:0;
           hr.rideT=(hr.rideT||0)+1;
           if(playerAv.current&&camModeRef.current==="3rd")playerAv.current.root.visible=true;
+        }
+      }
+      // ── Tree respawn ──
+      treesRef.current.forEach((tr:any)=>{if(tr.chopped&&tr.respawnAt>0&&FC.current>=tr.respawnAt){tr.chopped=false;tr.mesh.visible=true;tr.respawnAt=0;}});
+      // ── Tortoise movement + ride ──
+      if(tortoiseCooldown.current>0)tortoiseCooldown.current--;
+      if(tortoiseRef.current){
+        const tor=tortoiseRef.current;const tm=tor.mesh;tm.position.y=Math.sin(FC.current*.04)*.08;
+        const wp=TORTOISE_WAYPOINTS[tor.wpIdx%TORTOISE_WAYPOINTS.length];
+        const _tdx=wp.x-tm.position.x,_tdz=wp.z-tm.position.z,_tdd=Math.sqrt(_tdx*_tdx+_tdz*_tdz);
+        if(_tdd>1.5){tm.position.x+=_tdx/_tdd*tor.speed;tm.position.z+=_tdz/_tdd*tor.speed;tm.rotation.y=Math.atan2(_tdx,_tdz);}
+        else{tor.wpIdx++;// reached waypoint
+          if(onTortoise.current){tortoiseWpIdx.current++;
+            if(tortoiseWpIdx.current>=TORTOISE_WAYPOINTS.length&&!pd.current.hiddenQDone.includes('TURTLE ISLAND')){
+              pd.current.hiddenQDone.push('TURTLE ISLAND');pd.current.xp+=100000;pd.current.tk+=5000;
+              pd.current.tier=gT(pd.current.xp);pd.current.belt=gB(pd.current.dojoXP);
+              // Ninja transformation
+              ninjaMode.current=true;pd.current.ninjaMode=true;pd.current.skin=SKINS[3];// samurai/ninja skin
+              if(pd.current.backpack)pd.current.backpack.push({type:'item',name:'NINJA OUTFIT',icon:'🥷',rarity:'legendary',desc:'Earned riding the ancient tortoise around the whole town.',ts:Date.now(),minted:false});
+              setBackpackFlash(true);setTimeout(()=>setBackpackFlash(false),2000);
+              if(playerAv.current){const par=playerAv.current.root.parent;par.remove(playerAv.current.root);const nAv=mkAv(pd.current.tier,SKINS[3],true,BELTS.indexOf(pd.current.belt));nAv.root.position.copy(playerPos.current);nAv.root.scale.setScalar(3);par.add(nAv.root);playerAv.current=nAv;}
+              addToast('🐢 TURTLE ISLAND COMPLETE — 100,000XP! You are 3x. Ninja outfit equipped.','#88ff44');
+              addToast('🥷 NINJA TRANSFORMATION — you have been changed permanently','#c084fc');
+              aL('🐢 TURTLE ISLAND complete — ancient wisdom granted. You are ninja now.','system');
+              const _tq=HQ.find((q:any)=>q.n==='TURTLE ISLAND');
+              if(_tq){const _sn={xp:pd.current.xp,tk:pd.current.tk,beltN:pd.current.belt.n,beltC:pd.current.belt.c,tierN:pd.current.tier.n,tierC:pd.current.tier.c,ms:pd.current.ms,mainDone:pd.current.mainQDone.length,sideDone:pd.current.sideQDone.length,hiddenDone:pd.current.hiddenQDone.length};celebRef.current={frame:0,quest:_tq,snap:_sn};setCelebMode({_tq,snap:_sn} as any);setTimeout(()=>setCelebMode(null),7000);}
+              checkSuper();onTortoise.current=false;
+            }
+          }
+        }
+        // Leg animation
+        tm.children.forEach((c:any,i:number)=>{if(i>=9&&i<=12)c.rotation.x=Math.sin(FC.current*.06+i)*.15;});
+        if(onTortoise.current){
+          playerPos.current.x=tm.position.x;playerPos.current.z=tm.position.z;playerY.current=tm.position.y+5.5;
+          if(playerAv.current){playerAv.current.root.position.set(tm.position.x,playerY.current,tm.position.z);playerAv.current.root.visible=camModeRef.current==="3rd";}
+          if(t%240===0)addToast(`🐢 Waypoint ${tortoiseWpIdx.current}/${TORTOISE_WAYPOINTS.length} — stay on for 100,000 XP!`,'#88ff44');
         }
       }
       // ── Race logic ──
@@ -1622,7 +1729,8 @@ export default function GhostTown(){
         if(p.xp>=10000)addAch("Sovereign","Reached SOVEREIGN tier");
         checkSuper();
         if(playerAv.current&&SD.current){const par=playerAv.current.root.parent;par.remove(playerAv.current.root);const nAv=mkAv(p.tier,p.skin,true,BELTS.indexOf(p.belt));nAv.root.position.copy(playerPos.current);par.add(nAv.root);playerAv.current=nAv;
-          if(p.tronAcquired||tronAcquired.current){const tL=new THREE.PointLight(0x00ffe7,1.6,7);tL.position.set(0,1,0);nAv.root.add(tL);if(nAv.mV)nAv.mV.emissiveIntensity=1.5;}}
+          if(p.tronAcquired||tronAcquired.current){const tL=new THREE.PointLight(0x00ffe7,1.6,7);tL.position.set(0,1,0);nAv.root.add(tL);if(nAv.mV)nAv.mV.emissiveIntensity=1.5;}
+          if(p.ninjaMode||ninjaMode.current)nAv.root.scale.setScalar(3);}
         // Launch celebration
         const snap={xp:p.xp,tk:p.tk,beltN:p.belt.n,beltC:p.belt.c,tierN:p.tier.n,tierC:p.tier.c,ms:p.ms,mainDone:p.mainQDone.length,sideDone:p.sideQDone.length,hiddenDone:p.hiddenQDone.length};
         celebRef.current={frame:0,quest:q,snap};

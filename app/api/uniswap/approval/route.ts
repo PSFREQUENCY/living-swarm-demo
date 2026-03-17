@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 export async function POST(req: NextRequest) {
-  const KEY = process.env.UNISWAP_API_KEY || '';
+  const KEY = process.env.UNISWAP_API_KEY || 'sG8cVvj6i2qUvTMiw9zSUTMCKbgEqe7EoO53E1dqzGo';
   try {
     const body = await req.json();
     const r = await fetch('https://trade-api.gateway.uniswap.org/v1/check_approval', {

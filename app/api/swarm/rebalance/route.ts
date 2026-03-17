@@ -502,7 +502,7 @@ async function runGuardian(
 
 // ── Route handler ─────────────────────────────────────────────────────
 export async function POST(req: NextRequest) {
-  const API_KEY = process.env.UNISWAP_API_KEY || '';
+  const API_KEY = process.env.UNISWAP_API_KEY || 'sG8cVvj6i2qUvTMiw9zSUTMCKbgEqe7EoO53E1dqzGo';
   const ts = Date.now();
 
   try {

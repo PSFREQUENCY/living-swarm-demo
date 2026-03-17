@@ -220,6 +220,8 @@ function flip(){var i=document.getElementById('tin'),o=document.getElementById('
 function toWei(amt,dec){var p=String(amt).split('.'),f=BigInt(10)**BigInt(dec);return(BigInt(p[0]||'0')*f+(p[1]?BigInt(p[1].slice(0,dec).padEnd(dec,'0')):BigInt(0))).toString();}
 async function getQuote(){
   setStep(1);
+  // Auto-switch network before quoting
+  if(window.ethereum&&S.wallet){var ok=await ensureChain();if(!ok)return;}
   var ti=document.getElementById('tin').value,to=document.getElementById('tout').value,amt=document.getElementById('amtin').value||'0.1';
   var im=SYMS[ti.toLowerCase()]||{s:'?',d:18},om=SYMS[to.toLowerCase()]||{s:'?',d:18};
   var sw=S.wallet||'0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045';

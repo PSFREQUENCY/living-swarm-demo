@@ -360,7 +360,7 @@ function mkDragon():THREE.Group{
   for(let i=0;i<4;i++){const ts=new THREE.Mesh(new THREE.SphereGeometry(.09-.015*i,5,4),bM);ts.position.set(0,.02,-.5-.28*i);dr.add(ts);}
   // Glow
   const gl=new THREE.PointLight(0xff4500,1.5,6);dr.add(gl);
-  dr.scale.setScalar(1.8);
+  dr.scale.setScalar(5.4);// 3x bigger — visible from far
   return dr;
 }
 
@@ -456,46 +456,65 @@ function mkStairs():THREE.Group{
 }
 function mkMountain():THREE.Group{
   const gr=new THREE.Group();
-  // STEPPED PYRAMID — 6 flat levels, each narrower and higher (no slopes, no cones)
-  const levelW=[130,106,82,60,40,22];// width of each square level
-  const levelY=[0,6,12,18,24,30];   // Y of each platform surface
-  const levelH=6;// height of each step riser
-  const cols=[0x1e2d3a,0x222f3e,0x263240,0x2a3545,0x2e384a,0x32404e];
-  const snowM=new THREE.MeshBasicMaterial({color:0xc8d8ff});
-  for(let lv=0;lv<6;lv++){
-    const w=levelW[lv];const y=levelY[lv];
-    // Platform (flat top of each step)
-    const plat=new THREE.Mesh(new THREE.BoxGeometry(w,1.2,w),new THREE.MeshBasicMaterial({color:cols[lv]}));
-    plat.position.y=y+.6;plat.name=`mtLevel${lv}`;gr.add(plat);
+  // RECTANGULAR stepped plateau — flat, 8 levels, 2-unit steps, easy to climb, NO peak/point
+  const levelW=[110,95,80,65,50,35,20,10];// X width per level
+  const levelD=[70, 60,50,40,30,22,14,10];// Z depth per level
+  const levelY=[0,  2, 4, 6, 8,10,12,14];// Y surface of each step
+  const cols=[0x1e2d3a,0x222f3e,0x263240,0x2a3545,0x2e384a,0x32404e,0x364450,0x3a4855];
+  for(let lv=0;lv<8;lv++){
+    const plat=new THREE.Mesh(new THREE.BoxGeometry(levelW[lv],1.2,levelD[lv]),new THREE.MeshBasicMaterial({color:cols[lv]}));
+    plat.position.y=levelY[lv]+.6;plat.name=`mtLevel${lv}`;gr.add(plat);
   }
-  // Snow cap on top
-  const cap=new THREE.Mesh(new THREE.BoxGeometry(22,4,22),snowM);cap.position.y=33;gr.add(cap);
-  const peak=new THREE.Mesh(new THREE.OctahedronGeometry(2.5),new THREE.MeshBasicMaterial({color:0x00b4ff,transparent:true,opacity:.9}));peak.position.y=38;peak.name='mtPeak';gr.add(peak);
-  // Race track on level 2 (y=12, radius=28)
+  // Flat glowing summit (no point, no peak)
+  const top=new THREE.Mesh(new THREE.BoxGeometry(10,.4,10),new THREE.MeshBasicMaterial({color:0x00b4ff}));
+  top.position.y=15.4;top.name='mtPeak';gr.add(top);
+  // Race track on level 2 (y=4, radius=22)
   const trackM=new THREE.MeshBasicMaterial({color:0x2a2a2a,side:THREE.DoubleSide});
-  const track=new THREE.Mesh(new THREE.TorusGeometry(28,2,4,48),trackM);track.rotation.x=Math.PI/2;track.position.y=13.2;track.name='raceTrack';gr.add(track);
-  for(let i=0;i<12;i++){const ang=i/12*Math.PI*2;const mk=new THREE.Mesh(new THREE.BoxGeometry(1.5,.1,4),new THREE.MeshBasicMaterial({color:0xffffff}));mk.position.set(Math.cos(ang)*28,13.4,Math.sin(ang)*28);mk.rotation.y=-ang;gr.add(mk);}
-  const fl=new THREE.Mesh(new THREE.BoxGeometry(6,.15,4.5),new THREE.MeshBasicMaterial({color:0xff3333}));fl.position.set(28,13.5,0);fl.name='finishLine';gr.add(fl);
-  // 9 staircases — one every 40° around the pyramid, each going from level to level
-  const stairM=new THREE.MeshBasicMaterial({color:0x3a4a3a});
-  for(let s=0;s<9;s++){
-    const baseAng=s/9*Math.PI*2;
-    // Each staircase: 6 sections (one per level transition), each with 6 steps
-    for(let lv=0;lv<5;lv++){
-      const fromW=levelW[lv]/2-1;const toW=levelW[lv+1]/2-1;
-      const fromY=levelY[lv]+1.2;const toY=levelY[lv+1]+1.2;
-      const numSteps=6;
+  const track=new THREE.Mesh(new THREE.TorusGeometry(22,2,4,48),trackM);track.rotation.x=Math.PI/2;track.position.y=5.2;track.name='raceTrack';gr.add(track);
+  for(let i=0;i<12;i++){const ang=i/12*Math.PI*2;const mk=new THREE.Mesh(new THREE.BoxGeometry(1.5,.1,4),new THREE.MeshBasicMaterial({color:0xffffff}));mk.position.set(Math.cos(ang)*22,5.4,Math.sin(ang)*22);mk.rotation.y=-ang;gr.add(mk);}
+  const fl=new THREE.Mesh(new THREE.BoxGeometry(5,.15,4),new THREE.MeshBasicMaterial({color:0xff3333}));fl.position.set(22,5.5,0);fl.name='finishLine';gr.add(fl);
+  // STRAIGHT STAIRCASES on N/S/E/W faces + 4 corners — 8 paths total, small easy steps
+  const stairM=new THREE.MeshBasicMaterial({color:0x4a5a4a});
+  // N and S faces (steps along Z axis)
+  [-1,1].forEach((side:number)=>{
+    for(let lv=0;lv<7;lv++){
+      const numSteps=4;
       for(let st=0;st<numSteps;st++){
         const frac=(st+.5)/numSteps;
-        const r=lerp(fromW,toW,frac)*0.97;
-        const stepY=lerp(fromY,toY,frac);
-        const stepBox=new THREE.Mesh(new THREE.BoxGeometry(4,.5,3),stairM);
-        stepBox.position.set(Math.cos(baseAng)*r,stepY,Math.sin(baseAng)*r);
-        stepBox.rotation.y=-baseAng-Math.PI/2;
-        gr.add(stepBox);
+        const stepY=lerp(levelY[lv]+1.2,levelY[lv+1]+1.2,frac);
+        const stepZ=side*(lerp(levelD[lv]/2,levelD[lv+1]/2,frac)-.5);
+        const step=new THREE.Mesh(new THREE.BoxGeometry(8,.5,2),stairM);
+        step.position.set(0,stepY,stepZ);gr.add(step);
       }
     }
-  }
+  });
+  // E and W faces (steps along X axis)
+  [-1,1].forEach((side:number)=>{
+    for(let lv=0;lv<7;lv++){
+      const numSteps=4;
+      for(let st=0;st<numSteps;st++){
+        const frac=(st+.5)/numSteps;
+        const stepY=lerp(levelY[lv]+1.2,levelY[lv+1]+1.2,frac);
+        const stepX=side*(lerp(levelW[lv]/2,levelW[lv+1]/2,frac)-.5);
+        const step=new THREE.Mesh(new THREE.BoxGeometry(2,.5,8),stairM);
+        step.position.set(stepX,stepY,0);gr.add(step);
+      }
+    }
+  });
+  // Corner staircases (NE/NW/SE/SW)
+  ([[1,1],[1,-1],[-1,1],[-1,-1]] as [number,number][]).forEach(([sx,sz])=>{
+    for(let lv=0;lv<7;lv++){
+      const numSteps=4;
+      for(let st=0;st<numSteps;st++){
+        const frac=(st+.5)/numSteps;
+        const stepY=lerp(levelY[lv]+1.2,levelY[lv+1]+1.2,frac);
+        const stepX=sx*lerp(levelW[lv]/2-.5,levelW[lv+1]/2-.5,frac);
+        const stepZ=sz*lerp(levelD[lv]/2-.5,levelD[lv+1]/2-.5,frac);
+        const step=new THREE.Mesh(new THREE.BoxGeometry(3,.5,3),stairM);
+        step.position.set(stepX,stepY,stepZ);gr.add(step);
+      }
+    }
+  });
   return gr;
 }
 function mkRapids():THREE.Group{
@@ -782,6 +801,12 @@ export default function GhostTown(){
     // Canyon rim rocks framing the gap
     [[125,-.3,-14],[125,-.3,18],[114,-.3,2],[136,-.3,2]].forEach(([x,y,z])=>{
       const rim=new THREE.Mesh(new THREE.BoxGeometry(4,1.5,4),new THREE.MeshBasicMaterial({color:0x1a2230}));rim.position.set(x,y,z);sc.add(rim);});
+    // ── Glowing surface path: dock (x=88) → rapids entry (x=120) ──
+    const pathM=new THREE.MeshBasicMaterial({color:0x00ffe7,transparent:true,opacity:.45});
+    for(let px=90;px<=120;px+=4){
+      const node=new THREE.Mesh(new THREE.BoxGeometry(2,.12,2),pathM);
+      node.position.set(px,-.48,0);sc.add(node);
+    }
     // Initial ASCII draw
     const chars2=['~','≈','~','≋','~','≈','∿','~','≈','~'];
     seaCtx.fillStyle='#04111e';seaCtx.fillRect(0,0,512,256);
@@ -821,9 +846,14 @@ export default function GhostTown(){
     for(let si=0;si<7;si++){const sr=mkStairs();sr.position.set(125,-18+si*3,si*4+24);sc.add(sr);}
     const stairsGr=new THREE.Group();sc.add(stairsGr);
     // ── Walkway from entry point to Savage Cafe ──
-    const walkwayM=new THREE.MeshBasicMaterial({color:0x00cc88,transparent:true,opacity:.6});
-    const walkway=new THREE.Mesh(new THREE.BoxGeometry(4,.3,30),walkwayM);
-    walkway.position.set(125,-17.85,4);sc.add(walkway);
+    const walkwayM=new THREE.MeshBasicMaterial({color:0x00cc88,transparent:true,opacity:.7});
+    // Underground walkway: from entry (z=0) all the way to cafe (z=18)
+    const walkway=new THREE.Mesh(new THREE.BoxGeometry(4,.3,40),walkwayM);
+    walkway.position.set(125,-17.85,8);sc.add(walkway);
+    // Glowing edge lights along the walkway
+    for(let wz=0;wz<=20;wz+=4){
+      [-1,1].forEach((s:number)=>{const wl=new THREE.Mesh(new THREE.BoxGeometry(.4,.4,.4),new THREE.MeshBasicMaterial({color:0x00ffe7}));wl.position.set(125+s*2.5,-17.5,wz);sc.add(wl);});
+    }
     // Cafe steps (3 steps leading up to cafe entrance)
     for(let cs=0;cs<3;cs++){
       const cstep=new THREE.Mesh(new THREE.BoxGeometry(5,.4,1.2),new THREE.MeshBasicMaterial({color:0x00ffe7}));
@@ -835,8 +865,8 @@ export default function GhostTown(){
     // ── Race cars (2: player + AI, on mountain track at level 2) ──
     const mkCar=(col:number)=>{const g=new THREE.Group();const body=new THREE.Mesh(new THREE.BoxGeometry(1.8,.7,3.5),new THREE.MeshBasicMaterial({color:col}));body.position.y=.4;g.add(body);const top=new THREE.Mesh(new THREE.BoxGeometry(1.4,.5,2),new THREE.MeshBasicMaterial({color:col}));top.position.set(0,.9,.1);g.add(top);([[.8,.1,1.4],[-.8,.1,1.4],[.8,.1,-1.4],[-.8,.1,-1.4]] as [number,number,number][]).forEach(([x,y,z])=>{const w=new THREE.Mesh(new THREE.CylinderGeometry(.35,.35,.3,8),new THREE.MeshBasicMaterial({color:0x111111}));w.rotation.z=Math.PI/2;w.position.set(x,y,z);g.add(w);});return g;};
     const playerCar=mkCar(0x00ffc8);const aiCar=mkCar(0xf43f5e);
-    // mountain is at (0,0,-130), race track at y=13.2 radius 28
-    playerCar.position.set(28,13.2,-130);aiCar.position.set(26,13.2,-128);
+    // mountain is at (0,0,-130), race track at y=5.2 radius 22
+    playerCar.position.set(22,5.2,-130);aiCar.position.set(20,5.2,-128);
     playerCar.visible=false;aiCar.visible=false;
     sc.add(playerCar);sc.add(aiCar);
     // ── Sea coins ──
@@ -846,8 +876,8 @@ export default function GhostTown(){
       return{mesh:cm,x:cx,z:cz,collected:false,respawnAt:0};
     });
     SD.current={sc,cam,ren,blds,ags,eds,rain,rP,rN,ff,fP,fN,discoBall,sea,seaCtx,seaTex,seaOff:0,agentBoats,playerBoats,ambL,dirL,starsObj,seaCoins,wfall,mountain,playerCar,aiCar,fishArr};
-    // ── Mountain guardian dragon — circles peak, attacks approaching players ──
-    const guardDragonMesh=mkDragon();guardDragonMesh.position.set(18,20,-112);sc.add(guardDragonMesh);
+    // ── Mountain guardian dragon — clearly visible, circles above the peak ──
+    const guardDragonMesh=mkDragon();guardDragonMesh.position.set(30,38,-130);sc.add(guardDragonMesh);
     dragonRef.current={mesh:guardDragonMesh,tx:0,tz:-130,frame:300,tgtZone:null,riding:false};
     aL("▶ 81 GHOST TOWN v6 SAMAUR-AI — the macro-hard city is LIVE","system");
     aL("▶ WASD/Arrows to move · V = 1st/3rd person · Shift = sprint","system");
@@ -997,10 +1027,13 @@ export default function GhostTown(){
       if(_mv.lengthSq()>0){_mv.normalize().multiplyScalar(spd);playerPos.current.add(_mv);playerPos.current.x=clamp(playerPos.current.x,-95,95);playerPos.current.z=clamp(playerPos.current.z,-95,95);playerAngle.current=Math.atan2(_mv.x,_mv.z);}
       if(flyingRef.current){if(k.space)playerY.current=Math.min(25,playerY.current+.12);else playerY.current=Math.max(inUnderground.current?-18:0,playerY.current-.04);}
       else if(inUnderground.current){playerY.current=lerp(playerY.current,-18,.12);}
-      else{const _dxm=playerPos.current.x,_dzm=playerPos.current.z+130,_dm=Math.sqrt(_dxm*_dxm+_dzm*_dzm);
+      else{// Rectangular mountain height — snap to nearest step level
+        const _dxm=Math.abs(playerPos.current.x);const _dzm=Math.abs(playerPos.current.z+130);
+        const _rD=Math.max(_dxm/55,_dzm/35);// normalized Chebyshev distance (mountain half-extents 55x35)
         let _tY=0;
-        if(_dm<65)_tY=6;if(_dm<52)_tY=12;if(_dm<40)_tY=18;if(_dm<28)_tY=24;if(_dm<16)_tY=30;if(_dm<8)_tY=36;
-        playerY.current=lerp(playerY.current,_tY,.12);}
+        if(_rD<1.0)_tY=2;if(_rD<0.86)_tY=4;if(_rD<0.72)_tY=6;if(_rD<0.58)_tY=8;
+        if(_rD<0.45)_tY=10;if(_rD<0.31)_tY=12;if(_rD<0.09)_tY=14;
+        playerY.current=lerp(playerY.current,_tY,.2);}
       if(playerAv.current){
         _tgt.set(playerPos.current.x,playerY.current,playerPos.current.z);
         playerAv.current.root.position.lerp(_tgt,.2);
@@ -1090,7 +1123,7 @@ export default function GhostTown(){
       }
       // ── Mountain summit quest ──
       if(!inUnderground.current&&!inBoat.current){const _dmt=Math.sqrt(playerPos.current.x**2+(playerPos.current.z+130)**2);
-        if(_dmt<10&&playerY.current>28&&!pd.current.hiddenQDone.includes('CLIMB CYBER MT SOVEREIGN')){
+        if(_dmt<12&&playerY.current>12&&!pd.current.hiddenQDone.includes('CLIMB CYBER MT SOVEREIGN')){
           pd.current.hiddenQDone.push('CLIMB CYBER MT SOVEREIGN');pd.current.xp+=800;pd.current.tk+=180;pd.current.tier=gT(pd.current.xp);pd.current.belt=gB(pd.current.dojoXP);
           addToast('🏔️ SUMMIT! CYBER MT SOVEREIGN CONQUERED +800XP — 🐉 DRAGON RIDING UNLOCKED! Press R near dragon','#00b4ff');
           aL('🏔️ YOU scaled CYBER MT SOVEREIGN — dragon riding unlocked! Press H to summon, R to mount','system');checkSuper();
@@ -1124,7 +1157,7 @@ export default function GhostTown(){
         } else if(_drgDist>=40&&dragonRef.current){
           const dr2=dragonRef.current;const dm2=dr2.mesh;
           const _circAng=(t*.008);
-          dm2.position.set(Math.cos(_circAng)*18,22+Math.sin(t*.04)*3,Math.sin(_circAng)*18-130);
+          dm2.position.set(Math.cos(_circAng)*30,36+Math.sin(t*.04)*4,Math.sin(_circAng)*25-130);
           dm2.rotation.y=_circAng+Math.PI/2;
         }
         if(t%360===0){const _dd2=Math.sqrt(playerPos.current.x**2+(playerPos.current.z+130)**2);if(_dd2<65&&_dd2>40)addToast('🐉 A dragon guards the mountain summit...','#ff6b35');}
@@ -1160,7 +1193,7 @@ export default function GhostTown(){
       }
       // ── Race logic ──
       if(raceActive.current&&SD.current.playerCar&&SD.current.aiCar){
-        const TRACK_R=28,MTY=13.2,MTZ=-130;
+        const TRACK_R=22,MTY=5.2,MTZ=-130;
         aiCarAngle.current+=.008;// AI constant speed
         const prevAngle=playerCarAngle.current;
         if(inCar.current){// player drives on track

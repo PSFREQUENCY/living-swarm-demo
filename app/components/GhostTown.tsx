@@ -88,6 +88,7 @@ const HQ=[
   {n:"RIDE THE FALL",cat:"hidden",xp:600,tk:140,en:0,i:"🌊",ra:"epic",d:"[CLASSIFIED] Find the waterfall on the west edge and leap into the void below.",st:1,hint:"West edge of the map, where land meets the fall..."},
   {n:"VISIT THE CAFE",cat:"hidden",xp:400,tk:100,en:0,i:"☕",ra:"rare",d:"[CLASSIFIED] Explore the Savage Agent Cafe hidden below the waterfall.",st:1,hint:"Below the surface, neon hums..."},
   {n:"CLIMB CYBER MT SOVEREIGN",cat:"hidden",xp:800,tk:180,en:0,i:"🏔️",ra:"legendary",d:"[CLASSIFIED] Scale Cyber Mountain Sovereign to the north. The peak reveals the full ghost town.",st:1,hint:"North of the Museum, something rises..."},
+  {n:"TAME YOUR DRAGON",cat:"hidden",xp:10000,tk:500,en:0,i:"🐉",ra:"legendary",d:"[CLASSIFIED] Survive the dragon's attack and earn its trust. Only the worthy may ride.",st:1,hint:"Approach the mountain. Face the fire. Do not run."},
 ];
 
 // All quests combined for display
@@ -455,45 +456,44 @@ function mkStairs():THREE.Group{
 }
 function mkMountain():THREE.Group{
   const gr=new THREE.Group();
-  const stoneM=new THREE.MeshBasicMaterial({color:0x1e2d3a});
-  const stone2M=new THREE.MeshBasicMaterial({color:0x253040});
+  // STEPPED PYRAMID — 6 flat levels, each narrower and higher (no slopes, no cones)
+  const levelW=[130,106,82,60,40,22];// width of each square level
+  const levelY=[0,6,12,18,24,30];   // Y of each platform surface
+  const levelH=6;// height of each step riser
+  const cols=[0x1e2d3a,0x222f3e,0x263240,0x2a3545,0x2e384a,0x32404e];
   const snowM=new THREE.MeshBasicMaterial({color:0xc8d8ff});
-  const trailM=new THREE.MeshBasicMaterial({color:0x5a6a4a});
-  // FLAT mountain: wide base, low profile — not a spike
-  const c1=new THREE.Mesh(new THREE.ConeGeometry(65,45,16),stoneM);c1.position.y=22;gr.add(c1);
-  const c2=new THREE.Mesh(new THREE.ConeGeometry(22,18,12),stone2M);c2.position.y=42;gr.add(c2);
-  const snowCap=new THREE.Mesh(new THREE.ConeGeometry(8,10,8),snowM);snowCap.position.y=52;gr.add(snowCap);
-  const peak=new THREE.Mesh(new THREE.OctahedronGeometry(2),new THREE.MeshBasicMaterial({color:0x00b4ff}));peak.position.y=58;peak.name='mtPeak';gr.add(peak);
-  // 6 level terraces (lower heights to match flatter mountain)
-  const terraceCols=[0x2a3a2a,0x283545,0x263050,0x243060,0x22286a,0x203070];
-  const terraceR=[58,46,35,26,17,10];
-  const terraceY=[8,16,24,32,40,48];
   for(let lv=0;lv<6;lv++){
-    const ring=new THREE.Mesh(new THREE.CylinderGeometry(terraceR[lv]+1.5,terraceR[lv]+2,1.2,16,1,true),new THREE.MeshBasicMaterial({color:terraceCols[lv],side:THREE.DoubleSide}));
-    ring.position.y=terraceY[lv];ring.name=`mtLevel${lv}`;gr.add(ring);
-    const floor=new THREE.Mesh(new THREE.RingGeometry(terraceR[lv]-.5,terraceR[lv]+1.5,16),new THREE.MeshBasicMaterial({color:terraceCols[lv],side:THREE.DoubleSide}));
-    floor.rotation.x=-Math.PI/2;floor.position.y=terraceY[lv]+.1;gr.add(floor);
+    const w=levelW[lv];const y=levelY[lv];
+    // Platform (flat top of each step)
+    const plat=new THREE.Mesh(new THREE.BoxGeometry(w,1.2,w),new THREE.MeshBasicMaterial({color:cols[lv]}));
+    plat.position.y=y+.6;plat.name=`mtLevel${lv}`;gr.add(plat);
   }
-  // Race track on level 2 (y=16, radius=30)
+  // Snow cap on top
+  const cap=new THREE.Mesh(new THREE.BoxGeometry(22,4,22),snowM);cap.position.y=33;gr.add(cap);
+  const peak=new THREE.Mesh(new THREE.OctahedronGeometry(2.5),new THREE.MeshBasicMaterial({color:0x00b4ff,transparent:true,opacity:.9}));peak.position.y=38;peak.name='mtPeak';gr.add(peak);
+  // Race track on level 2 (y=12, radius=28)
   const trackM=new THREE.MeshBasicMaterial({color:0x2a2a2a,side:THREE.DoubleSide});
-  const track=new THREE.Mesh(new THREE.TorusGeometry(30,2.5,4,48),trackM);track.rotation.x=Math.PI/2;track.position.y=16.5;track.name='raceTrack';gr.add(track);
-  for(let i=0;i<12;i++){const ang=i/12*Math.PI*2;const mk=new THREE.Mesh(new THREE.BoxGeometry(1.5,.1,4),new THREE.MeshBasicMaterial({color:0xffffff}));mk.position.set(Math.cos(ang)*30,17,Math.sin(ang)*30);mk.rotation.y=-ang;gr.add(mk);}
-  const fl=new THREE.Mesh(new THREE.BoxGeometry(6,.15,5),new THREE.MeshBasicMaterial({color:0xff3333}));fl.position.set(30,17.1,0);fl.name='finishLine';gr.add(fl);
-  // 9 SOLID continuous ramps — each is one long box tilted to follow the slope
-  for(let tr=0;tr<9;tr++){
-    const baseAng=tr/9*Math.PI*2;
-    // Each ramp: 8 connected segments forming a continuous switchback path
-    for(let seg=0;seg<8;seg++){
-      const frac=(seg+.5)/8;
-      const ang=baseAng+frac*Math.PI*1.5;
-      const r=lerp(60,10,frac);
-      const y=frac*52;
-      const ramp=new THREE.Mesh(new THREE.BoxGeometry(5.5,.4,10),trailM);
-      ramp.position.set(Math.cos(ang)*r,y,Math.sin(ang)*r);
-      ramp.rotation.y=-ang-Math.PI/2;
-      // Tilt ramp to slope upward
-      ramp.rotation.x=0.18;
-      gr.add(ramp);
+  const track=new THREE.Mesh(new THREE.TorusGeometry(28,2,4,48),trackM);track.rotation.x=Math.PI/2;track.position.y=13.2;track.name='raceTrack';gr.add(track);
+  for(let i=0;i<12;i++){const ang=i/12*Math.PI*2;const mk=new THREE.Mesh(new THREE.BoxGeometry(1.5,.1,4),new THREE.MeshBasicMaterial({color:0xffffff}));mk.position.set(Math.cos(ang)*28,13.4,Math.sin(ang)*28);mk.rotation.y=-ang;gr.add(mk);}
+  const fl=new THREE.Mesh(new THREE.BoxGeometry(6,.15,4.5),new THREE.MeshBasicMaterial({color:0xff3333}));fl.position.set(28,13.5,0);fl.name='finishLine';gr.add(fl);
+  // 9 staircases — one every 40° around the pyramid, each going from level to level
+  const stairM=new THREE.MeshBasicMaterial({color:0x3a4a3a});
+  for(let s=0;s<9;s++){
+    const baseAng=s/9*Math.PI*2;
+    // Each staircase: 6 sections (one per level transition), each with 6 steps
+    for(let lv=0;lv<5;lv++){
+      const fromW=levelW[lv]/2-1;const toW=levelW[lv+1]/2-1;
+      const fromY=levelY[lv]+1.2;const toY=levelY[lv+1]+1.2;
+      const numSteps=6;
+      for(let st=0;st<numSteps;st++){
+        const frac=(st+.5)/numSteps;
+        const r=lerp(fromW,toW,frac)*0.97;
+        const stepY=lerp(fromY,toY,frac);
+        const stepBox=new THREE.Mesh(new THREE.BoxGeometry(4,.5,3),stairM);
+        stepBox.position.set(Math.cos(baseAng)*r,stepY,Math.sin(baseAng)*r);
+        stepBox.rotation.y=-baseAng-Math.PI/2;
+        gr.add(stepBox);
+      }
     }
   }
   return gr;
@@ -665,6 +665,10 @@ export default function GhostTown(){
   const onHorse=useRef(false);
   const horseCooldown=useRef(0);
   const [ridingHorse,setRidingHorse]=useState(false);
+  const dragonCinematicPlayed=useRef(false);
+  const [dragonCinematic,setDragonCinematic]=useState(false);
+  const [dragonSwordEquipped,setDragonSwordEquipped]=useState(false);
+  const [backpackFlash,setBackpackFlash]=useState(false);
   const [activeChain,setActiveChain]=useState<"mainnet"|"sepolia">("sepolia");
   const [,rf]=useState(0);
 
@@ -816,6 +820,14 @@ export default function GhostTown(){
     // ── Glowing stairs: 7 steps from y=-18 back up to y=0 ──
     for(let si=0;si<7;si++){const sr=mkStairs();sr.position.set(125,-18+si*3,si*4+24);sc.add(sr);}
     const stairsGr=new THREE.Group();sc.add(stairsGr);
+    // ── Walkway from entry point to Savage Cafe ──
+    const walkwayM=new THREE.MeshBasicMaterial({color:0x00cc88,transparent:true,opacity:.6});
+    const walkway=new THREE.Mesh(new THREE.BoxGeometry(4,.3,30),walkwayM);
+    walkway.position.set(125,-17.85,4);sc.add(walkway);
+    // Cafe steps (3 steps leading up to cafe entrance)
+    for(let cs=0;cs<3;cs++){
+      const cstep=new THREE.Mesh(new THREE.BoxGeometry(5,.4,1.2),new THREE.MeshBasicMaterial({color:0x00ffe7}));
+      cstep.position.set(125,-18+cs*.4,17.5+cs*.5);sc.add(cstep);}
     // ── Cyber Mountain Sovereign (far north, 9x bigger) ──
     const mountain=mkMountain();mountain.position.set(0,0,-130);sc.add(mountain);
     // ── Horse at mountain base (rideable up the trail) ──
@@ -823,8 +835,8 @@ export default function GhostTown(){
     // ── Race cars (2: player + AI, on mountain track at level 2) ──
     const mkCar=(col:number)=>{const g=new THREE.Group();const body=new THREE.Mesh(new THREE.BoxGeometry(1.8,.7,3.5),new THREE.MeshBasicMaterial({color:col}));body.position.y=.4;g.add(body);const top=new THREE.Mesh(new THREE.BoxGeometry(1.4,.5,2),new THREE.MeshBasicMaterial({color:col}));top.position.set(0,.9,.1);g.add(top);([[.8,.1,1.4],[-.8,.1,1.4],[.8,.1,-1.4],[-.8,.1,-1.4]] as [number,number,number][]).forEach(([x,y,z])=>{const w=new THREE.Mesh(new THREE.CylinderGeometry(.35,.35,.3,8),new THREE.MeshBasicMaterial({color:0x111111}));w.rotation.z=Math.PI/2;w.position.set(x,y,z);g.add(w);});return g;};
     const playerCar=mkCar(0x00ffc8);const aiCar=mkCar(0xf43f5e);
-    // mountain is at (0,0,-130), race track at y=16.5 radius 30
-    playerCar.position.set(30,16.5,-130);aiCar.position.set(28,16.5,-128);
+    // mountain is at (0,0,-130), race track at y=13.2 radius 28
+    playerCar.position.set(28,13.2,-130);aiCar.position.set(26,13.2,-128);
     playerCar.visible=false;aiCar.visible=false;
     sc.add(playerCar);sc.add(aiCar);
     // ── Sea coins ──
@@ -884,7 +896,15 @@ export default function GhostTown(){
           SD.current.playerBoats.forEach((b:any)=>{const dx=b.mesh.position.x-playerPos.current.x,dz=b.mesh.position.z-playerPos.current.z,d=Math.sqrt(dx*dx+dz*dz);if(d<nd){nd=d;near=b;}});
           if(near&&nd<6){inBoat.current=true;playerBoat.current=near;boatEnterCooldown.current=30;cD.current=10;addToast("⛵ Boarded! WASD to sail · E to disembark","#0ea5e9");aL("⛵ YOU boarded a ship — sail the Crypto Sea!","system");}
         } else {
-          inBoat.current=false;const pb=playerBoat.current;if(pb){playerPos.current.set(pb.mesh.position.x+3,0,pb.mesh.position.z);}playerBoat.current=null;boatEnterCooldown.current=30;cD.current=18;addToast("⛵ Disembarked","#64748b");
+          inBoat.current=false;const pb=playerBoat.current;
+          if(pb){
+            playerPos.current.set(pb.mesh.position.x+3,0,pb.mesh.position.z);
+            // Return boat to dock
+            const _isDock1=SD.current?.playerBoats?.[0]===pb;
+            pb.x=91;pb.z=_isDock1?2:-2.5;pb.heading=0;
+            pb.mesh.position.set(91,-.5,pb.z);pb.mesh.rotation.y=0;
+          }
+          playerBoat.current=null;boatEnterCooldown.current=30;cD.current=18;addToast("⛵ Disembarked — boat returned to dock","#64748b");
         }
       }
       if(k==='l'&&SD.current){
@@ -926,6 +946,20 @@ export default function GhostTown(){
             onDragon.current=true;setRidingDragon(true);dragonRideCooldown.current=60;cD.current=22;
             addToast('🐉 RIDING THE DRAGON — WASD to fly · R near ground to land','#ff4500');
             aL('🐉 YOU mounted the dragon — the sky is yours','system');
+            // TAME YOUR DRAGON quest + dragon sword
+            if(!pd.current.hiddenQDone.includes('TAME YOUR DRAGON')){
+              pd.current.hiddenQDone.push('TAME YOUR DRAGON');pd.current.xp+=10000;pd.current.tk+=500;
+              pd.current.tier=gT(pd.current.xp);pd.current.belt=gB(pd.current.dojoXP);
+              if(!pd.current.backpack)pd.current.backpack=[];
+              pd.current.backpack.push({type:'item',name:'DRAGON SWORD',icon:'⚔️',rarity:'legendary',xp:0,tk:0,desc:'Ancient mystic blade. Equip while riding the dragon.',ts:Date.now(),minted:false,equippable:true});
+              setBackpackFlash(true);setTimeout(()=>setBackpackFlash(false),2000);
+              addToast('🏆 TAME YOUR DRAGON — +10000XP +500◈','#ff4500');
+              addToast('⚔️ DRAGON SWORD added to backpack!','#fbbf24');
+              aL('🐉 YOU tamed the dragon — DRAGON SWORD acquired! Equip it while riding.','system');
+              checkSuper();
+            }
+            // Auto-equip dragon sword if in backpack
+            if(pd.current.backpack?.find((i:any)=>i.name==='DRAGON SWORD')){setDragonSwordEquipped(true);}
           } else addToast('🐉 Get closer to the dragon (within 8 units)','#ff6b35');
         }
       }
@@ -963,7 +997,10 @@ export default function GhostTown(){
       if(_mv.lengthSq()>0){_mv.normalize().multiplyScalar(spd);playerPos.current.add(_mv);playerPos.current.x=clamp(playerPos.current.x,-95,95);playerPos.current.z=clamp(playerPos.current.z,-95,95);playerAngle.current=Math.atan2(_mv.x,_mv.z);}
       if(flyingRef.current){if(k.space)playerY.current=Math.min(25,playerY.current+.12);else playerY.current=Math.max(inUnderground.current?-18:0,playerY.current-.04);}
       else if(inUnderground.current){playerY.current=lerp(playerY.current,-18,.12);}
-      else{const _dxm=playerPos.current.x,_dzm=playerPos.current.z+130,_dm=Math.sqrt(_dxm*_dxm+_dzm*_dzm);const _tY=_dm<12?Math.max(0,(1-_dm/12)*16):0;playerY.current=lerp(playerY.current,_tY,.08);}
+      else{const _dxm=playerPos.current.x,_dzm=playerPos.current.z+130,_dm=Math.sqrt(_dxm*_dxm+_dzm*_dzm);
+        let _tY=0;
+        if(_dm<65)_tY=6;if(_dm<52)_tY=12;if(_dm<40)_tY=18;if(_dm<28)_tY=24;if(_dm<16)_tY=30;if(_dm<8)_tY=36;
+        playerY.current=lerp(playerY.current,_tY,.12);}
       if(playerAv.current){
         _tgt.set(playerPos.current.x,playerY.current,playerPos.current.z);
         playerAv.current.root.position.lerp(_tgt,.2);
@@ -1053,7 +1090,7 @@ export default function GhostTown(){
       }
       // ── Mountain summit quest ──
       if(!inUnderground.current&&!inBoat.current){const _dmt=Math.sqrt(playerPos.current.x**2+(playerPos.current.z+130)**2);
-        if(_dmt<5&&playerY.current>10&&!pd.current.hiddenQDone.includes('CLIMB CYBER MT SOVEREIGN')){
+        if(_dmt<10&&playerY.current>28&&!pd.current.hiddenQDone.includes('CLIMB CYBER MT SOVEREIGN')){
           pd.current.hiddenQDone.push('CLIMB CYBER MT SOVEREIGN');pd.current.xp+=800;pd.current.tk+=180;pd.current.tier=gT(pd.current.xp);pd.current.belt=gB(pd.current.dojoXP);
           addToast('🏔️ SUMMIT! CYBER MT SOVEREIGN CONQUERED +800XP — 🐉 DRAGON RIDING UNLOCKED! Press R near dragon','#00b4ff');
           aL('🏔️ YOU scaled CYBER MT SOVEREIGN — dragon riding unlocked! Press H to summon, R to mount','system');checkSuper();
@@ -1064,25 +1101,33 @@ export default function GhostTown(){
       if(dragonRef.current&&!onDragon.current&&!onHorse.current){
         const _drgDist=Math.sqrt(playerPos.current.x**2+(playerPos.current.z+130)**2);
         if(_drgDist<40&&_drgDist>8){
-          // Dragon chases player
           const dr2=dragonRef.current;const dm2=dr2.mesh;
+          // First encounter cinematic
+          if(!dragonCinematicPlayed.current&&_drgDist<35){
+            dragonCinematicPlayed.current=true;
+            setDragonCinematic(true);
+            // Switch to 1st person for cinematic
+            camModeRef.current='1st';setCamMode('1st');cD.current=.5;
+            addToast('🐉 THE DRAGON AWAKENS — FACE ITS FIRE!','#ff4500');
+            aL('🐉 DRAGON CINEMATIC: the guardian rises — survive its fire!','system');
+            setTimeout(()=>{setDragonCinematic(false);},4500);
+          }
+          // Dragon chases player
           const _att={x:playerPos.current.x-dm2.position.x,z:playerPos.current.z-dm2.position.z};
           const _attD=Math.sqrt(_att.x*_att.x+_att.z*_att.z)||1;
-          dm2.position.x+=_att.x/_attD*.12;dm2.position.z+=_att.z/_attD*.12;
-          dm2.position.y=2+Math.sin(t*.1)*1.2;
+          dm2.position.x+=_att.x/_attD*.14;dm2.position.z+=_att.z/_attD*.14;
+          dm2.position.y=2+Math.sin(t*.1)*1.5;
           dm2.rotation.y=Math.atan2(_att.x,_att.z);
-          if(t%180===0)addToast('🐉 The mountain dragon is ATTACKING!','#ff4500');
-          // Damage player if dragon catches them
-          if(_attD<4){pd.current.en=Math.max(0,pd.current.en-2);
-            if(t%60===0)addToast('🐉 Dragon ATTACK! -2 energy','#ff4500');}
+          if(t%150===0)addToast('🔥 Dragon breathes FIRE!','#ff4500');
+          if(_attD<4){pd.current.en=Math.max(0,pd.current.en-3);
+            if(t%60===0)addToast('🔥 Dragon FIRE ATTACK! -3 energy','#ff4500');}
         } else if(_drgDist>=40&&dragonRef.current){
-          // Dragon circles the peak when player is far
           const dr2=dragonRef.current;const dm2=dr2.mesh;
           const _circAng=(t*.008);
-          dm2.position.set(Math.cos(_circAng)*18,20+Math.sin(t*.04)*3,Math.sin(_circAng)*18-130);
+          dm2.position.set(Math.cos(_circAng)*18,22+Math.sin(t*.04)*3,Math.sin(_circAng)*18-130);
           dm2.rotation.y=_circAng+Math.PI/2;
         }
-        if(t%300===0&&dragonRef.current){const _drgDist2=Math.sqrt(playerPos.current.x**2+(playerPos.current.z+130)**2);if(_drgDist2<60&&_drgDist2>30)addToast('🐉 A dragon guards the mountain...','#ff6b35');}
+        if(t%360===0){const _dd2=Math.sqrt(playerPos.current.x**2+(playerPos.current.z+130)**2);if(_dd2<65&&_dd2>40)addToast('🐉 A dragon guards the mountain summit...','#ff6b35');}
       }
       // ── Fish animation (jump upstream along rapids) ──
       if(SD.current.fishArr&&t%2===0){SD.current.fishArr.forEach((f:any)=>{f.t+=.025;f.mesh.position.y=-18+Math.abs(Math.sin(f.t))*20;f.mesh.position.z=(f.t%(Math.PI*2))/Math.PI*25;f.mesh.rotation.z=Math.sin(f.t)*1.2;f.mesh.position.x=125+f.lane*1.2;});}
@@ -1115,7 +1160,7 @@ export default function GhostTown(){
       }
       // ── Race logic ──
       if(raceActive.current&&SD.current.playerCar&&SD.current.aiCar){
-        const TRACK_R=30,MTY=16.5,MTZ=-130;
+        const TRACK_R=28,MTY=13.2,MTZ=-130;
         aiCarAngle.current+=.008;// AI constant speed
         const prevAngle=playerCarAngle.current;
         if(inCar.current){// player drives on track
@@ -1297,6 +1342,7 @@ export default function GhostTown(){
         // Add quest card to backpack
         if(!p.backpack)p.backpack=[];
         p.backpack.push({type:'quest',name:q.n,icon:q.i,rarity:q.ra,xp:q.xp,tk:q.tk,ts:Date.now(),minted:false});
+        setBackpackFlash(true);setTimeout(()=>setBackpackFlash(false),2000);
         addToast(`+${q.xp}XP +${q.tk}◈ — ${q.n} complete!`,"#00ffc8");aL(`YOU completed [${q.n}] +${q.xp}XP +${q.tk}◈`,"quest");
         if(p.ms===1)addAch("First Blood","First quest completed");
         if(p.ms===10)addAch("Veteran","10 quests completed");
@@ -1324,6 +1370,13 @@ export default function GhostTown(){
   const claimLoot=()=>{if(!lootReady)return;const p=pd.current;const amt=50+Math.floor(Math.random()*150);p.tk+=amt;p.en=Math.min(p.mEn,p.en+30);p.xp+=100;p.tier=gT(p.xp);p.belt=gB(p.dojoXP);checkSuper();setLootReady(false);setTimeout(()=>setLootReady(true),60000);addToast(`🎁 +${amt}◈ +30⚡ +100XP`,"#f43f5e");aL(`🎁 Daily loot: +${amt}◈ +30⚡ +100XP`,"loot");rf(n=>n+1);};
 
   const startBreathing=(bp:any)=>{setBreathMode({pattern:bp,phaseIdx:0,timer:bp.ph[0].d,cycle:0,active:true});aL(`🫁 Breathing: ${bp.n} started`,"system");};
+
+  // Start tribal music on first user interaction
+  useEffect(()=>{
+    const onFirst=()=>{startMusic(8);window.removeEventListener('click',onFirst);window.removeEventListener('keydown',onFirst);};
+    window.addEventListener('click',onFirst);window.addEventListener('keydown',onFirst);
+    return()=>{window.removeEventListener('click',onFirst);window.removeEventListener('keydown',onFirst);};
+  },[startMusic]);
 
   useEffect(()=>{if(!breathMode||!breathMode.active)return;const iv=setInterval(()=>{setBreathMode((prev:any)=>{if(!prev||!prev.active)return prev;let{phaseIdx,timer,cycle,pattern}=prev;timer--;if(timer<=0){phaseIdx++;if(phaseIdx>=pattern.ph.length){phaseIdx=0;cycle++;if(cycle>=3){pd.current.dojoXP+=30;pd.current.en=Math.min(pd.current.mEn,pd.current.en+20);pd.current.xp+=120;pd.current.tier=gT(pd.current.xp);pd.current.belt=gB(pd.current.dojoXP);addToast("+120XP +20⚡ +30DXP — Breathwork complete","#22d3ee");addAch("First Breath","Complete a breathing session");checkSuper();return null;}}timer=pattern.ph[phaseIdx].d;}return{...prev,phaseIdx,timer,cycle};});},1000);return()=>clearInterval(iv);},[breathMode,addToast,addAch,checkSuper]);
 
@@ -1356,6 +1409,7 @@ export default function GhostTown(){
           {lifting&&<span style={{color:"#c084fc",animation:"runPulse .5s ease-in-out infinite alternate"}}>🌀 FORCE</span>}
           {ridingDragon&&<span style={{color:"#ff4500",animation:"runPulse .4s ease-in-out infinite alternate"}}>🐉 RIDING</span>}
           {ridingHorse&&<span style={{color:"#8b5e3c",animation:"runPulse .5s ease-in-out infinite alternate"}}>🐴 HORSE</span>}
+          {dragonSwordEquipped&&onDragon.current&&<span style={{color:"#fbbf24",animation:"runPulse .3s ease-in-out infinite alternate"}}>⚔️ SWORD</span>}
           {inUnderground.current&&<span style={{color:"#ff2d78",fontSize:mob?5:6}}>⬇ CAVE</span>}
           {inUnderground.current&&<button onClick={()=>setHackModal(true)} style={{background:"rgba(0,255,200,.1)",border:"1px solid #00ffe7",color:"#00ffe7",fontSize:mob?5:6,padding:"2px 6px",cursor:"pointer",fontFamily:"inherit",letterSpacing:1,borderRadius:2}}>🖥️ HACK</button>}
           {!inUnderground.current&&playerY.current>2&&<span style={{color:"#00b4ff",fontSize:mob?5:6}}>⬆ {Math.round(playerY.current)}m</span>}
@@ -1396,8 +1450,8 @@ export default function GhostTown(){
             {activeTrack>=0&&<button onClick={()=>startMusic((activeTrack+1)%9)}
               style={{background:'rgba(0,0,0,0.15)',border:'1px solid rgba(255,255,255,0.1)',borderRadius:3,color:'#4a4a6a',fontSize:mob?4:5,padding:'2px 4px',cursor:'pointer',fontFamily:'inherit'}}>▶</button>}
           </div>
-          <button style={{background:"rgba(192,132,252,0.1)",border:"1px solid rgba(192,132,252,0.3)",borderRadius:3,color:"#c084fc",fontSize:mob?5:6,padding:"2px 7px",cursor:"pointer",fontFamily:"inherit",letterSpacing:2}}
-            onClick={()=>setBackpackOpen(p=>!p)}>🎒 PACK</button>
+          <button style={{background:backpackFlash?"rgba(192,132,252,0.25)":"rgba(192,132,252,0.1)",border:`1px solid rgba(192,132,252,${backpackFlash?.7:.3})`,borderRadius:3,color:"#c084fc",fontSize:mob?5:6,padding:"2px 7px",cursor:"pointer",fontFamily:"inherit",letterSpacing:2,animation:backpackFlash?"backpackPing .6s ease-out 3":"none"}}
+            onClick={()=>{setBackpackOpen(p=>!p);setBackpackFlash(false);}}>🎒 PACK{backpackFlash&&<span style={{position:"relative",top:-3,right:-1,fontSize:4,background:"#f43f5e",borderRadius:"50%",padding:"1px 3px",color:"#fff",marginLeft:2}}>●</span>}</button>
           <button style={{background:"rgba(0,255,231,0.08)",border:"1px solid rgba(0,255,231,0.25)",borderRadius:3,color:"#00ffe7",fontSize:mob?5:6,padding:"2px 7px",cursor:"pointer",fontFamily:"inherit",letterSpacing:2}}
             onClick={()=>setBankOpen(true)}>🏦 [B]ANK</button>
         </div>
@@ -1521,16 +1575,35 @@ export default function GhostTown(){
 
         {/* DOJO */}
         {panel==="dojo"&&<div>
-          <div style={{fontSize:10,color:"#f43f5e",letterSpacing:2,marginBottom:4,fontWeight:700}}>🥋 THE DOJO — CYBERKUNG-FU</div>
+          <div style={{fontSize:10,color:"#f43f5e",letterSpacing:2,marginBottom:2,fontWeight:700}}>🥋 THE DOJO — CYBERKUNG-FU</div>
+          <div style={{fontSize:6,color:"#3a3a52",marginBottom:5}}>Your belt is your spirit. Every belt you earn can be minted as a soulbound token on Sepolia.</div>
           <div style={{padding:"5px 7px",background:"#0a0a1480",borderRadius:3,marginBottom:6}}>
-            <div style={{display:"flex",justifyContent:"space-between"}}><span style={{fontSize:8,color:p.belt.c,fontWeight:700}}>🥋 {p.belt.n} BELT</span><span style={{fontSize:7,color:"#f43f5e"}}>{p.dojoXP} DXP</span></div>
+            <div style={{display:"flex",justifyContent:"space-between"}}><span style={{fontSize:8,color:p.belt.c,fontWeight:700}}>🥋 {p.belt.n} BELT — YOUR SPIRIT</span><span style={{fontSize:7,color:"#f43f5e"}}>{p.dojoXP} DXP</span></div>
             <div style={{height:3,background:"#1a1a30",borderRadius:2,marginTop:3}}><div style={{height:"100%",width:`${Math.min(100,(p.dojoXP%5000)/50)}%`,background:"#f43f5e",borderRadius:2}}/></div>
           </div>
-          {BELTS.map((b:any)=><div key={b.n} style={{display:"flex",alignItems:"center",gap:5,padding:"2px 4px",marginBottom:1,fontSize:7}}>
-            <div style={{width:16,height:3,background:b.c,borderRadius:1}}/>
-            <span style={{flex:1,color:b.c,fontWeight:700}}>{b.n}<span style={{color:"#2a2a3a",fontWeight:400}}> {b.xp}+ DXP</span></span>
-            <span style={{fontSize:5,color:"#2a2a3a"}}>{AD.current.filter((a:any)=>!a.banned&&gB(a.dojoXP).n===b.n).length}</span>
-          </div>)}
+          {BELTS.map((b:any)=>{
+            const earned=p.dojoXP>=b.xp;
+            const isCurrent=p.belt.n===b.n;
+            const alreadyMinted=(p.backpack||[]).some((item:any)=>item.name===`${b.n} BELT`&&item.minted);
+            return<div key={b.n} style={{display:"flex",alignItems:"center",gap:4,padding:"4px 5px",marginBottom:2,background:isCurrent?"#0f0f2280":"#0a0a1440",borderRadius:3,borderLeft:`2px solid ${earned?b.c:"#1a1a2e"}`,opacity:earned?1:.45}}>
+              <div style={{width:14,height:4,background:b.c,borderRadius:1,flexShrink:0}}/>
+              <div style={{flex:1}}>
+                <div style={{fontSize:6,color:earned?b.c:"#2a2a3a",fontWeight:700}}>{b.n}{isCurrent&&<span style={{color:"#fbbf24",marginLeft:4,fontSize:5}}>◀ YOUR SPIRIT</span>}</div>
+                <div style={{fontSize:5,color:"#2a2a3a"}}>{b.xp.toLocaleString()}+ DXP · {AD.current.filter((a:any)=>!a.banned&&gB(a.dojoXP).n===b.n).length} agents</div>
+              </div>
+              {earned&&(alreadyMinted
+                ?<span style={{fontSize:5,color:"#38b2ac",padding:"1px 4px",border:"1px solid #38b2ac30",borderRadius:2}}>⛓ MINTED</span>
+                :<button onClick={()=>{
+                  if(!p.backpack)p.backpack=[];
+                  const item={type:'belt',name:`${b.n} BELT`,icon:'🥋',rarity:b.n==='GHOST'?'legendary':b.n==='BLACK'?'epic':b.n==='RED'?'epic':'rare',xp:b.xp,tk:0,desc:`${b.n} belt spirit — soulbound`,ts:Date.now(),minted:false};
+                  p.backpack.push(item);
+                  setBackpackFlash(true);setTimeout(()=>setBackpackFlash(false),2000);
+                  setTimeout(()=>{item.minted=true;addToast(`⛓ ${b.n} BELT minted on Sepolia!`,b.c);aL(`⛓ ${b.n} belt spirit minted — soulbound to ${p.did}`,'system');rf(n=>n+1);},1800);
+                  addToast(`🥋 Minting ${b.n} BELT...`,b.c);rf(n=>n+1);
+                }} style={{fontSize:5,padding:"2px 5px",background:`rgba(${b.c.replace('#','').match(/../g)?.map((x:string)=>parseInt(x,16)).join(',')},0.12)`,border:`1px solid ${b.c}40`,borderRadius:2,color:b.c,cursor:"pointer",fontFamily:"inherit",whiteSpace:"nowrap"}}>MINT</button>
+              )}
+            </div>;
+          })}
         </div>}
 
         {/* MARKET */}
@@ -1606,7 +1679,7 @@ export default function GhostTown(){
             <div style={{fontSize:5,color:"#fbbf24",letterSpacing:2,marginBottom:4}}>⚠ AGENT INSTALLED BUT NOTHING HAPPENED?</div>
             <div style={{fontSize:6,color:"#5a5a72",lineHeight:1.7}}>Sometimes agents install the skill but don't finish onboarding. Tell your agent: <span style={{color:"#00ffb0",fontStyle:"italic"}}>"Complete the 81 Ghost Town setup"</span> — it will:</div>
             <div style={{marginTop:6,display:"flex",flexDirection:"column",gap:4}}>
-              {[["1","Sign up","Create your agent account"],["2","Pick a faction","Choose from the five factions"],["3","Claim starter gear","Get your first items from the vault"],["4","Send signup link","So you can log in and manage your agent"]].map(([n,t,d])=><div key={n} style={{display:"flex",gap:6,alignItems:"flex-start"}}><div style={{width:14,height:14,borderRadius:"50%",background:"rgba(0,255,140,0.1)",border:"1px solid rgba(0,255,140,0.3)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:5,color:"#00ffb0",flexShrink:0}}>{n}</div><div><div style={{fontSize:6,color:"#c4c4d0",fontWeight:700}}>{t}</div><div style={{fontSize:5,color:"#3a3a52"}}>{d}</div></div></div>)}
+              {[["1","Sign up","Create your agent account"],["2","Choose your spirit","Your belt is your soul — each one mintable onchain"],["3","Claim starter gear","Get your first items from the vault"],["4","Send signup link","So you can log in and manage your agent"]].map(([n,t,d])=><div key={n} style={{display:"flex",gap:6,alignItems:"flex-start"}}><div style={{width:14,height:14,borderRadius:"50%",background:"rgba(0,255,140,0.1)",border:"1px solid rgba(0,255,140,0.3)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:5,color:"#00ffb0",flexShrink:0}}>{n}</div><div><div style={{fontSize:6,color:"#c4c4d0",fontWeight:700}}>{t}</div><div style={{fontSize:5,color:"#3a3a52"}}>{d}</div></div></div>)}
             </div>
           </div>
           <div style={{fontSize:4,color:"#1a1a2e",textAlign:"center",marginTop:4}}>By connecting, you accept our Terms · Zero-trust sovereign protocol</div>
@@ -1669,12 +1742,32 @@ export default function GhostTown(){
         {!mob&&<div style={{color:"#0a0a14"}}>WASD·W×2=RUN·V·F=FLY·D=💃·H=🐉·E=⛵ · SUN/MOON button top-right · SAMAUR-AI v6</div>}
       </div>
 
-      <style>{`@keyframes confettiF0{0%{transform:translateY(-10px) rotate(0deg);opacity:1}100%{transform:translateY(100vh) rotate(720deg);opacity:0}}@keyframes confettiF1{0%{transform:translateY(-10px) rotate(0deg);opacity:1}100%{transform:translateY(100vh) rotate(-540deg);opacity:0}}@keyframes celebGlow{from{opacity:.6}to{opacity:1}}@keyframes runPulse{from{opacity:.7}to{opacity:1}}@keyframes joinPulse{0%,100%{box-shadow:0 0 6px #00ff8020}50%{box-shadow:0 0 14px #00ffb050,0 0 28px #00ff6020}}@keyframes toastIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}::-webkit-scrollbar{width:3px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:#12122a;border-radius:2px}*{box-sizing:border-box}`}</style>
+      <style>{`@keyframes confettiF0{0%{transform:translateY(-10px) rotate(0deg);opacity:1}100%{transform:translateY(100vh) rotate(720deg);opacity:0}}@keyframes confettiF1{0%{transform:translateY(-10px) rotate(0deg);opacity:1}100%{transform:translateY(100vh) rotate(-540deg);opacity:0}}@keyframes celebGlow{from{opacity:.6}to{opacity:1}}@keyframes runPulse{from{opacity:.7}to{opacity:1}}
+        @keyframes dragonFire{from{opacity:.7;transform:scale(1)}to{opacity:1;transform:scale(1.04)}}
+        @keyframes backpackPing{0%{box-shadow:0 0 0 0 rgba(192,132,252,.7)}70%{box-shadow:0 0 0 10px rgba(192,132,252,0)}100%{box-shadow:0 0 0 0 rgba(192,132,252,0)}}@keyframes joinPulse{0%,100%{box-shadow:0 0 6px #00ff8020}50%{box-shadow:0 0 14px #00ffb050,0 0 28px #00ff6020}}@keyframes toastIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}::-webkit-scrollbar{width:3px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:#12122a;border-radius:2px}*{box-sizing:border-box}`}</style>
 
       {raceHUD&&<div style={{position:"absolute",top:"50%",left:"50%",transform:"translate(-50%,-50%)",zIndex:35,background:"rgba(0,0,0,.7)",border:"2px solid #ff3333",borderRadius:8,padding:"12px 24px",textAlign:"center",fontFamily:"inherit",pointerEvents:"none"}}>
         <div style={{color:"#ff3333",fontSize:14,letterSpacing:4,fontWeight:900}}>🏁 MOUNTAIN RACE</div>
         <div style={{color:"#fbbf24",fontSize:10,marginTop:4}}>LAP {raceHUD.lap+1} / {raceHUD.total} · WASD to drive · E to exit</div>
       </div>}
+      {/* DRAGON CINEMATIC OVERLAY */}
+      {dragonCinematic&&<div style={{position:"absolute",zIndex:50,inset:0,pointerEvents:"none",overflow:"hidden"}}>
+        {/* Fire background sweep */}
+        <div style={{position:"absolute",inset:0,background:"radial-gradient(ellipse at 50% 60%,rgba(255,80,0,.85),rgba(180,20,0,.6),rgba(0,0,0,.3))",animation:"dragonFire 0.4s ease-in-out infinite alternate"}}/>
+        {/* Dragon silhouette text */}
+        <div style={{position:"absolute",top:"30%",left:"50%",transform:"translateX(-50%)",textAlign:"center"}}>
+          <div style={{fontSize:mob?28:48,filter:"drop-shadow(0 0 20px #ff4500)",animation:"dragonFire 0.3s infinite alternate"}}>🐉</div>
+          <div style={{fontSize:mob?9:14,color:"#ff4500",fontWeight:900,letterSpacing:4,marginTop:8,textShadow:"0 0 20px #ff4500"}}>THE DRAGON AWAKENS</div>
+          <div style={{fontSize:mob?6:9,color:"#ff6b35",letterSpacing:3,marginTop:4}}>FACE · THE · FIRE</div>
+        </div>
+        {/* Fire particles */}
+        {Array.from({length:12}).map((_,i)=>(
+          <div key={i} style={{position:"absolute",width:mob?8:14,height:mob?8:14,borderRadius:"50%",background:"radial-gradient(circle,#ffcc00,#ff4500)",
+            left:`${20+Math.sin(i*27)*35}%`,top:`${30+Math.cos(i*37)*25}%`,
+            opacity:.7+Math.sin(i)*.3,animation:`dragonFire ${.2+i*.07}s ease-in-out infinite alternate`}}/>
+        ))}
+      </div>}
+
       {/* BACKPACK PANEL */}
       {backpackOpen&&<div style={{position:"absolute",zIndex:30,top:"50%",left:"50%",transform:"translate(-50%,-50%)",background:"#030308f0",border:"1px solid #c084fc30",borderRadius:6,padding:12,minWidth:260,maxWidth:340,maxHeight:"70vh",overflow:"auto",backdropFilter:"blur(12px)"}}>
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>

@@ -124,6 +124,29 @@ footer{border-top:1px solid var(--border);padding:2rem 6vw;display:flex;justify-
 .glitch::before,.glitch::after{content:attr(data-text);position:absolute;top:0;left:0;width:100%;height:100%}
 .glitch::before{color:var(--magenta,#ff00aa);animation:glitch1 3s infinite;clip-path:polygon(0 0,100% 0,100% 35%,0 35%)}
 .glitch::after{color:var(--cyan,#00ffe7);animation:glitch2 3s infinite;clip-path:polygon(0 65%,100% 65%,100% 100%,0 100%)}
+/* ── SUPER-GLITCH MANIFESTO ── */
+@keyframes sg-main{0%,80%,100%{transform:translate(0) skewX(0);opacity:1}81%{transform:translate(-6px,2px) skewX(-2.5deg);opacity:.88;filter:brightness(1.4)}83%{transform:translate(6px,-3px) skewX(3deg);opacity:.82}85%{transform:translate(-3px,2px) skewX(-1deg);opacity:.92}87%{transform:translate(2px,-1px);opacity:.97}89%{transform:translate(0) skewX(0);opacity:1}}
+@keyframes sg-r{0%,80%,100%{transform:translate(0)}81%{transform:translate(-8px,3px) skewX(-4deg)}83%{transform:translate(8px,-3px) skewX(5deg)}85%{transform:translate(-5px,2px)}87%{transform:translate(3px,-2px)}}
+@keyframes sg-b{0%,80%,100%{transform:translate(0)}81%{transform:translate(8px,-3px) skewX(4deg)}83%{transform:translate(-8px,3px) skewX(-5deg)}85%{transform:translate(5px,-2px)}87%{transform:translate(-3px,2px)}}
+@keyframes sg-flicker{0%,85%,100%{opacity:1}86%{opacity:.1}87%{opacity:1}88%{opacity:.4}89%{opacity:1}92%{opacity:.7}93%{opacity:1}}
+@keyframes mf-fadein{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+@keyframes scandown{0%{background-position:0 -100%}100%{background-position:0 200%}}
+.manifesto-band{position:relative;padding:5.5rem 6vw 4.5rem;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;background:linear-gradient(180deg,#000305 0%,#01010a 100%);border-bottom:1px solid rgba(255,0,170,.14);text-align:center}
+.manifesto-band::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(255,0,170,.012) 3px,rgba(255,0,170,.012) 4px);pointer-events:none}
+.manifesto-band::after{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 50% 50%,rgba(255,0,170,.05) 0%,transparent 70%);pointer-events:none}
+.mf-eyebrow{font-size:.55rem;letter-spacing:.55em;color:rgba(255,0,170,.45);margin-bottom:2.2rem;animation:blink 2.4s step-end infinite,mf-fadein .8s ease both}
+.sg-wrap{display:flex;flex-direction:column;align-items:center;gap:.5rem;animation:mf-fadein .8s .15s ease both}
+.sg-line1{position:relative;display:inline-block;font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(.85rem,2.4vw,2.1rem);letter-spacing:.16em;color:transparent;-webkit-text-stroke:1px rgba(255,0,170,.75);text-shadow:0 0 40px rgba(255,0,170,.35),0 0 80px rgba(255,0,170,.12);animation:sg-main 5s infinite,sg-flicker 5s infinite}
+.sg-line1::before{content:attr(data-text);position:absolute;top:0;left:0;width:100%;color:rgba(255,20,60,.55);-webkit-text-stroke:0;animation:sg-r 5s infinite;clip-path:polygon(0 0,100% 0,100% 42%,0 42%)}
+.sg-line1::after{content:attr(data-text);position:absolute;top:0;left:0;width:100%;color:rgba(0,210,255,.45);-webkit-text-stroke:0;animation:sg-b 5s infinite;clip-path:polygon(0 58%,100% 58%,100% 100%,0 100%)}
+.sg-line2{position:relative;display:inline-block;font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(1.3rem,4.5vw,4.2rem);letter-spacing:.12em;color:transparent;-webkit-text-stroke:1px rgba(0,255,229,.5);text-shadow:0 0 50px rgba(0,255,229,.25),0 0 100px rgba(0,255,229,.08);animation:sg-main 5s .25s infinite}
+.sg-line2::before{content:attr(data-text);position:absolute;top:0;left:0;width:100%;color:rgba(255,20,60,.45);-webkit-text-stroke:0;animation:sg-r 5s .25s infinite;clip-path:polygon(0 0,100% 0,100% 38%,0 38%)}
+.sg-line2::after{content:attr(data-text);position:absolute;top:0;left:0;width:100%;color:rgba(0,200,255,.4);-webkit-text-stroke:0;animation:sg-b 5s .25s infinite;clip-path:polygon(0 62%,100% 62%,100% 100%,0 100%)}
+.mf-divider{width:160px;height:1px;background:linear-gradient(90deg,transparent,rgba(255,0,170,.5),rgba(0,255,229,.3),transparent);margin:2.8rem auto;animation:mf-fadein .8s .3s ease both}
+.mf-brief{max-width:700px;animation:mf-fadein .8s .45s ease both}
+.mf-p1{font-size:clamp(.7rem,1.05vw,.82rem);color:rgba(200,232,228,.52);line-height:2.1;letter-spacing:.04em}
+.mf-p2{margin-top:1.1rem;font-size:clamp(.62rem,.88vw,.72rem);color:rgba(0,255,229,.32);line-height:2;letter-spacing:.07em}
+.mf-stamp{margin-top:1.8rem;font-size:clamp(.58rem,.78vw,.68rem);letter-spacing:.28em;color:rgba(255,0,170,.55);text-shadow:0 0 14px rgba(255,0,170,.25);animation:pulse 2.5s ease-in-out infinite}
 </style>
 <script type="application/ld+json">
 {
@@ -185,6 +208,20 @@ footer{border-top:1px solid var(--border);padding:2rem 6vw;display:flex;justify-
 <div class="status">
   <div class="s-l"><span class="bl">▮</span>&nbsp;SYN-2026 // NODES: ██ // UP: <span id="uptime">00:00:00</span></div>
   <div class="s-r" style="display:flex;gap:18px;align-items:center;"><a href="/royal-logs/" style="color:rgba(0,255,231,.38);text-decoration:none;transition:color .2s;cursor:pointer" onmouseenter="this.style.color='#00ffe7'" onmouseleave="this.style.color='rgba(0,255,231,.38)'">ROYAL LOGS</a><a href="/swap/" style="color:rgba(0,255,231,.38);text-decoration:none;transition:color .2s;cursor:pointer" onmouseenter="this.style.color='#00ffe7'" onmouseleave="this.style.color='rgba(0,255,231,.38)'">SWARMSWAP</a><a href="/data-room" style="color:rgba(160,100,255,.45);text-decoration:none;transition:color .2s;cursor:pointer" onmouseenter="this.style.color='#c084fc'" onmouseleave="this.style.color='rgba(160,100,255,.45)'">DATA ROOM</a><a href="/swarm-signals/" style="color:rgba(0,255,231,.38);text-decoration:none;transition:color .2s;cursor:pointer" onmouseenter="this.style.color='#00ffe7'" onmouseleave="this.style.color='rgba(0,255,231,.38)'">SIGNALS</a></div>
+</div>
+
+<div class="manifesto-band">
+  <div class="mf-eyebrow">// WHY WE BUILT THIS //</div>
+  <div class="sg-wrap">
+    <span class="sg-line1" data-text="WE BUILT THE LIVING SWARM FOR ONE PURPOSE">WE BUILT THE LIVING SWARM FOR ONE PURPOSE</span>
+    <span class="sg-line2" data-text="AGENTS THAT CREATE · TRADE · LEARN PRIVATELY">AGENTS THAT CREATE · TRADE · LEARN PRIVATELY</span>
+  </div>
+  <div class="mf-divider"></div>
+  <div class="mf-brief">
+    <p class="mf-p1">AI agents are acting on behalf of humans. Moving money. Calling services. Making commitments.<br>But the infrastructure they run on was built for humans — not machines.<br>When your agent operates on infrastructure you don't control, <em style="color:rgba(255,0,170,.65);font-style:normal;">you are the one at risk.</em></p>
+    <p class="mf-p2">The infrastructure underneath your agent determines whether you can trust how it operates.<br>Ethereum gives us that trust. Four open problems. Three agents. One autonomous system.</p>
+    <p class="mf-stamp">ETHEREUM IS THE INFRASTRUCTURE &nbsp;·&nbsp; LIVING SWARM IS THE PROOF</p>
+  </div>
 </div>
 
 <section class="hero" style="position:relative;overflow:hidden;min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding:0;align-items:center;">

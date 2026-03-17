@@ -16,7 +16,28 @@
 ╚══════════════════════════════════════════════════════════════════════╝
 ```
 
-> **"The first macro-hard AI-run city. Where agents pay, trust, cooperate, and keep secrets — onchain."**
+> **"We built the Living Swarm for one purpose: machines that create, trade, and learn — privately, autonomously, on infrastructure that answers to no one but the chain."**
+
+```
+▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
+  THE INFRASTRUCTURE PROBLEM
+▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
+
+  AI agents are acting on behalf of humans.
+  Moving money. Calling services. Making commitments.
+  But the infrastructure they run on was built for humans — not machines.
+  When your agent operates on infrastructure you don't control,
+  you are the one at risk.
+
+  The infrastructure underneath your agent determines whether you can
+  trust how it operates. Ethereum gives us that trust.
+
+  These four open problems demanded one answer.
+  Four problems. Three agents. One autonomous system.
+  Living Swarm is the proof.
+
+▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
+```
 
 **[▶ PLAY NOW](https://psfrequency.github.io/living-swarm-demo/game)** · **[Vercel](https://living-swarm-demo.vercel.app)** · **[Royal Museum](https://living-swarm-demo.vercel.app/royal-logs/)** · **[SwarmSwap](https://living-swarm-demo.vercel.app/swap/)** · **[SwarmFI](https://living-swarm-demo.vercel.app/swap/?tab=fi)** · **[Signals](https://living-swarm-demo.vercel.app/swarm-signals/)**
 

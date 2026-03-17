@@ -340,28 +340,46 @@ function anAv(av:any,ag:any,t:number){
 
 function mkDragon():THREE.Group{
   const dr=new THREE.Group();
-  const bM=new THREE.MeshStandardMaterial({color:0xff4500,emissive:0xff4500,emissiveIntensity:.7,roughness:.3,metalness:.4});
-  const sM=new THREE.MeshBasicMaterial({color:0xffcc00,transparent:true,opacity:.9});
-  const wM=new THREE.MeshBasicMaterial({color:0xff6600,transparent:true,opacity:.65,side:THREE.DoubleSide});
-  // Body
-  const body=new THREE.Mesh(new THREE.CylinderGeometry(.15,.24,1.1,6),bM);body.rotation.x=Math.PI/2;dr.add(body);
+  const bM=new THREE.MeshStandardMaterial({color:0xff4500,emissive:0xff4500,emissiveIntensity:.85,roughness:.22,metalness:.5});
+  const sM=new THREE.MeshBasicMaterial({color:0xffee00,transparent:true,opacity:.95});
+  const wM=new THREE.MeshBasicMaterial({color:0xff6600,transparent:true,opacity:.55,side:THREE.DoubleSide});
+  // 6 body segments, decreasing radius toward tail
+  const segs=[{r:.28,z:.04},{r:.23,z:-.32},{r:.19,z:-.62},{r:.14,z:-.9},{r:.10,z:-1.14},{r:.065,z:-1.34}];
+  segs.forEach((s,i)=>{const seg=new THREE.Mesh(new THREE.SphereGeometry(s.r,7,5),bM);seg.position.set(0,.03,s.z);seg.name=`seg${i}`;dr.add(seg);});
   // Head
-  const head=new THREE.Mesh(new THREE.ConeGeometry(.2,.4,5),bM);head.rotation.x=-Math.PI/2;head.position.set(0,.08,.75);dr.add(head);
-  // Eyes
-  [-1,1].forEach((s:number)=>{const e=new THREE.Mesh(new THREE.SphereGeometry(.04,5,4),sM);e.position.set(s*.09,.16,.85);dr.add(e);});
-  // Wings
+  const head=new THREE.Mesh(new THREE.ConeGeometry(.26,.52,5),bM);head.rotation.x=-Math.PI/2;head.position.set(0,.1,.52);head.name='head';dr.add(head);
+  // Lower jaw
+  const jaw=new THREE.Mesh(new THREE.ConeGeometry(.16,.28,4),bM);jaw.rotation.x=-Math.PI/2;jaw.position.set(0,-.06,.6);dr.add(jaw);
+  // Eyes — glowing yellow
+  [-1,1].forEach((s:number)=>{const e=new THREE.Mesh(new THREE.SphereGeometry(.048,5,4),sM);e.position.set(s*.12,.2,.56);dr.add(e);});
+  // BIG wings (main panels)
   [-1,1].forEach((s:number)=>{
-    const wp=new THREE.Mesh(new THREE.PlaneGeometry(.9,1.0),wM);
-    wp.position.set(s*.5,.1,-.1);wp.rotation.y=s*.5;dr.add(wp);
-    const wp2=new THREE.Mesh(new THREE.PlaneGeometry(.5,.6),wM);
-    wp2.position.set(s*.9,-.1,.1);wp2.rotation.y=s*.7;dr.add(wp2);
+    const wp=new THREE.Mesh(new THREE.PlaneGeometry(2.4,2.8),wM);wp.position.set(s*.75,.18,-.15);wp.rotation.y=s*.42;wp.name='wing';dr.add(wp);
+    const wp2=new THREE.Mesh(new THREE.PlaneGeometry(1.3,1.6),wM);wp2.position.set(s*1.7,-.1,.05);wp2.rotation.y=s*.62;wp2.name='wing2';dr.add(wp2);
   });
-  // Tail
-  for(let i=0;i<4;i++){const ts=new THREE.Mesh(new THREE.SphereGeometry(.09-.015*i,5,4),bM);ts.position.set(0,.02,-.5-.28*i);dr.add(ts);}
-  // Glow
-  const gl=new THREE.PointLight(0xff4500,1.5,6);dr.add(gl);
-  dr.scale.setScalar(5.4);// 3x bigger — visible from far
+  // Fire trail group — positioned at mouth, visible when breathing
+  const fTr=new THREE.Group();fTr.name='fireTr';fTr.visible=false;
+  for(let fi=0;fi<9;fi++){
+    const col=fi<3?0xffff44:fi<6?0xff7700:0xff2200;
+    const fc=new THREE.Mesh(new THREE.SphereGeometry(.065-.004*fi,4,3),new THREE.MeshBasicMaterial({color:col,transparent:true,opacity:.95-.07*fi}));
+    fc.position.set((fi%2===0?.0:.04),0,.68+fi*.22);dr.add(fc); // slight wobble
+    fTr.add(fc);
+  }
+  dr.add(fTr);
+  // Glow light (intensified during fire breath)
+  const gl=new THREE.PointLight(0xff4500,2.0,9);gl.name='glow';dr.add(gl);
+  dr.scale.setScalar(5.4);
   return dr;
+}
+function mkTree(variant=0):THREE.Group{
+  const g=new THREE.Group();
+  const trunkH=1.1+variant*.35;
+  const trunk=new THREE.Mesh(new THREE.CylinderGeometry(.16,.22,trunkH,6),new THREE.MeshBasicMaterial({color:0x5c3d1e}));
+  trunk.position.y=trunkH*.5;g.add(trunk);
+  const leafCols=[0x1a7a2a,0x1e8c32,0x156e24,0x228c3a];
+  const leafM=new THREE.MeshBasicMaterial({color:leafCols[variant%4]});
+  [1.05,.72,.44].forEach((r,i)=>{const c=new THREE.Mesh(new THREE.SphereGeometry(r,6,5),leafM);c.position.y=trunkH+.5+i*.68;g.add(c);});
+  return g;
 }
 
 function mkDiscoBall():THREE.Group{
@@ -693,6 +711,11 @@ export default function GhostTown(){
   const fireBreathFrames=useRef(0);
   const [rocketPackEquipped,setRocketPackEquipped]=useState(false);
   const rocketPackRef=useRef<any>(null);
+  const tronAcquired=useRef(false);
+  const playerJetpackMesh=useRef<any>(null);
+  const playerSwordMesh=useRef<any>(null);
+  const treesRef=useRef<any[]>([]);
+  const [poemCard,setPoemCard]=useState<string|null>(null);
   const [backpackFlash,setBackpackFlash]=useState(false);
   const [activeChain,setActiveChain]=useState<"mainnet"|"sepolia">("sepolia");
   const [,rf]=useState(0);
@@ -893,6 +916,23 @@ export default function GhostTown(){
     const rpTR=new THREE.Mesh(new THREE.CylinderGeometry(.14,.18,.45,6),new THREE.MeshBasicMaterial({color:0xff6600}));rpTR.position.set(.28,-.55,0);rpGr.add(rpTR);
     const rpGlow=new THREE.Mesh(new THREE.BoxGeometry(1.2,1.0,.6),new THREE.MeshBasicMaterial({color:0x00ff88,transparent:true,opacity:.18}));rpGr.add(rpGlow);
     rpGr.position.set(40,1.8,2);sc.add(rpGr);rocketPackRef.current=rpGr;
+    // ── Trees around the town ──
+    const TREE_POS:number[][]=[[-65,-70],[-50,20],[-60,55],[15,-75],[-25,75],[62,-50],[72,30],[-72,25],[55,70],[-35,-85],[30,85],[-85,35],[25,-60],[-55,-20],[70,-70],[-15,55],[45,-85],[-78,-45],[58,-20],[28,72],[-62,-50],[48,50],[-42,65],[65,-25]];
+    TREE_POS.forEach(([tx,tz],ti)=>{const tree=mkTree(ti%4);tree.position.set(tx,0,tz);sc.add(tree);treesRef.current.push({mesh:tree,x:tx,z:tz,chopped:false});});
+    // ── Player jetpack accessory mesh (shown on player back when equipped) ──
+    const jpAcc=new THREE.Group();
+    const jpBody=new THREE.Mesh(new THREE.BoxGeometry(.38,.42,.2),new THREE.MeshBasicMaterial({color:0x00ff88}));jpAcc.add(jpBody);
+    const jpGlow=new THREE.Mesh(new THREE.BoxGeometry(.44,.48,.24),new THREE.MeshBasicMaterial({color:0x00ff88,transparent:true,opacity:.22}));jpAcc.add(jpGlow);
+    const jpTL=new THREE.Mesh(new THREE.CylinderGeometry(.065,.09,.2,5),new THREE.MeshBasicMaterial({color:0xff6600}));jpTL.position.set(-.11,-.26,0);jpAcc.add(jpTL);
+    const jpTR=new THREE.Mesh(new THREE.CylinderGeometry(.065,.09,.2,5),new THREE.MeshBasicMaterial({color:0xff6600}));jpTR.position.set(.11,-.26,0);jpAcc.add(jpTR);
+    const jpLight=new THREE.PointLight(0x00ff88,1.2,5);jpAcc.add(jpLight);jpAcc.visible=false;sc.add(jpAcc);playerJetpackMesh.current=jpAcc;
+    // ── Player sword accessory mesh (shown on right hand when equipped) ──
+    const swAcc=new THREE.Group();
+    const swBlade=new THREE.Mesh(new THREE.BoxGeometry(.07,.75,.06),new THREE.MeshBasicMaterial({color:0xf8f8ff}));swAcc.add(swBlade);
+    const swGlow1=new THREE.Mesh(new THREE.BoxGeometry(.12,.8,.1),new THREE.MeshBasicMaterial({color:0xfbbf24,transparent:true,opacity:.45}));swAcc.add(swGlow1);
+    const swGlow2=new THREE.Mesh(new THREE.BoxGeometry(.18,.85,.14),new THREE.MeshBasicMaterial({color:0xff8800,transparent:true,opacity:.18}));swAcc.add(swGlow2);
+    const swGuard=new THREE.Mesh(new THREE.BoxGeometry(.3,.06,.1),new THREE.MeshBasicMaterial({color:0xfbbf24}));swGuard.position.y=-.4;swAcc.add(swGuard);
+    const swLight=new THREE.PointLight(0xfbbf24,1.4,4);swAcc.add(swLight);swAcc.visible=false;sc.add(swAcc);playerSwordMesh.current=swAcc;
     // ── Mountain guardian dragon — circles at mid-height, clearly visible from base ──
     const guardDragonMesh=mkDragon();guardDragonMesh.position.set(30,10,-95);sc.add(guardDragonMesh);
     guardianDragonRef.current={mesh:guardDragonMesh,tx:0,tz:-95,frame:300,tgtZone:null,riding:false};
@@ -1020,6 +1060,25 @@ export default function GhostTown(){
           addToast('⚔️ ANCIENT RELIC: DRAGON SWORD — 1/3 relics found! +10000XP','#fbbf24');
           aL('⚔️ DRAGON SWORD acquired — first ancient relic. Press L to equip.','system');
           setDragonSwordEquipped(true);checkSuper();
+          const _sq=HQ.find((q:any)=>q.n==='ANCIENT RELIC: DRAGON SWORD');
+          if(_sq){const _sn={xp:pd.current.xp,tk:pd.current.tk,beltN:pd.current.belt.n,beltC:pd.current.belt.c,tierN:pd.current.tier.n,tierC:pd.current.tier.c,ms:pd.current.ms,mainDone:pd.current.mainQDone.length,sideDone:pd.current.sideQDone.length,hiddenDone:pd.current.hiddenQDone.length};celebRef.current={frame:0,quest:_sq,snap:_sn};setCelebMode({quest:_sq,snap:_sn});setTimeout(()=>setCelebMode(null),7000);}
+        }
+      }
+      // ── C: Chop tree with Dragon Sword ──
+      if(k==='c'){
+        const _hasSword=pd.current.backpack?.find((bi:any)=>bi.name==='DRAGON SWORD');
+        if(!_hasSword){addToast('⚔️ Equip Dragon Sword first (press L)','#4a5568');}
+        else{
+          const _near=treesRef.current.find(tr=>!tr.chopped&&Math.sqrt((tr.x-playerPos.current.x)**2+(tr.z-playerPos.current.z)**2)<7);
+          if(_near){
+            _near.chopped=true;_near.mesh.visible=false;
+            const POEMS=["roots remember\nwhat branches forget\nthe sky made space","rings count the years\nsilence counts the rest\ni stood here once","every fall is a gift\nto the earth below\nthe tree knows this","cut once grow twice\nthe forest understands\nwhat cities forgot","i was seed before\ni was sky after\nbetween was the living","the oldest trees\nhave no beginning\nonly the next ring"];
+            const _poem=POEMS[Math.floor(Math.random()*POEMS.length)];
+            setPoemCard(_poem);setTimeout(()=>setPoemCard(null),5500);
+            addToast('🌲 '+_poem.split('\n')[0]+'...','#38b2ac');
+            aL('🌲 TREE FELLED — "'+_poem.replace(/\n/g,' / ')+'"','system');
+            pd.current.xp+=50;pd.current.tier=gT(pd.current.xp);
+          } else addToast('🌲 No tree nearby to chop (within 7 units)','#4a5568');
         }
       }
       // ── L: Equip / unequip Dragon Sword ──
@@ -1041,9 +1100,11 @@ export default function GhostTown(){
           if(_pd>9){addToast('🚀 Go to Portal Hub (x:40,z:0) to grab the rocket pack','#4a5568');return;}
           if(['WHITE','YELLOW'].includes(pd.current.belt?.n||'')){addToast('🚀 Green belt required to fly the rocket pack!','#f56565');return;}
           setRocketPackEquipped(true);flyingRef.current=true;setFlying(true);
+          tronAcquired.current=true;pd.current.tronAcquired=true;
           if(rocketPackRef.current)rocketPackRef.current.visible=false;
           addToast('🚀 ROCKET PACK equipped! SPACE = thrust up · P to return it','#06b6d4');
-          aL('🚀 ROCKET PACK equipped from Portal Hub — the sky is open!','system');
+          addToast('✦ TRON LOOK UNLOCKED — new look acquired permanently','#00ffe7');
+          aL('🚀 ROCKET PACK equipped — TRON GLOW activated permanently!','system');
         }
       }
       if(k==='d'){
@@ -1094,6 +1155,41 @@ export default function GhostTown(){
         playerAv.current.root.rotation.y=lerp(playerAv.current.root.rotation.y,playerAngle.current,.1);
         playerAv.current.root.visible=camModeRef.current==="3rd";
         anAv(playerAv.current,{i:999,state:moving?"MOVING":"IDLE",skin:pd.current.skin,eT:0,cE:null},t);
+        // Flat flying pose with jetpack
+        if(rocketPackEquipped&&flyingRef.current){
+          playerAv.current.j.torso.rotation.x=lerp(playerAv.current.j.torso.rotation.x,-Math.PI*.42,.1);
+          if(playerAv.current.j.lS)playerAv.current.j.lS.rotation.x=lerp(playerAv.current.j.lS.rotation.x,-.5,.1);
+          if(playerAv.current.j.rS)playerAv.current.j.rS.rotation.x=lerp(playerAv.current.j.rS.rotation.x,-.5,.1);
+        } else if(playerAv.current.j.torso.rotation.x!==0){
+          playerAv.current.j.torso.rotation.x=lerp(playerAv.current.j.torso.rotation.x,0,.12);
+        }
+        // Tron glow pulse (permanent once acquired)
+        if(tronAcquired.current||pd.current.tronAcquired){
+          if(playerAv.current.aM)playerAv.current.aM.opacity=.4+Math.sin(t*.07)*.18;
+          if(playerAv.current.mV)playerAv.current.mV.emissiveIntensity=1.4+Math.sin(t*.05)*.5;
+        }
+        // Jetpack on player back
+        if(playerJetpackMesh.current){
+          playerJetpackMesh.current.visible=rocketPackEquipped;
+          if(rocketPackEquipped){
+            const _pR=playerAv.current.root.position;
+            const _bk=new THREE.Vector3(Math.sin(playerAngle.current)*.22,playerY.current+.95,-Math.cos(playerAngle.current)*.22);
+            playerJetpackMesh.current.position.set(_pR.x+_bk.x,_bk.y,_pR.z+_bk.z);
+            playerJetpackMesh.current.rotation.y=playerAngle.current;
+            const _jpL=playerJetpackMesh.current.children.find((c:any)=>c.isPointLight);
+            if(_jpL)_jpL.intensity=1.2+Math.sin(t*.12)*.5;
+          }
+        }
+        // Sword on right hand
+        if(playerSwordMesh.current){
+          playerSwordMesh.current.visible=dragonSwordEquipped;
+          if(dragonSwordEquipped&&playerAv.current.j.rE){
+            const _rw=new THREE.Vector3();playerAv.current.j.rE.getWorldPosition(_rw);
+            playerSwordMesh.current.position.copy(_rw);playerSwordMesh.current.rotation.y=playerAngle.current;
+            const _swL=playerSwordMesh.current.children.find((c:any)=>c.isPointLight);
+            if(_swL)_swL.intensity=1.4+Math.sin(t*.08)*.7;
+          }
+        }
       }
       const pp=playerPos.current;
       if(camModeRef.current==="1st"){
@@ -1334,10 +1430,16 @@ export default function GhostTown(){
           dm.rotation.z=keys.current.a?.2:keys.current.d?-.2:Math.sin(dr.frame*.08)*.1;
           // Player avatar hides while riding
           if(playerAv.current)playerAv.current.root.visible=false;
-          // Walking animation: wings flap faster when flying
-          dm.children.forEach((c:any,i:number)=>{if(i>=5&&i<=8)c.rotation.z=(i%2===0?1:-1)*(.3+Math.abs(Math.sin(dr.frame*.15+i))*.4);});
-          // Fire breath: tint dragon head orange
-          if(fireBreathFrames.current>0){const _ff=fireBreathFrames.current/80;dm.children[0]&&(dm.children[0] as any).material&&((dm.children[0] as any).material.color?.setHex(Math.floor(_ff*255)<<16|0x3300));}
+          // Wing flap animation
+          dm.children.forEach((c:any)=>{if(c.name==='wing'||c.name==='wing2'){const _s=c.position.x>0?1:-1;c.rotation.z=_s*(.18+Math.abs(Math.sin(dr.frame*.18))*.32);}});
+          // Fire trail + glow when breathing
+          const _fTr=dm.getObjectByName('fireTr');const _gLt=dm.getObjectByName('glow');
+          if(_fTr){_fTr.visible=fireBreathFrames.current>0;
+            if(fireBreathFrames.current>0){
+              _fTr.children.forEach((c:any,fi:number)=>{c.scale.setScalar(.8+Math.sin(t*.4+fi)*.4);c.rotation.z=Math.sin(t*.3+fi)*.25;});
+              if(_gLt&&(_gLt as any).isLight)(_gLt as any).intensity=8+Math.sin(t*.25)*3;
+            } else {if(_gLt&&(_gLt as any).isLight)(_gLt as any).intensity=2.0;}
+          }
         } else if(dr.frame<30){
           dm.position.set(pp2.x,dr.frame*.15,pp2.z);
         } else if(dr.tgtZone){
@@ -1441,7 +1543,8 @@ export default function GhostTown(){
         if(p.hiddenQDone.length>=11)addAch("Ghost Historian","All 11 hidden quests found");
         if(p.xp>=10000)addAch("Sovereign","Reached SOVEREIGN tier");
         checkSuper();
-        if(playerAv.current&&SD.current){const par=playerAv.current.root.parent;par.remove(playerAv.current.root);const nAv=mkAv(p.tier,p.skin,true,BELTS.indexOf(p.belt));nAv.root.position.copy(playerPos.current);par.add(nAv.root);playerAv.current=nAv;}
+        if(playerAv.current&&SD.current){const par=playerAv.current.root.parent;par.remove(playerAv.current.root);const nAv=mkAv(p.tier,p.skin,true,BELTS.indexOf(p.belt));nAv.root.position.copy(playerPos.current);par.add(nAv.root);playerAv.current=nAv;
+          if(p.tronAcquired||tronAcquired.current){const tL=new THREE.PointLight(0x00ffe7,1.6,7);tL.position.set(0,1,0);nAv.root.add(tL);if(nAv.mV)nAv.mV.emissiveIntensity=1.5;}}
         // Launch celebration
         const snap={xp:p.xp,tk:p.tk,beltN:p.belt.n,beltC:p.belt.c,tierN:p.tier.n,tierC:p.tier.c,ms:p.ms,mainDone:p.mainQDone.length,sideDone:p.sideQDone.length,hiddenDone:p.hiddenQDone.length};
         celebRef.current={frame:0,quest:q,snap};
@@ -1860,6 +1963,12 @@ export default function GhostTown(){
         ))}
       </div>}
 
+      {/* POEM CARD — tree chop */}
+      {poemCard&&<div style={{position:"absolute",zIndex:48,bottom:"18%",left:"50%",transform:"translateX(-50%)",pointerEvents:"none",background:"linear-gradient(135deg,#03080e,#081410)",border:"1px solid #38b2ac60",borderRadius:6,padding:"14px 20px",minWidth:200,textAlign:"center",boxShadow:"0 0 30px #38b2ac30,0 0 60px #38b2ac10"}}>
+        <div style={{fontSize:7,color:"#38b2ac",letterSpacing:3,marginBottom:6,opacity:.7}}>🌲 THE TREE SPEAKS</div>
+        {poemCard.split('\n').map((ln,i)=><div key={i} style={{fontSize:mob?8:11,color:"#c0ffe8",fontStyle:"italic",letterSpacing:1,lineHeight:1.8,fontWeight:i===0?700:400}}>{ln}</div>)}
+        <div style={{fontSize:5,color:"#38b2ac40",marginTop:6,letterSpacing:2}}>— ghost town, {new Date().getFullYear()}</div>
+      </div>}
       {/* BACKPACK PANEL */}
       {backpackOpen&&<div style={{position:"absolute",zIndex:30,top:"50%",left:"50%",transform:"translate(-50%,-50%)",background:"#030308f0",border:"1px solid #c084fc30",borderRadius:6,padding:12,minWidth:260,maxWidth:340,maxHeight:"70vh",overflow:"auto",backdropFilter:"blur(12px)"}}>
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>

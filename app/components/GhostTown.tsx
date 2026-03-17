@@ -903,6 +903,7 @@ export default function GhostTown(){
   const rocketTrailCooldown=useRef(0);// regen cooldown
   const rocketTrailBuf=useRef<{x:number,y:number,z:number}[]>([]);
   const laserTrailRef=useRef<any>(null);
+  const ufoLasersRef=useRef<any[]>([]);
   const [ridingVehicle,setRidingVehicle]=useState(false);
   const [vehicleLabel,setVehicleLabel]=useState<string|null>(null);
   const [activeChain,setActiveChain]=useState<"mainnet"|"sepolia">("sepolia");
@@ -1435,6 +1436,26 @@ export default function GhostTown(){
           aL(`✦ Switched to ${s.name} suit`,'system');
         }
       }
+      // ── F: UFO laser fire (saucer mode only) ──
+      if(k==='f'&&inCyberVehicle.current&&vehicleMode.current===2&&SD.current&&cyberVehicleRef.current){
+        const _cvm=cyberVehicleRef.current.mesh;
+        const _fwdX=-Math.sin(cA.current),_fwdZ=-Math.cos(cA.current);
+        // fire 3 bolts: center + slight spread
+        [0,-0.3,0.3].forEach((_spread:number)=>{
+          const _lGrp=new THREE.Group();
+          const _lBolt=new THREE.Mesh(new THREE.SphereGeometry(.55,6,6),new THREE.MeshBasicMaterial({color:0x00ffe7,transparent:true,opacity:1}));
+          _lGrp.add(_lBolt);
+          const _lLight=new THREE.PointLight(0x00ffe7,5,12);_lGrp.add(_lLight);
+          // also a trail cylinder behind bolt
+          const _trail=new THREE.Mesh(new THREE.CylinderGeometry(.08,.08,8,4),new THREE.MeshBasicMaterial({color:0x00ffe7,transparent:true,opacity:.6}));
+          _trail.rotation.x=Math.PI/2;_trail.position.z=4;_lGrp.add(_trail);
+          _lGrp.position.set(_cvm.position.x+_spread*2,_cvm.position.y-1.5,_cvm.position.z);
+          _lGrp.rotation.y=cA.current;
+          SD.current.sc.add(_lGrp);
+          ufoLasersRef.current.push({mesh:_lGrp,vx:(_fwdX+_spread*.15)*2.8,vy:-.04,vz:(_fwdZ)*2.8,frames:90});
+        });
+        addToast('🛸 LASER FIRED — ⚡⚡⚡','#00ffe7');
+      }
       if(k==='d'){
         danceMode.current=!danceMode.current;
         if(danceMode.current){
@@ -1702,7 +1723,7 @@ export default function GhostTown(){
           if(_swimming){tor.swimWpIdx++;
             tortoiseWpIdx.current=tor.swimWpIdx;
             if(tor.swimWpIdx>=TURTLE_SWIM_WAYPOINTS.length&&!pd.current.hiddenQDone.includes('TURTLE ISLAND')){
-              pd.current.hiddenQDone.push('TURTLE ISLAND');pd.current.xp+=100000;pd.current.tk+=5000;
+              pd.current.hiddenQDone.push('TURTLE ISLAND');pd.current.xp+=100000;pd.current.tk+=5000;pd.current.dojoXP+=100000;
               pd.current.tier=gT(pd.current.xp);pd.current.belt=gB(pd.current.dojoXP);
               // Ninja transformation
               ninjaMode.current=true;pd.current.ninjaMode=true;pd.current.skin=SKINS[3];// samurai/ninja skin
@@ -1715,7 +1736,7 @@ export default function GhostTown(){
               }
               setBackpackFlash(true);setTimeout(()=>setBackpackFlash(false),2000);
               if(playerAv.current){const par=playerAv.current.root.parent;par.remove(playerAv.current.root);const nAv=mkAv(pd.current.tier,SKINS[3],true,BELTS.indexOf(pd.current.belt));nAv.root.position.copy(playerPos.current);nAv.root.scale.setScalar(3);par.add(nAv.root);playerAv.current=nAv;}
-              addToast('🐢 TURTLE ISLAND COMPLETE — 100,000XP! You are 3x. Ninja outfit equipped.','#88ff44');
+              addToast('🐢 TURTLE ISLAND — 100,000 XP + 100,000 DXP! GHOST BELT! Ninja transformation.','#88ff44');
               addToast('🥷 NINJA TRANSFORMATION — you have been changed permanently','#c084fc');
               aL('🐢 TURTLE ISLAND complete — ancient wisdom granted. You are ninja now.','system');
               const _tq=HQ.find((q:any)=>q.n==='TURTLE ISLAND');
@@ -1925,11 +1946,15 @@ export default function GhostTown(){
           if(k.w){playerPos.current.x+=_fwd.x*_spd;playerPos.current.z+=_fwd.z*_spd;playerPos.current.x=clamp(playerPos.current.x,-150,150);playerPos.current.z=clamp(playerPos.current.z,-165,150);}
           if(k.s){playerPos.current.x-=_fwd.x*_spd*.45;playerPos.current.z-=_fwd.z*_spd*.45;}
           if(k.a)cA.current+=.04;if(k.d)cA.current-=.04;
-          // Altitude: saucer/rocket = space key; sub = space goes up, no-space sinks in water
+          // Altitude: saucer=hold+space rises; sub=neutral buoyancy+S dives+space surfaces
           if(_vm===2||_vm===1){
-            if(k.space)playerY.current=Math.min(35,playerY.current+.14);
-            else if(_vm===2)playerY.current=Math.max(0,playerY.current-.04);
-            else playerY.current=Math.max(-8,playerY.current-.03);// sub sinks slowly
+            if(k.space)playerY.current=Math.min(35,playerY.current+.18);
+            if(_vm===1){// SUBMARINE: S=dive, Space=surface, else hold depth
+              if(k.s)playerY.current=Math.max(-18,playerY.current-.18);
+              // neutral buoyancy — depth held when not pressing space or s
+            } else {// SAUCER: hold altitude (no gravity), Space=rise, min 1.5
+              if(!k.space)playerY.current=Math.max(1.5,playerY.current);
+            }
           } else {// car — follow terrain height
             const _dxm=Math.abs(playerPos.current.x),_dzm=Math.abs(playerPos.current.z+130);
             const _rD=Math.max(_dxm/55,_dzm/35);let _tY=0;
@@ -1988,6 +2013,19 @@ export default function GhostTown(){
         // Vehicle speed exhaust glow (car exhaust pipes when rocket speed)
         const _exL=cvm.getObjectByName('exhaL');const _exR=cvm.getObjectByName('exhaR');
         if(_exL&&_exR){const _em=(_exL as any).material;if(_em){_em.color.setHex(_vs===2?0xff4400:_vs===1?0xff8800:0x223344);_em.emissive?.setHex(_vs===2?0xff4400:_vs===1?0xff8800:0x0);}}
+      }
+      // ── UFO Laser projectiles ──
+      if(ufoLasersRef.current.length>0&&SD.current){
+        ufoLasersRef.current=ufoLasersRef.current.filter((lsr:any)=>{
+          lsr.frames--;
+          lsr.mesh.position.x+=lsr.vx;lsr.mesh.position.y+=lsr.vy;lsr.mesh.position.z+=lsr.vz;
+          const _f=lsr.frames/90;
+          if(lsr.mesh.children[0]){(lsr.mesh.children[0] as any).material.opacity=_f;}
+          if(lsr.mesh.children[1]){(lsr.mesh.children[1] as any).intensity=5*_f;}
+          if(lsr.mesh.children[2]){(lsr.mesh.children[2] as any).material.opacity=_f*.6;}
+          if(lsr.frames<=0){SD.current.sc.remove(lsr.mesh);return false;}
+          return true;
+        });
       }
       // ── Rocket pack: hover at portal, proximity hint ──
       if(rocketPackRef.current&&rocketPackRef.current.visible){
@@ -2324,6 +2362,24 @@ export default function GhostTown(){
             <div style={{display:"flex",justifyContent:"space-between"}}><span style={{fontSize:8,color:p.belt.c,fontWeight:700}}>🥋 {p.belt.n} BELT — YOUR SPIRIT</span><span style={{fontSize:7,color:"#f43f5e"}}>{p.dojoXP} DXP</span></div>
             <div style={{height:3,background:"#1a1a30",borderRadius:2,marginTop:3}}><div style={{height:"100%",width:`${Math.min(100,(p.dojoXP%5000)/50)}%`,background:"#f43f5e",borderRadius:2}}/></div>
           </div>
+          {p.dojoXP>=25000&&<div style={{padding:"6px 8px",marginBottom:6,background:"linear-gradient(135deg,#1a0a3080,#0a0a1480)",borderRadius:3,border:"1px solid #c084fc50",textAlign:"center"}}>
+            <div style={{fontSize:7,color:"#c084fc",fontWeight:700,letterSpacing:2,marginBottom:3}}>◼ GHOST BELT — ALL BELTS UNLOCKED</div>
+            <div style={{fontSize:5,color:"#7a5a9a",marginBottom:5}}>The full mastery path. Every belt is now yours to mint.</div>
+            <button onClick={()=>{
+              if(!p.backpack)p.backpack=[];
+              let added=0;
+              BELTS.forEach((b:any)=>{
+                if(!(p.backpack||[]).some((item:any)=>item.name===`${b.n} BELT`)){
+                  p.backpack.push({type:'belt',name:`${b.n} BELT`,icon:'🥋',rarity:b.n==='GHOST'?'legendary':b.n==='BLACK'||b.n==='RED'?'epic':'rare',xp:b.xp,tk:0,desc:`${b.n} belt spirit — soulbound to ${p.did}`,ts:Date.now(),minted:false});
+                  added++;
+                }
+              });
+              setBackpackFlash(true);setTimeout(()=>setBackpackFlash(false),2000);
+              addToast(`◼ GHOST PACK — ${added>0?`${added} belts claimed`:'all belts already in pack'}!`,'#c084fc');
+              aL('◼ GHOST BELT: full belt pack claimed — all 7 belts soulbound to '+p.did,'system');
+              rf(n=>n+1);
+            }} style={{fontSize:6,padding:"3px 10px",background:"#c084fc18",border:"1px solid #c084fc50",borderRadius:2,color:"#c084fc",cursor:"pointer",fontFamily:"inherit",letterSpacing:1}}>◼ CLAIM FULL GHOST PACK — MINT ALL 7 BELTS</button>
+          </div>}
           {BELTS.map((b:any)=>{
             const earned=p.dojoXP>=b.xp;
             const isCurrent=p.belt.n===b.n;

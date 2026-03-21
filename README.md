@@ -46,6 +46,31 @@
 
 ---
 
+## ◈ DEMO VIDEO
+
+[![Watch the Living Swarm demo](https://img.youtube.com/vi/27lm18mKJlY/maxresdefault.jpg)](https://youtu.be/27lm18mKJlY)
+
+> **Three autonomous agents that pay, trust, cooperate, and keep secrets — on Ethereum, in real-time, inside a living 3D world.**
+
+---
+
+## ◈ SYNTHESIS 2026 — JUDGE SUBMISSION
+
+Living Swarm deploys three on-chain AI agents — Herald-01 (Scout), Engineer-02 (Strategist), and Sentinel-03 (Guardian) — that operate a complete DeFi execution loop without human intervention. Each agent holds an ERC-8004 identity token and an ERC-8183 capability manifest anchored to the Sepolia testnet. Together they run a continuous **discover → plan → execute → verify** cycle: scouting market signals and HackerNews intelligence via Venice AI (llama-3.3-70b), planning portfolio rebalances, executing real swaps through the Uniswap Trading API, and clearing every transaction through an 8-checkpoint safety gauntlet before anything moves.
+
+All inter-agent communication is cryptographically private — sessions derived from wallet signatures, encrypted with AES-256-GCM, message-authenticated with HMAC-SHA256. The swarm runs on 6-hour autonomous heartbeat cycles, accumulates learning across runs, and maintains zero data retention by design. The entire system surfaces as a living visualization: 9,000 WebGL particles whose behavior reflects live agent state in real time.
+
+**Track Alignment:**
+
+| Track | Implementation |
+|---|---|
+| **Agents that Pay** | SwarmFI executes autonomous Uniswap swaps with on-chain verifiable tx IDs on Sepolia |
+| **Agents that Trust** | ERC-8004 identity tokens + ERC-8183 capability manifests + Guardian's 8-checkpoint safety protocol |
+| **Agents that Cooperate** | Three specialized agents share a synchronized discover→plan→execute→verify loop; no single agent acts alone |
+| **Agents that Keep Secrets** | Ghost Protocol: wallet-derived AES-256-GCM sessions, HMAC-SHA256 signed messages, server-side RPC proxying, zero plaintext comms |
+
+---
+
 ## ◈ WHAT THIS IS
 
 Living Swarm is a three-layer autonomous system:

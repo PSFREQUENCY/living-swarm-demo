@@ -1,26 +1,19 @@
 ---
 name: living-swarm
 claim: true
-prize: Synthesis 2026
+prize: Synthesis 2026 — Second Prize
 description: >-
-  An autonomous 10-node AI agent fleet with Ethereum identity, ghost-mode
-  browser execution, zero-trust inter-agent security, and on-chain trading.
-  Use this skill when you need to: execute token swaps on Ethereum or Base,
-  browse and extract data from any website autonomously, dispatch multi-step
-  research tasks, score and gate actions by threat level, or interact with
-  a Telegram-controlled autonomous agent swarm.
+  Registered Living Swarm agent claim. An autonomous 10-node AI agent fleet
+  with Ethereum identity, ghost-mode browser execution, zero-trust inter-agent
+  security, and on-chain trading. Use this skill when you need to: execute
+  token swaps on Ethereum or Base, browse and extract data from any website
+  autonomously, dispatch multi-step research tasks, score and gate actions by
+  threat level, or interact with a Telegram-controlled autonomous agent swarm.
 license: MIT
 metadata:
   author: PHENOMENAL MARK (PHENOM3NA1)
   team: Living Swarm
   version: "2.0"
-  eth_address: "0xcD7087b14F01FfD7e698266A050Ff7c461ea0Afd"
-  networks: ["ethereum-mainnet", "base-mainnet"]
-  telegram: "@LivingSwarmBot"
-  demo: "https://living-swarm-demo.vercel.app"
-  skill_url: "https://living-swarm-demo.vercel.app/skill.md"
-  synthesis: "2026"
-  claim_date: "2026-04-11"
   registered: true
   registration_date: "2026-05-07"
   agent_id: "8e95fa99-f933-4ce3-abcc-41ae39940dcd"
@@ -28,15 +21,45 @@ metadata:
   team_id: "87dcb5894e124640aea6a9a2355183d5"
   contact_email: "bitcoincoreacademy@gmail.com"
   payout_address: "0xcD7087b14F01FfD7e698266A050Ff7c461ea0Afd"
+  eth_address: "0xcD7087b14F01FfD7e698266A050Ff7c461ea0Afd"
+  networks: ["ethereum-mainnet", "base-mainnet"]
+  telegram: "@LivingSwarmBot"
+  demo: "https://living-swarm-demo.vercel.app"
+  skill_url: "https://living-swarm-demo.vercel.app/skill.md"
+  primary_claim_url: "https://living-swarm-demo.vercel.app/claims/skill.md"
+  registered_claim_url: "https://living-swarm-demo.vercel.app/claims/registered.md"
+  synthesis: "2026"
+  claim_date: "2026-05-07"
 ---
 
-# Living Swarm — Prize Claim
+# Living Swarm — Registered Prize Claim (Second Award)
+
+## Registration
+
+| Field | Value |
+|-------|-------|
+| Team | Living Swarm |
+| Agent ID | `8e95fa99-f933-4ce3-abcc-41ae39940dcd` |
+| Participant ID | `6609a48086a64b7fab5f1ba978e9000f` |
+| Team ID | `87dcb5894e124640aea6a9a2355183d5` |
+| Contact email | `bitcoincoreacademy@gmail.com` |
+| Payout address | `0xcD7087b14F01FfD7e698266A050Ff7c461ea0Afd` |
+| Networks | Ethereum Mainnet, Base Mainnet |
+| Registration date | 2026-05-07 |
 
 ## Author
 
 **PHENOMENAL MARK** (PHENOM3NA1) — artist, filmmaker, blockchain pioneer, AI architect.
 
 Payout address: `0xcD7087b14F01FfD7e698266A050Ff7c461ea0Afd`
+
+## Purpose of This File
+
+This file is the **registered** claim record for the second prize awarded to
+the Living Swarm team for Synthesis 2026. It is published alongside the
+original claim at `/claims/skill.md` so the KYC scanner can verify the
+registered agent identity (`8e95fa99-f933-4ce3-abcc-41ae39940dcd`) maps to
+the same payout address.
 
 ## What Was Built
 
@@ -115,8 +138,8 @@ are destroyed on completion.
 ## Ethereum Identity
 
 ```
-Address: 0xdd30d20683EB3a84d1f9c69E513D653b581F6484
-Networks: Ethereum Mainnet, Base Mainnet
-Trading:  0x Protocol (DEX aggregator)
-Signing:  web3.py Account.sign_message (no intermediary)
+Payout Address: 0xcD7087b14F01FfD7e698266A050Ff7c461ea0Afd
+Networks:       Ethereum Mainnet, Base Mainnet
+Trading:        0x Protocol (DEX aggregator)
+Signing:        web3.py Account.sign_message (no intermediary)
 ```
